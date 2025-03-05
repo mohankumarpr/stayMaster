@@ -3,16 +3,16 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack'; 
 import { RootStackParamList } from '../../navigation/AppNavigator';
 
-type WelcomeScreenProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'Welcome'>;
+type HomeScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'Home'>;
 };
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome</Text>
       <Button title="Go to Profile" onPress={() => {
-              return navigation.navigate('Home');
+            //   return navigation.navigate('Home');
           }} />
     </View>
   );
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 }
 });
 
-export default WelcomeScreen;
+export default HomeScreen;
