@@ -73,7 +73,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
       console.log('Response Data:', response.data);
       var data = response.data;
 
-      if (data!=null && data.success) {
+      if (data!=null) {
       Alert.alert('Success', 'OTP verified successfully.');
       navigation.navigate('Welcome'); // Navigate to the home screen or any other screen
       } else {
