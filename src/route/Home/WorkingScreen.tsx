@@ -1,7 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import HomeScreen from '../MainScreen/HomeScreen';
+
+// Import SVG icons
+import HomeIcon from '../../assets/icons/home.svg';
+import WalletIcon from '../../assets/icons/dollar.svg';
+import CalendarIcon from '../../assets/icons/calendartest.svg';
+import ProfileIcon from '../../assets/icons/profile.svg';
+import AlertIcon from '../../assets/icons/alert.svg';
 
 // Placeholder Screens
 const DashboardScreen = () => (
@@ -31,34 +40,30 @@ const CalendarScreen = () => (
 // Create Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
-const HomeScreen = () => {
+type WorkingScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'Working'>;
+};
+
+const WorkingScreen: React.FC<WorkingScreenProps> = ({ navigation }) => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
-          let iconName;
-
           switch (route.name) {
-            case 'Dashboard':
-              iconName = 'home-outline';
-              break;
+            case 'Home':
+              return <HomeIcon width={size} height={size} fill={color} />;
             case 'Earnings':
-              iconName = 'wallet-outline';
-              break;
+              return <WalletIcon width={size} height={size} fill={color} />;
             case 'Calendar':
-              iconName = 'calendar-outline';
-              break;
+              return <CalendarIcon width={size} height={size} fill={color} />;
             case 'Profile':
-              iconName = 'person-outline';
-              break;
+              return <ProfileIcon width={size} height={size} fill={color} />;
             default:
-              iconName = 'alert-circle-outline';
+              return <HomeIcon width={size} height={size} fill={color} />;
           }
-
-          return <Icon name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#2A144B',
-        tabBarInactiveTintColor: 'gray',
+        tabBarInactiveTintColor: '#9CA1A7',
         tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold' },
         tabBarStyle: {
           backgroundColor: 'white',
@@ -78,7 +83,11 @@ const HomeScreen = () => {
         },
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
       <Tab.Screen name="Earnings" component={EarningsScreen} />
       <Tab.Screen name="Calendar" component={CalendarScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
@@ -92,4 +101,4 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
 });
 
-export default HomeScreen;
+export default WorkingScreen;

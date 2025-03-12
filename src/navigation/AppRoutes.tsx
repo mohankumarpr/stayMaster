@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../route/Auth/LoginScreen';
 import OTPScreen from '../route/Auth/OTPScreen'; 
 import WelcomeScreen from '../route/Home/WelcomeScreen'; 
-import HomeScreen from '../route/Home/HomeScreen';
+import HomeScreen from '../route/Home/WorkingScreen';
 
 const AppRoutes = (Stack: ReturnType<typeof createStackNavigator>) => {
   return (

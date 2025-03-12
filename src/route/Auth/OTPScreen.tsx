@@ -5,6 +5,13 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import NetInfo from '@react-native-community/netinfo';
 import api from '../../api/api'; // Import the axios instance
+import Storage, { STORAGE_KEYS } from '../../utils/Storage';
+
+interface UserData {
+  id?: string;
+  phoneNumber?: string;
+  // Add other fields based on your API response
+}
 
 type OTPScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'OTP'>;
@@ -60,24 +67,33 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     // Show loading indicator
     setLoading(true);
 
-      console.log('Mobile Number:', mobileNumber);
-      console.log('Entered OTP:', enteredOtp);
+    console.log('Mobile Number:', mobileNumber);
+    console.log('Entered OTP:', enteredOtp);
     // Verify OTP
     try {
       const response = await api.post('/hosts/loginWithOTP', {
-      phone: `91${mobileNumber}`,
-      otp: enteredOtp
+        phone: `91${mobileNumber}`,
+        otp: enteredOtp
       });
 
       // Debugging: Log the response data
       console.log('Response Data:', response.data);
       var data = response.data;
 
-      if (data!=null) {
-      Alert.alert('Success', 'OTP verified successfully.');
-      navigation.navigate('Welcome'); // Navigate to the home screen or any other screen
+      if (data != null) {
+        // Store user data and token separately
+        await Storage.setObject(STORAGE_KEYS.USER_DATA, data);
+        if (data.token) {
+          await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.token);
+          console.log('Token stored:', data.token);
+        }
+        Alert.alert('Success', 'OTP verified successfully.');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Welcome' }],
+        });
       } else {
-      Alert.alert('Error', `Failed to verify OTP. Please try again. ${data.message}`);
+        Alert.alert('Error', `Failed to verify OTP. Please try again. ${data.message}`);
       }
     } catch (error) {
       // Debugging: Log the error

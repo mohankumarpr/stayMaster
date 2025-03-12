@@ -1,19 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import api from '../../api/api';
+import api from '../../api/api'; 
+import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
 type LoginScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Login'>;
 };
+
+interface UserData {
+  id?: string;
+  phoneNumber?: string;
+  // Add other user data fields as needed
+}
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Add useEffect to check for stored user data
+  useEffect(() => {
+    checkUserData();
+  }, []);
+
+  const checkUserData = async () => {
+    const userData = await Storage.getObject<UserData>(STORAGE_KEYS.USER_DATA);
+    if (userData) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Working' }],
+      });
+    }
+  };
 
   const handleLogin = async () => {
 

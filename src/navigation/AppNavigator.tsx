@@ -1,31 +1,33 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native'; 
+import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from '../route/Auth/LoginScreen';
-import OTPScreen from '../route/Auth/OTPScreen'; 
+import OTPScreen from '../route/Auth/OTPScreen';
 import WelcomeScreen from '../route/Home/WelcomeScreen'; 
-import HomeScreen from '../route/Home/HomeScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/Ionicons';
-import DashboardScreen from '../route/MainScreen/DashboardScreen';
+import Icon from 'react-native-vector-icons/Ionicons'; 
+import HomeScreen from '../route/MainScreen/HomeScreen';
 import EarningsScreen from '../route/MainScreen/EarningsScreen';
 import CalendarScreen from '../route/MainScreen/CalendarScreen';
 import ProfileScreen from '../route/MainScreen/ProfileScreen';
+import WorkingScreen from '../route/Home/WorkingScreen';
+import PropertyDetails from '../route/MainScreen/PropertyDetails';
+
 export type RootStackParamList = {
   Login: undefined;
   OTP: { mobileNumber: string };
   Welcome: undefined;
   Home: undefined;
-  Dashboard: undefined;
   Earnings: undefined;
   Calendar: undefined;
   Profile: undefined;
+  Working: undefined;
+  PropertyDetails: { propertyId: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 // Stack Navigator for Authentication Flow 
 const Tab = createBottomTabNavigator();
-
 
 // HomeScreen with Bottom Tabs
 const HomeTabs = () => {
@@ -57,7 +59,7 @@ const HomeTabs = () => {
         tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold' },
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Earnings" component={EarningsScreen} />
       <Tab.Screen name="Calendar" component={CalendarScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
@@ -65,22 +67,30 @@ const HomeTabs = () => {
   );
 };
 
-
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen} 
-          options={{ headerShown: false }} // Hide the app bar for LoginScreen
-        />
-        <Stack.Screen name="OTP" component={OTPScreen}options={{ headerShown: false }} />
+      <Stack.Navigator 
+        initialRouteName="Login"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="OTP" component={OTPScreen} />
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Home" component={HomeScreen}options={{headerShown: false}} />
+        <Stack.Screen name="Working" component={WorkingScreen} />
+        <Stack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="PropertyDetails" 
+          component={PropertyDetails}
+          options={{
+            headerShown: true,
+            headerTitle: '',
+            headerTransparent: true,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
-}; 
+};
 
 export default AppNavigator;
