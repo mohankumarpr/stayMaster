@@ -1,21 +1,44 @@
-import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, ImageBackground, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
+import React, { useEffect, useState } from 'react';
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
 type WelcomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Welcome'>;
 };
 
+interface UserData {
+  firstname: string;
+  // ... other user data properties ...
+}
+
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
+  const [firstName, setFirstName] = useState<string>('');
+
+  useEffect(() => {
+    const getUserName = async () => {
+      try {
+        const userData = await Storage.getObject<UserData>(STORAGE_KEYS.USER_DATA);
+        if (userData?.firstname) {
+          setFirstName(userData.firstname);
+        }
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+      }
+    };
+
+    getUserName();
+  }, []);
+
   return (
     <ImageBackground source={require('../../assets/images/Login.png')} style={styles.background}>
       <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode='contain' />
       <View style={styles.container}>
         <View style={styles.Space} />
         <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Text style={[styles.subtitle1, { textAlign: 'center', color: 'white', fontSize: 22, fontFamily: 'Inter', fontWeight: '500', lineHeight: 30.80, }]}>Good Evening, Arun</Text>
+          <Text style={[styles.subtitle1, { textAlign: 'center', color: 'white', fontSize: 22, fontFamily: 'Inter', fontWeight: '500', lineHeight: 30.80, }]}>Good Evening, {firstName}</Text>
 
           <View style={styles.bottomSpace} />
           <TouchableOpacity style={styles.fab} onPress={() => {

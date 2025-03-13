@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Image, ImageBackground, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import NetInfo from '@react-native-community/netinfo';
+import { RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import api from '../../api/api'; // Import the axios instance
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
 interface UserData {
@@ -82,9 +82,9 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
 
       if (data != null) {
         // Store user data and token separately
-        await Storage.setObject(STORAGE_KEYS.USER_DATA, data);
-        if (data.token) {
-          await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.token);
+        await Storage.setObject(STORAGE_KEYS.USER_DATA, data.user);
+        if (data.webUserToken) {
+          await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.webUserToken);
           console.log('Token stored:', data.token);
         }
         Alert.alert('Success', 'OTP verified successfully.');
