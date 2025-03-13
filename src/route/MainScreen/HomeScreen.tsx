@@ -1,20 +1,23 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
+  Dimensions,
   Image,
+  ImageBackground,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
   StatusBar,
-  Dimensions,
-  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import PropertyService from '../../services/propertyService';
+// import Storage from '../../services/storageService';
+import { Property } from '../../types/property';
+import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
 type HomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
@@ -48,7 +51,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   return (
     <TouchableOpacity style={styles.propertyCard} onPress={onPress}>
-      <Image source={image} style={styles.propertyImage} resizeMode="cover" />
+      <Image source={{ uri: image }}  style={styles.propertyImage} resizeMode="cover" />
       <View style={styles.propertyTitleContainer}>
         <Text style={styles.propertyTitle}>{title}</Text>
         <TouchableOpacity>
@@ -75,6 +78,42 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const [properties, setProperties] = React.useState<Property[]>([]);
+  const [totalGBV, setTotalGBV] = React.useState(0);
+  const [totalNights, setTotalNights] = React.useState(0);
+  const [userName, setUserName] = React.useState('');
+
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await Storage.getObject(STORAGE_KEYS.USER_DATA);
+        console.log("userData", userData);
+        if (userData && userData.firstname) {
+          setUserName(userData.firstname);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await PropertyService.getAllProperties();
+        setProperties(response.properties || []);
+        setTotalGBV(response.totalGBV);
+        setTotalNights(response.totalNights);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#008489" />
@@ -95,7 +134,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 />
                 <View>
                   <Text style={styles.welcomeText}>Welcome back,</Text>
-                  <Text style={styles.userName}>Arun</Text>
+                  <Text style={styles.userName}>{userName}</Text>
                 </View>
               </View>
             </View>
@@ -125,7 +164,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       />
                     </View>
                   </View>
-                  <Text style={styles.bookingValue}>12,450.45</Text>
+                  <Text style={styles.bookingValue}>₹ {totalGBV.toFixed(2)}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -153,7 +192,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       />
                     </View>
                   </View>
-                  <Text style={styles.bookingValue}>16 days</Text>
+                  <Text style={styles.bookingValue}>{totalNights} days</Text>
                 </View>
               </TouchableOpacity>
 
@@ -172,34 +211,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.sectionTitle}>Our Property</Text>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.propertiesScrollContent}>
-              <PropertyCard
-                title="Iconic Vally"
-                image={require('../../assets/images/property.png')}
-                guests={4}
-                bedrooms={2}
-                beds={2}
-                bathrooms={1}
-                bookingValue={12450}
-                nightsBooked={5}
-
-                onPress={() => {
-                  // return navigation.navigate('PropertyDetails', { propertyId: '1' });
-                }}
-              />
-
-              <PropertyCard
-                title="Moon Tower"
-                image={require('../../assets/images/property.png')}
-                guests={4}
-                bedrooms={2}
-                beds={2}
-                bathrooms={1}
-                bookingValue={12450}
-                nightsBooked={5}
-                onPress={() => {
-                  // return navigation.navigate('PropertyDetails', { propertyId: '2' });
-                }}
-              />
+              {properties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  title={property.listing_name}
+                  image={property.url}
+                  guests={property.number_of_guests}
+                  bedrooms={property.number_of_bedrooms}
+                  beds={property.number_of_bedrooms}
+                  bathrooms={property.number_of_bathrooms}
+                  bookingValue={property.gbv || 0}
+                  nightsBooked={property.nights || 0}
+                  onPress={() => {
+                    // return navigation.navigate('PropertyDetails', { propertyId: property.id });
+                  }}
+                />
+              ))}
             </ScrollView>
           </View>
         </ScrollView>

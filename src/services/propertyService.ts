@@ -2,6 +2,18 @@ import api from '../api/api';
 import { Property, PropertyResponse } from '../types/property';
 import Storage, { STORAGE_KEYS } from '../utils/Storage';
 
+interface EarningsByMonth {
+  earnings: Array<{
+    count: number;
+    amount: number;
+    date: string;
+  }>;
+  nights: Array<{
+    count: number;
+    date: string;
+  }>;
+}
+
 class PropertyService {
   private static instance: PropertyService;
   private readonly baseUrl = '/hosts/properties';
@@ -32,9 +44,8 @@ class PropertyService {
 
   async getAllProperties(): Promise<PropertyResponse> {
     try {
-      console.log('\n=== Starting getAllProperties Request ===');
+      console.log('\n=== Starting getAllProperties Request ===11');
       const guestToken = await this.getGuestToken();
-      
       if (!guestToken) {
         console.error('❌ Guest token not found in storage');
         throw new Error('Guest token not found');
@@ -159,6 +170,42 @@ class PropertyService {
       });
     } catch (error) {
       console.error(`Error deleting property with id ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async getEarningsByMonth(propertyId: string): Promise<EarningsByMonth> {
+    try {
+      console.log(`\n=== Starting getEarningsByMonth Request (Property ID: ${propertyId}) ===`);
+      const guestToken = await this.getGuestToken();
+      
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = '/hosts/earningsByMonth';
+      console.log(`📡 Making API request to: ${url}`);
+      
+      const response = await api.post<EarningsByMonth>(url, {
+        property_id: propertyId,
+        guestToken
+      });
+      
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End getEarningsByMonth Request ===\n`);
+      
+      return response.data;
+    } catch (error: any) {
+      console.error(`\n❌ Error in getEarningsByMonth:`, {
+        propertyId,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
       throw error;
     }
   }

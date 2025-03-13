@@ -1,18 +1,17 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackNavigationProp } from '@react-navigation/stack';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import HomeScreen from '../MainScreen/HomeScreen';
 
 // Import SVG icons
-import HomeIcon from '../../assets/icons/home.svg';
-import WalletIcon from '../../assets/icons/dollar.svg';
 import CalendarIcon from '../../assets/icons/calendartest.svg';
+import WalletIcon from '../../assets/icons/dollar.svg';
+import HomeIcon from '../../assets/icons/home.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
-import AlertIcon from '../../assets/icons/alert.svg';
-import EarningsScreen from '../MainScreen/EarningsScreen';
 import CalendarScreen from '../MainScreen/CalendarScreen';
+import EarningsScreen from '../MainScreen/EarningsScreen';
 import ProfileScreen from '../MainScreen/ProfileScreen';
 
 // Placeholder Screens
