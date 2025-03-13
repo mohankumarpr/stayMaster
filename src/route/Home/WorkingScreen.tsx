@@ -11,6 +11,9 @@ import WalletIcon from '../../assets/icons/dollar.svg';
 import CalendarIcon from '../../assets/icons/calendartest.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
 import AlertIcon from '../../assets/icons/alert.svg';
+import EarningsScreen from '../MainScreen/EarningsScreen';
+import CalendarScreen from '../MainScreen/CalendarScreen';
+import ProfileScreen from '../MainScreen/ProfileScreen';
 
 // Placeholder Screens
 const DashboardScreen = () => (
@@ -19,24 +22,7 @@ const DashboardScreen = () => (
   </View>
 );
 
-const ProfileScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Profile</Text>
-  </View>
-);
-
-const EarningsScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Earnings</Text>
-  </View>
-);
-
-const CalendarScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Calendar</Text>
-  </View>
-);
-
+ 
 // Create Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
@@ -88,9 +74,9 @@ const WorkingScreen: React.FC<WorkingScreenProps> = ({ navigation }) => {
         component={HomeScreen}
         options={{ headerShown: false }}
       />
-      <Tab.Screen name="Earnings" component={EarningsScreen} />
-      <Tab.Screen name="Calendar" component={CalendarScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Earnings" component={EarningsScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Calendar" component={CalendarScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 };
