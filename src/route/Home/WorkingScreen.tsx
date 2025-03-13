@@ -74,7 +74,7 @@ const WorkingScreen: React.FC<WorkingScreenProps> = ({ navigation }) => {
         component={HomeScreen}
         options={{ headerShown: false }}
       />
-      <Tab.Screen name="Earnings" component={EarningsScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Earnings" component={EarningsScreen} options={{ headerShown: false   }} />
       <Tab.Screen name="Calendar" component={CalendarScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
