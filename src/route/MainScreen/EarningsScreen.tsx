@@ -1,54 +1,570 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { RootStackParamList } from '../../navigation/AppNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { Picker } from '@react-native-picker/picker';
+import React, { useEffect, useState } from 'react';
+import {
+    Image,
+    ImageBackground,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import PropertyService from '../../services/propertyService';
+import { Property } from '../../types/property';
 
+// const { width } = Dimensions.get('window');
+// const cardWidth = width * 0.8;
 
-type EarningsScreenProps = {
-    navigation: StackNavigationProp<RootStackParamList, 'Earnings'>;
-  };
-  
+// Update the interface to match the service response and include listing_name
+interface EarningsByMonth {
+    listing_name: string;
+    earnings: Array<{
+        count: number;
+        amount: number;
+        date: string;
+    }>;
+    nights: Array<{
+        count: number;
+        date: string;
+    }>;
+}
 
-const EarningsScreen: React.FC<EarningsScreenProps> = ({ navigation }) => {
-    const data = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-            {
-                data: [500, 1000, 750, 1250, 900, 1500],
-                strokeWidth: 2,
-            },
-        ],
+const EarningsScreen: React.FC = () => {
+    const [selectedProperty, setSelectedProperty] = useState('');
+    const [properties, setProperties] = useState<Property[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+    const [propertyDetails, setPropertyDetails] = useState<EarningsByMonth | null>(null);
+
+    // Add new function to transform API data into chart format
+    const transformPropertyDataToChartFormat = (details: EarningsByMonth | null) => {
+        if (!details) return [];
+        
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+
+        return months.map((month, index) => {
+            const monthData = details.earnings.find(e => {
+                const [month, year] = e.date.split('-');
+                return parseInt(month, 10) - 1 === index && parseInt(year, 10) === currentYear;
+            });
+            
+            const nightsData = details.nights.find(n => {
+                const [month, year] = n.date.split('-');
+                return parseInt(month, 10) - 1 === index && parseInt(year, 10) === currentYear;
+            });
+
+            let type = 'upcoming';
+            if (index === currentMonth) {
+                type = 'current';
+            } else if (index < currentMonth) {
+                type = 'checkedOut';
+            }
+
+            return {
+                month,
+                bookings: nightsData?.count || 0,
+                type,
+                totalNights: nightsData?.count || 0,
+                totalEarnings: monthData?.amount || 0
+            };
+        });
     };
+
+    // Replace static bookingsData with transformed API data
+    const bookingsData = transformPropertyDataToChartFormat(propertyDetails);
+
+    // Update totals calculation to use the new bookingsData
+    const totals = bookingsData.reduce((acc, item) => {
+        acc[item.type] = (acc[item.type] || 0) + item.bookings;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const maxBookings = Math.max(...bookingsData.map(data => data.bookings));
+
+    useEffect(() => {
+        const fetchProperties = async () => {
+            try {
+                const response = await PropertyService.getAllProperties();
+                setProperties(response.properties || []);
+            } catch (error) {
+                console.error('Error fetching properties:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProperties();
+    }, []);
+
+    useEffect(() => {
+        const fetchPropertyDetails = async () => {
+            if (!selectedProperty) {
+                setPropertyDetails(null);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const details = await PropertyService.getEarningsByMonth(selectedProperty);
+                setPropertyDetails(details);
+            } catch (error) {
+                console.error('Error fetching property details:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPropertyDetails();
+    }, [selectedProperty]);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Earnings</Text>
-            <LineChart
-                data={data}
-                width={Dimensions.get('window').width - 40} // from react-native
-                height={220}
-                chartConfig={chartConfig}
-                bezier
-                style={styles.chart}
-            />
+            <StatusBar barStyle="light-content" backgroundColor="#008489" />
+
+            {/* Top portion with curved image background */}
+            <View style={styles.topContainer}>
+                <ImageBackground
+                    source={require('../../assets/images/curved_bg.png')}
+                    style={styles.topBackground}
+                    resizeMode="cover"
+                >
+                    <SafeAreaView>
+                        <View style={styles.header}>
+                            <View style={styles.userInfo}>
+                                <View>
+                                    <Text style={styles.welcomeText}>Earnings</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Summary Cards */}
+                        <View style={styles.summaryContainer}>
+                            <TouchableOpacity style={[styles.summaryCard, styles.singleCard]}>
+                                <View style={styles.topRow}>
+                                    <Text style={styles.summaryLabel}>Gross Booking Value (current month)</Text>
+                                    <Ionicons name="chevron-forward" size={15} color="#008489" />
+                                </View>
+
+                                <View style={styles.bottomRow}>
+                                    <View style={styles.leftContent}>
+                                        <View style={styles.curvedContainer}>
+                                            <Image
+                                                source={require('../../assets/images/dollar.png')}
+                                                style={styles.currencyImage}
+                                            />
+                                        </View>
+                                        <Text style={styles.bookingValue}>₹ 24,890.45</Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </SafeAreaView>
+                </ImageBackground>
+            </View>
+
+            {/* Content Area */}
+            <View style={styles.contentArea}>
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                    <View style={styles.earningsSection}>
+                        <Text style={styles.sectionTitle}>Select property</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={selectedProperty}
+                                onValueChange={(itemValue) => setSelectedProperty(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Select a property" value="" />
+                                {properties.map((property) => (
+                                    <Picker.Item
+                                        key={property.id}
+                                        label={property.listing_name}
+                                        value={property.id}
+                                    />
+                                ))}
+                            </Picker>
+                        </View>
+                        
+                        {loading && (
+                            <View style={styles.loadingContainer}>
+                                <Text>Loading property details...</Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Only show statistics if a property is selected */}
+                    {propertyDetails && (
+                        <View style={styles.chartContainer}>
+                            <Text style={styles.chartTitle}>Statistics</Text>
+                            <View style={styles.bookingSummary}>
+                                <View style={styles.summaryItem}>
+                                    <Text style={styles.summaryValue}>
+                                        {totals.checkedOut || 0}
+                                    </Text>
+                                    <Text style={[styles.summaryLabel, styles.checkedOutText]}>
+                                        Checked Out
+                                    </Text>
+                                </View>
+                                <View style={styles.summaryItem}>
+                                    <Text style={styles.summaryValue}>
+                                        {totals.current || 0}
+                                    </Text>
+                                    <Text style={[styles.summaryLabel, styles.currentText]}>
+                                        Current
+                                    </Text>
+                                </View>
+                                <View style={styles.summaryItem}>
+                                    <Text style={styles.summaryValue}>
+                                        {totals.upcoming || 0}
+                                    </Text>
+                                    <Text style={[styles.summaryLabel, styles.upcomingText]}>
+                                        Upcoming
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <ScrollView 
+                                horizontal 
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.barChartScrollContent}
+                            >
+                                <View style={styles.barChart}>
+                                    {/* Add horizontal grid lines */}
+                                    {[0, 1, 2, 3, 4].map((line) => (
+                                        <View
+                                            key={`grid-${line}`}
+                                            style={[
+                                                styles.gridLine,
+                                                { bottom: (line * 30) + 25 }
+                                            ]}
+                                        />
+                                    ))}
+                                    
+                                    {bookingsData.map((item, index) => (
+                                        <TouchableOpacity 
+                                            key={index}
+                                            style={styles.barWrapper}
+                                            onPress={() => setSelectedMonth(index)}
+                                        >
+                                            <View 
+                                                style={[
+                                                    styles.bar,
+                                                    styles[item.type],
+                                                    { height: (item.bookings / maxBookings) * 150 }
+                                                ]}
+                                            />
+                                            <Text style={styles.barLabel}>{item.month}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </ScrollView>
+                        </View>
+                    )}
+
+                    {selectedMonth !== null && (
+                        <View style={[styles.detailsCard, { marginHorizontal: 20, marginBottom: 40 }]}>
+                            <View style={styles.detailsRow}>
+                                <Text style={styles.detailsMonth}>
+                                    {bookingsData[selectedMonth].month}
+                                </Text>
+                            </View>
+                            <View style={styles.detailsRow}>
+                                <Text style={styles.detailsNights}>
+                                    {bookingsData[selectedMonth].totalNights} nights booked
+                                </Text>
+                                <Text style={styles.detailsEarnings}>
+                                    ₹{bookingsData[selectedMonth].totalEarnings.toLocaleString()}
+                                </Text>
+                            </View>
+                        </View>
+                    )}
+                </ScrollView>
+            </View>
         </View>
     );
 };
 
-const chartConfig = {
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    strokeWidth: 2, // optional, default 3
-    barPercentage: 0.5,
-};
-
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-    chart: { marginVertical: 8, borderRadius: 16 },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f8f8',
+    },
+    container2: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+        paddingRight: 6,
+        paddingTop: 8,
+    },
+    curvedContainer: {
+        width: 35,
+        height: 35,
+        backgroundColor: '#e8f6f6',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.0,
+        shadowRadius: 0,
+        elevation: 0,
+    },
+    topContainer: {
+        height: 200,
+    },
+    topBackground: {
+        width: '100%',
+    },
+    contentArea: {
+        flex: 1,
+        marginTop: -10,
+    },
+    scrollContent: {
+        paddingBottom: 30,
+    },
+    header: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 15,
+    },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    avatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 20,
+        marginRight: 10,
+        resizeMode: 'contain',
+    },
+    welcomeText: {
+        color: 'white',
+        fontSize: 14,
+        opacity: 0.9,
+    },
+    userName: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    summaryContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        justifyContent: 'space-between',
+        marginTop: 5,
+    },
+    summaryCard: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+    },
+    summaryLabel: {
+        fontSize: 12,
+        color: '#666',
+        marginBottom: 5,
+        paddingRight: 6,
+    },
+    topRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 3,
+    },
+    bottomRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    leftContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    currencyImage: {
+        width: 15,
+        height: 15,
+        resizeMode: 'contain',
+    },
+    bookingValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        paddingTop: 5,
+    },
+    earningsSection: {
+        backgroundColor: '#f8f8f8',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        paddingHorizontal: 15,
+        paddingTop: 20,
+        flex: 1,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        marginLeft: 5,
+        color: '#333',
+    },
+    singleCard: {
+        width: '100%',
+    },
+    pickerContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        marginHorizontal: 5,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    picker: {
+        height: 50,
+        width: '100%',
+    },
+    chartContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 15,
+        marginHorizontal: 20,
+        marginTop: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    barChartScrollContent: {
+        paddingHorizontal: 10,
+    },
+    barChart: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        height: 180,
+        paddingTop: 10,
+        paddingBottom: 5,
+        position: 'relative',
+    },
+    barWrapper: {
+        alignItems: 'center',
+        marginHorizontal: 8,
+    },
+    bar: {
+        width: 30,
+        borderRadius: 5,
+        marginHorizontal: 5,
+        zIndex: 2,
+    },
+    checkedOut: {
+        backgroundColor: '#00BAB8',
+    },
+    current: {
+        backgroundColor: '#FF7F7B',
+    },
+    upcoming: {
+        backgroundColor: '#E3C063',
+    },
+    barLabel: {
+        marginTop: 5,
+        fontSize: 12,
+        color: '#666',
+    },
+    bookingSummary: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        marginBottom: 15,
+    },
+    summaryItem: {
+        alignItems: 'center',
+    },
+    summaryValue: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    checkedOutText: {
+        color: '#00BAB8',
+    },
+    currentText: {
+        color: '#FF7F7B',
+    },
+    upcomingText: {
+        color: '#E3C063',
+    },
+    detailsCard: {
+        marginTop: 15,
+        padding: 15,
+        backgroundColor: '#3A3B3F',
+        borderRadius: 10,
+    },
+    detailsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    detailsMonth: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    detailsNights: {
+        fontSize: 14,
+        color: '#ccc',
+    },
+    detailsEarnings: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#008489',
+    },
+    chartTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: '#333',
+    },
+    gridLine: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        height: 0.5,
+        borderWidth: 0.5,
+        borderColor: '#E9E9E9',
+        borderStyle: 'dashed',
+        zIndex: 1,
+    },
+    loadingContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    propertyDetails: {
+        padding: 15,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        marginTop: 10,
+        marginHorizontal: 5,
+    },
+    propertyName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
 });
 
 export default EarningsScreen;
