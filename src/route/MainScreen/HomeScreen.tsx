@@ -15,7 +15,9 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import PropertyService from '../../services/propertyService';
+// import Storage from '../../services/storageService';
 import { Property } from '../../types/property';
+import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
 type HomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
@@ -79,6 +81,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [properties, setProperties] = React.useState<Property[]>([]);
   const [totalGBV, setTotalGBV] = React.useState(0);
   const [totalNights, setTotalNights] = React.useState(0);
+  const [userName, setUserName] = React.useState('');
+
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await Storage.getObject(STORAGE_KEYS.USER_DATA);
+        console.log("userData", userData);
+        if (userData && userData.firstname) {
+          setUserName(userData.firstname);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   React.useEffect(() => {
     const fetchProperties = async () => {
@@ -115,7 +134,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 />
                 <View>
                   <Text style={styles.welcomeText}>Welcome back,</Text>
-                  <Text style={styles.userName}>Arun</Text>
+                  <Text style={styles.userName}>{userName}</Text>
                 </View>
               </View>
             </View>

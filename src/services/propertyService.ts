@@ -35,8 +35,7 @@ class PropertyService {
       if (token) {
         console.log('Token value:', token.substring(0, 10) + '...');  // Show first 10 chars for security
       }
-      return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiOTE5ODk4OTg5ODg5IiwiaWQiOjEsInRyYW5zRXhwaXJ5IjoxNzQxODc3NTU5fSwiaWF0IjoxNzQxODczOTU4LCJleHAiOjE3NDE4Nzc1NTh9.-e4WN3qE-6lqtcfP-ERCnfbYhY8u_JC_8veHvu8iVCI';
-      // return token;
+      return token;
     } catch (error) {
       console.error('Error retrieving guest token:', error);
       return null;
