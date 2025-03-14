@@ -86,7 +86,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   React.useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await Storage.getObject(STORAGE_KEYS.USER_DATA);
+        const userData = await Storage.getObject<{firstname?: string}>(STORAGE_KEYS.USER_DATA);
         console.log("userData", userData);
         if (userData && userData.firstname) {
           setUserName(userData.firstname);
@@ -164,7 +164,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       />
                     </View>
                   </View>
-                  <Text style={styles.bookingValue}>₹ {totalGBV.toFixed(2)}</Text>
+                  <Text style={styles.bookingValue}> {totalGBV.toFixed(2)}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -194,10 +194,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   </View>
                   <Text style={styles.bookingValue}>{totalNights} days</Text>
                 </View>
-              </TouchableOpacity>
-
-
-
+              </TouchableOpacity> 
             </View>
           </SafeAreaView>
         </ImageBackground>
@@ -369,6 +366,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     paddingTop: 5,
+    paddingLeft: 5,
   },
   calendarIcon: {
     marginRight: 5,

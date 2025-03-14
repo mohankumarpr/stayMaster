@@ -67,7 +67,7 @@ class PropertyService {
       console.log('Status:', response.status);
       console.log('Headers:', response.headers);
       console.log('Data:', JSON.stringify(response.data, null, 2));
-      console.log('=== End getAllProperties Request ===\n');
+      // console.log('=== End getAllProperties Request ===\n');
       
       return response.data;
     } catch (error: any) {

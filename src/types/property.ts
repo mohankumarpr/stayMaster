@@ -4,6 +4,7 @@ export interface Property {
   internal_name: string;
   number_of_bedrooms: number;
   number_of_bathrooms: number;
+  number_of_beds: number;
   number_of_guests: number;
   number_of_extra_guests: number;
   google_latitude: string;

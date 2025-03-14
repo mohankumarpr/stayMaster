@@ -112,7 +112,10 @@ const EarningsScreen: React.FC = () => {
             try {
                 setLoading(true);
                 const details = await PropertyService.getEarningsByMonth(selectedProperty);
-                setPropertyDetails(details);
+                setPropertyDetails({
+                    ...details,
+                    listing_name: selectedProperty || ''
+                });
             } catch (error) {
                 console.error('Error fetching property details:', error);
             } finally {
@@ -254,7 +257,9 @@ const EarningsScreen: React.FC = () => {
                                             <View 
                                                 style={[
                                                     styles.bar,
-                                                    styles[item.type],
+                                                    item.type === 'current' ? styles.current :
+                                                    item.type === 'upcoming' ? styles.upcoming :
+                                                    styles.checkedOut,
                                                     { height: (item.bookings / maxBookings) * 150 }
                                                 ]}
                                             />
