@@ -14,6 +14,21 @@ interface EarningsByMonth {
   }>;
 }
 
+interface CalendarBooking {
+  booking_id: number;
+  effectiveDate: string;
+  adults: number;
+  children: number;
+  value: number;
+}
+
+interface CalendarResponse {
+  calendar: {
+    bookings: CalendarBooking[];
+    blocks: any[]; // You can define a more specific type if needed
+  }
+}
+
 class PropertyService {
   private static instance: PropertyService;
   private readonly baseUrl = '/hosts/properties';
@@ -201,6 +216,42 @@ class PropertyService {
       return response.data;
     } catch (error: any) {
       console.error(`\n❌ Error in getEarningsByMonth:`, {
+        propertyId,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
+
+  async getPropertyCalendar(propertyId: string): Promise<CalendarResponse> {
+    try {
+      console.log(`\n=== Starting getPropertyCalendar Request (Property ID: ${propertyId}) ===`);
+      const guestToken = await this.getGuestToken();
+      
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = '/hosts/calendar';
+      console.log(`📡 Making API request to: ${url}`);
+      
+      const response = await api.post<CalendarResponse>(url, {
+        property_id: propertyId,
+        guestToken
+      });
+      
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End getPropertyCalendar Request ===\n`);
+      
+      return response.data;
+    } catch (error: any) {
+      console.error(`\n❌ Error in getPropertyCalendar:`, {
         propertyId,
         message: error.message,
         status: error.response?.status,
