@@ -64,10 +64,10 @@ class PropertyService {
     try {
       // Check if we have valid cached data
       const now = Date.now();
-      if (this.propertiesCache && (now - this.lastFetchTime) < this.CACHE_DURATION) {
-        console.log('📦 Returning cached properties data');
-        return this.propertiesCache;
-      }
+      // if (this.propertiesCache && (now - this.lastFetchTime) < this.CACHE_DURATION) {
+      //   console.log('📦 Returning cached properties data');
+      //   return this.propertiesCache;
+      // }
 
       console.log('\n=== Starting getAllProperties Request ===');
       const guestToken = await this.getGuestToken();

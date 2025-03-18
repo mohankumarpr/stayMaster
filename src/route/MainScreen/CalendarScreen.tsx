@@ -1,7 +1,9 @@
+import BottomSheet from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
-import React, { useEffect, useState } from 'react';
-import { ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CalendarList, DateData } from 'react-native-calendars';
+import 'react-native-reanimated';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
 
@@ -10,6 +12,8 @@ const CalendarScreen: React.FC = () => {
     const [properties, setProperties] = useState<Property[]>([]);
     const [markedDates, setMarkedDates] = useState<any>({});
     const [loading, setLoading] = useState(true);
+    const [selectedBooking, setSelectedBooking] = useState<any>(null);
+    const bottomSheetRef = useRef<BottomSheet>(null);
 
     useEffect(() => {
         fetchProperties();
@@ -24,7 +28,13 @@ const CalendarScreen: React.FC = () => {
     const fetchProperties = async () => {
         try {
             const response = await PropertyService.getAllProperties();
-            setProperties(response.properties || []);
+            const propertyList = response.properties || [];
+            setProperties(propertyList);
+
+            // Set the first property as default if no property is selected
+            if (propertyList.length > 0 && !selectedProperty) {
+                setSelectedProperty(propertyList[0].id);
+            }
         } catch (error) {
             console.error('Error fetching properties:', error);
         } finally {
@@ -92,7 +102,17 @@ const CalendarScreen: React.FC = () => {
     };
 
     const onDayPress = (day: DateData) => {
-        console.log('selected day', day);
+        const selectedDate = day.dateString;
+        // Find booking for the selected date
+        Object.values(bookingGroups).forEach(bookingGroup => {
+            const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
+            const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
+            
+            if (selectedDate >= firstDate && selectedDate <= lastDate) {
+                setSelectedBooking(bookingGroup[0]);
+                bottomSheetRef.current?.expand();
+            }
+        });
     };
 
     return (
@@ -185,6 +205,41 @@ const CalendarScreen: React.FC = () => {
                     )}
                 </View>
             </View>
+
+            {/* Bottom Sheet */}
+            <BottomSheet
+                ref={bottomSheetRef}
+                index={-1}
+                snapPoints={['50%']}
+                enablePanDownToClose
+                backgroundStyle={styles.bottomSheetBackground}
+            >
+                <View style={styles.bottomSheetContent}>
+                    {selectedBooking ? (
+                        <>
+                            <Text style={styles.bookingTitle}>Booking Details</Text>
+                            <View style={styles.bookingDetail}>
+                                <Text style={styles.label}>Booking ID:</Text>
+                                <Text style={styles.value}>{selectedBooking.booking_id}</Text>
+                            </View>
+                            <View style={styles.bookingDetail}>
+                                <Text style={styles.label}>Check-in:</Text>
+                                <Text style={styles.value}>
+                                    {new Date(selectedBooking.effectiveDate).toLocaleDateString()}
+                                </Text>
+                            </View>
+                            <TouchableOpacity 
+                                style={styles.closeButton}
+                                onPress={() => bottomSheetRef.current?.close()}
+                            >
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </>
+                    ) : (
+                        <Text style={styles.noBookingText}>No booking details available</Text>
+                    )}
+                </View>
+            </BottomSheet>
         </View>
     );
 };
@@ -273,6 +328,52 @@ const styles = StyleSheet.create({
     },
     calendar: {
         marginBottom: 10,
+    },
+    bottomSheetBackground: {
+        backgroundColor: '#ffffff',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+    },
+    bottomSheetContent: {
+        padding: 20,
+    },
+    bookingTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        color: '#333',
+    },
+    bookingDetail: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+        paddingHorizontal: 10,
+    },
+    label: {
+        fontSize: 16,
+        color: '#666',
+        fontWeight: '500',
+    },
+    value: {
+        fontSize: 16,
+        color: '#333',
+    },
+    closeButton: {
+        backgroundColor: '#50cebb',
+        padding: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    closeButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    noBookingText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: '#666',
     },
 });
 

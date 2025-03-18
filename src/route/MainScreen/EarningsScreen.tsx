@@ -91,7 +91,12 @@ const EarningsScreen: React.FC = () => {
         const fetchProperties = async () => {
             try {
                 const response = await PropertyService.getAllProperties();
-                setProperties(response.properties || []);
+                const propertyList = response.properties || [];
+                setProperties(propertyList);
+                // Set the first property as selected if available
+                if (propertyList.length > 0) {
+                    setSelectedProperty(propertyList[0].id);
+                }
             } catch (error) {
                 console.error('Error fetching properties:', error);
             } finally {
