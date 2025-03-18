@@ -12,6 +12,7 @@ import {
     View
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
 
@@ -33,7 +34,7 @@ interface EarningsByMonth {
 }
 
 const EarningsScreen: React.FC = () => {
-    const [selectedProperty, setSelectedProperty] = useState('');
+    const { selectedProperty, setSelectedProperty } = useProperty();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -91,7 +92,12 @@ const EarningsScreen: React.FC = () => {
         const fetchProperties = async () => {
             try {
                 const response = await PropertyService.getAllProperties();
-                setProperties(response.properties || []);
+                const propertyList = response.properties || [];
+                setProperties(propertyList);
+                // Set the first property as selected if available
+                if (propertyList.length > 0) {
+                    setSelectedProperty(propertyList[0].id);
+                }
             } catch (error) {
                 console.error('Error fetching properties:', error);
             } finally {

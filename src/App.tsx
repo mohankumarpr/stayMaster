@@ -1,10 +1,14 @@
 import React from 'react';
+import { PropertyProvider } from './context/PropertyContext';
 import AppNavigator from './navigation/AppNavigator';
-import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native'; 
+
 
 const App = () => {
-  return <AppNavigator />;
+  return (
+    <PropertyProvider>
+      <AppNavigator />;
+    </PropertyProvider>
+  );
 };
 
 export default App;

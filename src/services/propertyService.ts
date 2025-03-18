@@ -14,9 +14,27 @@ interface EarningsByMonth {
   }>;
 }
 
+interface CalendarBooking {
+  booking_id: number;
+  effectiveDate: string;
+  adults: number;
+  children: number;
+  value: number;
+}
+
+interface CalendarResponse {
+  calendar: {
+    bookings: CalendarBooking[];
+    blocks: any[]; // You can define a more specific type if needed
+  }
+}
+
 class PropertyService {
   private static instance: PropertyService;
   private readonly baseUrl = '/hosts/properties';
+  private propertiesCache: PropertyResponse | null = null;
+  private lastFetchTime: number = 0;
+  private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
   private constructor() {}
 
@@ -44,7 +62,14 @@ class PropertyService {
 
   async getAllProperties(): Promise<PropertyResponse> {
     try {
-      console.log('\n=== Starting getAllProperties Request ===11');
+      // Check if we have valid cached data
+      const now = Date.now();
+      // if (this.propertiesCache && (now - this.lastFetchTime) < this.CACHE_DURATION) {
+      //   console.log('📦 Returning cached properties data');
+      //   return this.propertiesCache;
+      // }
+
+      console.log('\n=== Starting getAllProperties Request ===');
       const guestToken = await this.getGuestToken();
       if (!guestToken) {
         console.error('❌ Guest token not found in storage');
@@ -63,7 +88,11 @@ class PropertyService {
         guestToken
       });
       
-      console.log('✅ API Response received');
+      // Cache the response
+      this.propertiesCache = response.data;
+      this.lastFetchTime = now;
+      
+      console.log('✅ API Response received and cached');
       console.log('Status:', response.status);
       console.log('Headers:', response.headers);
       console.log('Data:', JSON.stringify(response.data, null, 2));
@@ -209,6 +238,55 @@ class PropertyService {
       throw error;
     }
   }
+
+  async getPropertyCalendar(propertyId: string): Promise<CalendarResponse> {
+    try {
+      console.log(`\n=== Starting getPropertyCalendar Request (Property ID: ${propertyId}) ===`);
+      const guestToken = await this.getGuestToken();
+      
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = '/hosts/calendar';
+      console.log(`📡 Making API request to: ${url}`);
+      
+      const response = await api.post<CalendarResponse>(url, {
+        property_id: propertyId,
+        guestToken
+      });
+      
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End getPropertyCalendar Request ===\n`);
+      
+      return response.data;
+    } catch (error: any) {
+      console.error(`\n❌ Error in getPropertyCalendar:`, {
+        propertyId,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
+
+  // Add method to clear cache if needed
+  public clearCache(): void {
+    console.log('🧹 Clearing properties cache');
+    this.propertiesCache = null;
+    this.lastFetchTime = 0;
+  }
+
+  // Add method to handle logout
+  public handleLogout(): void {
+    this.clearCache();
+  }
 }
 
-export default PropertyService.getInstance(); 
+const propertyService = PropertyService.getInstance();
+export default propertyService;

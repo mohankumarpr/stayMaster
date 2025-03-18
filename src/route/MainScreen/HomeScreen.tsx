@@ -16,6 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import PropertyService from '../../services/propertyService';
 // import Storage from '../../services/storageService';
+import { useProperty } from '../../context/PropertyContext';
 import { Property } from '../../types/property';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
@@ -78,6 +79,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const { setSelectedProperty } = useProperty();
   const [properties, setProperties] = React.useState<Property[]>([]);
   const [totalGBV, setTotalGBV] = React.useState(0);
   const [totalNights, setTotalNights] = React.useState(0);
@@ -220,7 +222,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   bookingValue={property.gbv || 0}
                   nightsBooked={property.nights || 0}
                   onPress={() => {
-                    // return navigation.navigate('PropertyDetails', { propertyId: property.id });
+                    // Navigate to Earnings screen and set the selected property
+                    navigation.navigate('Earnings');
+                    // Add a small delay to ensure navigation completes before setting the property
+                    setTimeout(() => {
+                      setSelectedProperty(property.id);
+                    }, 100);
                   }}
                 />
               ))}

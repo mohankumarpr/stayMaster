@@ -1,21 +1,20 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import {
-    StyleSheet,
-    View,
-    Text,
     Image,
-    TouchableOpacity,
-    ScrollView,
     SafeAreaView,
+    ScrollView,
     StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import Icon from 'react-native-vector-icons/Ionicons';
-import PropertyService from '../../services/propertyService';
-import Storage, { STORAGE_KEYS } from '../../utils/Storage';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import { default as PropertyService, default as propertyService } from '../../services/propertyService';
 import { Property } from '../../types/property';
-import { useNavigation } from '@react-navigation/native';
+import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
 
 type ProfileScreenProps = {
@@ -126,6 +125,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     const handleLogout = async () => {
         try {
+            // Call PropertyService logout first
+            await propertyService.handleLogout();
+            // Then clear storage and reset navigation
             await Storage.clear();
             navigation.reset({
                 index: 0,
