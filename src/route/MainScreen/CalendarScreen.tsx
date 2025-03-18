@@ -15,6 +15,7 @@ const CalendarScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedBooking, setSelectedBooking] = useState<any>(null);
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const [bookingGroups, setBookingGroups] = useState<{ [key: string]: any[] }>({});
 
     useEffect(() => {
         fetchProperties();
@@ -50,7 +51,7 @@ const CalendarScreen: React.FC = () => {
             const bookings = response.calendar.bookings;
             
             // Group bookings by booking_id
-            const bookingGroups = bookings.reduce((acc: { [key: string]: any[] }, booking) => {
+            const groups = bookings.reduce((acc: { [key: string]: any[] }, booking) => {
                 if (!acc[booking.booking_id]) {
                     acc[booking.booking_id] = [];
                 }
@@ -58,9 +59,12 @@ const CalendarScreen: React.FC = () => {
                 return acc;
             }, {});
 
+            // Store booking groups in state
+            setBookingGroups(groups);
+
             // Convert bookings to period marking format
             const marked: any = {};
-            Object.values(bookingGroups).forEach(bookingGroup => {
+            Object.values(groups).forEach(bookingGroup => {
                 // Sort dates in the group
                 bookingGroup.sort((a, b) => 
                     new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
@@ -104,12 +108,14 @@ const CalendarScreen: React.FC = () => {
 
     const onDayPress = (day: DateData) => {
         const selectedDate = day.dateString;
-        // Find booking for the selected date
+        console.log("onDaypress", day, bookingGroups);
+        // Now we can use bookingGroups from state
         Object.values(bookingGroups).forEach(bookingGroup => {
             const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
             const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
             
             if (selectedDate >= firstDate && selectedDate <= lastDate) {
+                console.log("bookingGroup[0]", bookingGroup[0]);
                 setSelectedBooking(bookingGroup[0]);
                 bottomSheetRef.current?.expand();
             }
