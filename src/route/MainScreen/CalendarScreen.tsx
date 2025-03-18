@@ -4,11 +4,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CalendarList, DateData } from 'react-native-calendars';
 import 'react-native-reanimated';
+import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
 
 const CalendarScreen: React.FC = () => {
-    const [selectedProperty, setSelectedProperty] = useState('');
+    const { selectedProperty, setSelectedProperty } = useProperty();
     const [properties, setProperties] = useState<Property[]>([]);
     const [markedDates, setMarkedDates] = useState<any>({});
     const [loading, setLoading] = useState(true);

@@ -12,6 +12,7 @@ import {
     View
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
 
@@ -33,7 +34,7 @@ interface EarningsByMonth {
 }
 
 const EarningsScreen: React.FC = () => {
-    const [selectedProperty, setSelectedProperty] = useState('');
+    const { selectedProperty, setSelectedProperty } = useProperty();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
