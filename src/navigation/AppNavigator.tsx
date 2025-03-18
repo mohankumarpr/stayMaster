@@ -12,6 +12,8 @@ import CalendarScreen from '../route/MainScreen/CalendarScreen';
 import ProfileScreen from '../route/MainScreen/ProfileScreen';
 import WorkingScreen from '../route/Home/WorkingScreen';
 import PropertyDetails from '../route/MainScreen/PropertyDetails';
+import RatingsScreen from '../route/ProfileSub/RatingScreen';
+import RatingsScree from '../route/ProfileSub/RatingScree';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -21,7 +23,13 @@ export type RootStackParamList = {
   Earnings: undefined;
   Calendar: undefined;
   Profile: undefined;
-  Working: undefined;
+  Working: undefined; 
+  RatingsScreen: undefined;
+  Statements: undefined;
+  ReferProperty: undefined;
+  Listings: undefined;
+  Support: undefined; 
+  RatingsScree: undefined;
   PropertyDetails: { propertyId: string };
 };
 
@@ -81,6 +89,12 @@ const AppNavigator = () => {
         <Stack.Screen name="Calendar" component={CalendarScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Working" component={WorkingScreen} /> 
+       {/*  <Stack.Screen name="Statements" component={StatementsScreen} />
+        <Stack.Screen name="ReferProperty" component={ReferPropertyScreen} />
+        <Stack.Screen name="Listings" component={ListingsScreen} />
+        <Stack.Screen name="Support" component={SupportScreen} /> */}
+        <Stack.Screen name="RatingsScreen" component={RatingsScreen} />
+        <Stack.Screen name="RatingsScree" component={RatingsScree} />
         <Stack.Screen 
           name="PropertyDetails" 
           component={PropertyDetails}

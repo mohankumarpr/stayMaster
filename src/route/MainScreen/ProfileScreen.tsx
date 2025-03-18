@@ -156,7 +156,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     />
                     <View style={styles.userInfo}>
                         <Text style={styles.userName}>{userName}</Text>
-                        <Text style={styles.userEmail}>yourname@gmail.com</Text>
+                        <Text style={styles.userEmail}></Text>
                     </View>
                     <Icon name="chevron-forward" size={20} color="#999" />
                 </TouchableOpacity>
@@ -192,37 +192,36 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         <SettingsItem
                             title="My Ratings"
                             onPress={() => {
-                                //   return navigation.navigate('Ratings');
+                                navigation.navigate('RatingsScreen');
                             }}
                         />
                         <SettingsItem
                             title="Monthly Statements"
                             onPress={() => {
-                                //   return navigation.navigate('Statements');
+                                // navigation.navigate('Statements');
                             }}
                         />
                         <SettingsItem
                             title="Refer a Property"
                             onPress={() => {
-                                //   return navigation.navigate('Statements');
+                                // navigation.navigate('ReferProperty');
                             }}
                         />
                         <SettingsItem
                             title="View your listings"
                             onPress={() => {
-                                //   return navigation.navigate('Statements');
+                                // navigation.navigate('Listings');
                             }}
                         />
                         <SettingsItem
                             title="Support"
                             onPress={() => {
-                                //   return navigation.navigate('Statements');
+                                // navigation.navigate('Support');
                             }}
                         />
                         <SettingsItem
                             title="Logout"
                             onPress={() => {
-                                //   return navigation.navigate('Statements');
                                 handleLogout();
                             }}
                         />
@@ -238,7 +237,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#F9F5F3',
     },
     containerborderline: {
         width: 261,
@@ -275,7 +274,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: 'white',
+        backgroundColor: '#F9F5F3',
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
