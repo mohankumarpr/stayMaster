@@ -6,6 +6,7 @@ import { ActivityIndicator, Alert, Image, ImageBackground, StyleSheet, Text, Tex
 import api from '../../api/api'; // Import the axios instance
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
+import Toast from 'react-native-toast-message';
 
 interface UserData {
   id?: string;
@@ -87,7 +88,10 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
           await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.webUserToken);
           console.log('Token stored:', data.token);
         }
-        Alert.alert('Success', 'OTP verified successfully.');
+        showToast('success', 'Success', 'OTP verified successfully.');
+
+
+
         navigation.reset({
           index: 0,
           routes: [{ name: 'Welcome' }],
@@ -104,6 +108,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
       setLoading(false);
     }
   };
+
 
   return (
     <ImageBackground source={require('../../assets/images/Login.png')} style={styles.background}>
@@ -143,6 +148,14 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
       </View>
     </ImageBackground>
   );
+};
+
+const showToast = (type: string, title: string, message: string) => {
+  Toast.show({
+    type: type,
+    text1: title,
+    text2: message
+  });
 };
 
 const styles = StyleSheet.create({

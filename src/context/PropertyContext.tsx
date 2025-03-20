@@ -4,6 +4,8 @@ interface PropertyContextType {
     selectedProperty: string;
     setSelectedProperty: (id: string) => void;
 }
+ 
+ 
 
 const PropertyContext = createContext<PropertyContextType | undefined>(undefined);
 

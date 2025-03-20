@@ -22,6 +22,7 @@ import { Property } from '../../types/property';
 // Update the interface to match the service response and include listing_name
 interface EarningsByMonth {
     listing_name: string;
+    totalEarnings: number;
     earnings: Array<{
         count: number;
         amount: number;
@@ -43,7 +44,7 @@ const EarningsScreen: React.FC = () => {
     // Add new function to transform API data into chart format
     const transformPropertyDataToChartFormat = (details: EarningsByMonth | null) => {
         if (!details) return [];
-        
+
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth();
@@ -54,7 +55,7 @@ const EarningsScreen: React.FC = () => {
                 const [month, year] = e.date.split('-');
                 return parseInt(month, 10) - 1 === index && parseInt(year, 10) === currentYear;
             });
-            
+
             const nightsData = details.nights.find(n => {
                 const [month, year] = n.date.split('-');
                 return parseInt(month, 10) - 1 === index && parseInt(year, 10) === currentYear;
@@ -79,6 +80,8 @@ const EarningsScreen: React.FC = () => {
 
     // Replace static bookingsData with transformed API data
     const bookingsData = transformPropertyDataToChartFormat(propertyDetails);
+    const totalEarnings = bookingsData.reduce((acc, item) => acc + item.totalEarnings, 0);
+    console.log('Total Earnings:', totalEarnings);
 
     // Update totals calculation to use the new bookingsData
     const totals = bookingsData.reduce((acc, item) => {
@@ -96,7 +99,7 @@ const EarningsScreen: React.FC = () => {
                 setProperties(propertyList);
                 // Set the first property as selected if available
                 if (propertyList.length > 0) {
-                    setSelectedProperty(propertyList[0].id);
+                    setSelectedProperty(propertyList[0].id.toString());
                 }
             } catch (error) {
                 console.error('Error fetching properties:', error);
@@ -114,13 +117,14 @@ const EarningsScreen: React.FC = () => {
                 setPropertyDetails(null);
                 return;
             }
-
             try {
                 setLoading(true);
                 const details = await PropertyService.getEarningsByMonth(selectedProperty);
+                const totalAmount = details.earnings.reduce((total, item) => total + item.amount, 0);
                 setPropertyDetails({
                     ...details,
-                    listing_name: selectedProperty || ''
+                    listing_name: selectedProperty || '',
+                    totalEarnings: totalAmount // Add total earnings to property details
                 });
             } catch (error) {
                 console.error('Error fetching property details:', error);
@@ -131,6 +135,11 @@ const EarningsScreen: React.FC = () => {
 
         fetchPropertyDetails();
     }, [selectedProperty]);
+
+    function formatAmount(amount: number | undefined): string {
+        if (amount === undefined) return '0.00';
+        return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
     return (
         <View style={styles.container}>
@@ -168,7 +177,7 @@ const EarningsScreen: React.FC = () => {
                                                 style={styles.currencyImage}
                                             />
                                         </View>
-                                        <Text style={styles.bookingValue}>₹ 24,890.45</Text>
+                                        <Text style={styles.bookingValue}> {formatAmount(propertyDetails?.earnings.reduce((total, item) => total + item.amount, 0))}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -184,11 +193,14 @@ const EarningsScreen: React.FC = () => {
                         <Text style={styles.sectionTitle}>Select property</Text>
                         <View style={styles.pickerContainer}>
                             <Picker
-                                selectedValue={selectedProperty}
+                                selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id : properties[0].id)}
+                                mode="dropdown"
+                                dropdownIconColor="#000"
+                                
                                 onValueChange={(itemValue) => setSelectedProperty(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="Select a property" value="" />
+                                <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id : ""} />
                                 {properties.map((property) => (
                                     <Picker.Item
                                         key={property.id}
@@ -198,7 +210,7 @@ const EarningsScreen: React.FC = () => {
                                 ))}
                             </Picker>
                         </View>
-                        
+
                         {loading && (
                             <View style={styles.loadingContainer}>
                                 <Text>Loading property details...</Text>
@@ -237,8 +249,8 @@ const EarningsScreen: React.FC = () => {
                                 </View>
                             </View>
 
-                            <ScrollView 
-                                horizontal 
+                            <ScrollView
+                                horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.barChartScrollContent}
                             >
@@ -253,19 +265,19 @@ const EarningsScreen: React.FC = () => {
                                             ]}
                                         />
                                     ))}
-                                    
+
                                     {bookingsData.map((item, index) => (
-                                        <TouchableOpacity 
+                                        <TouchableOpacity
                                             key={index}
                                             style={styles.barWrapper}
                                             onPress={() => setSelectedMonth(index)}
                                         >
-                                            <View 
+                                            <View
                                                 style={[
                                                     styles.bar,
                                                     item.type === 'current' ? styles.current :
-                                                    item.type === 'upcoming' ? styles.upcoming :
-                                                    styles.checkedOut,
+                                                        item.type === 'upcoming' ? styles.upcoming :
+                                                            styles.checkedOut,
                                                     { height: (item.bookings / maxBookings) * 150 }
                                                 ]}
                                             />
@@ -289,7 +301,7 @@ const EarningsScreen: React.FC = () => {
                                     {bookingsData[selectedMonth].totalNights} nights booked
                                 </Text>
                                 <Text style={styles.detailsEarnings}>
-                                    ₹{bookingsData[selectedMonth].totalEarnings.toLocaleString()}
+                                    {(bookingsData[selectedMonth].totalEarnings.toLocaleString())}
                                 </Text>
                             </View>
                         </View>
@@ -336,7 +348,7 @@ const styles = StyleSheet.create({
         marginTop: -10,
     },
     scrollContent: {
-        paddingBottom: 30,
+        paddingBottom: 25,
     },
     header: {
         paddingHorizontal: 20,
@@ -443,8 +455,10 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     picker: {
-        height: 50,
+        height: 55,
         width: '100%',
+        color: '#000',
+
     },
     chartContainer: {
         backgroundColor: '#fff',

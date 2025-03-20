@@ -1,6 +1,5 @@
-import BottomSheet from '@gorhom/bottom-sheet';
 import { Picker } from '@react-native-picker/picker';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CalendarList, DateData } from 'react-native-calendars';
 import 'react-native-reanimated';
@@ -14,7 +13,6 @@ const CalendarScreen: React.FC = () => {
     const [markedDates, setMarkedDates] = useState<any>({});
     const [loading, setLoading] = useState(true);
     const [selectedBooking, setSelectedBooking] = useState<any>(null);
-    const bottomSheetRef = useRef<BottomSheet>(null);
     const [bookingGroups, setBookingGroups] = useState<{ [key: string]: any[] }>({});
 
     useEffect(() => {
@@ -35,7 +33,7 @@ const CalendarScreen: React.FC = () => {
 
             // Set the first property as default if no property is selected
             if (propertyList.length > 0 && !selectedProperty) {
-                setSelectedProperty(propertyList[0].id);
+                setSelectedProperty(propertyList[0].id.toString());
             }
         } catch (error) {
             console.error('Error fetching properties:', error);
@@ -117,7 +115,7 @@ const CalendarScreen: React.FC = () => {
             if (selectedDate >= firstDate && selectedDate <= lastDate) {
                 console.log("bookingGroup[0]", bookingGroup[0]);
                 setSelectedBooking(bookingGroup[0]);
-                bottomSheetRef.current?.expand();
+                // bottomSheetRef.current?.expand();
             }
         });
     };
@@ -154,6 +152,9 @@ const CalendarScreen: React.FC = () => {
                             selectedValue={selectedProperty}
                             onValueChange={(itemValue) => setSelectedProperty(itemValue)}
                             style={styles.picker}
+                            mode="dropdown"
+                            dropdownIconColor="#000"
+                            
                         >
                             <Picker.Item label="Select a property" value="" />
                             {properties.map((property) => (
@@ -205,16 +206,15 @@ const CalendarScreen: React.FC = () => {
                                     textMonthFontSize: 16,
                                     textDayHeaderFontSize: 16
                                 }}
-                                dayNames={['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']}
-                                dayNamesShort={['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']}
+                                /* dayNames={['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']}
+                                dayNamesShort={['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']} */
                             />
                         </View>
                     )}
                 </View>
             </View>
-
             {/* Bottom Sheet */}
-            <BottomSheet
+            {/* <BottomSheet
                 ref={bottomSheetRef}
                 index={-1}
                 snapPoints={['50%']}
@@ -246,7 +246,7 @@ const CalendarScreen: React.FC = () => {
                         <Text style={styles.noBookingText}>No booking details available</Text>
                     )}
                 </View>
-            </BottomSheet>
+            </bottomSheet> */}
         </View>
     );
 };
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
     },
     topContainer: {
-        height: 120,
+        height: 80,
     },
     topBackground: {
         width: '100%',
@@ -313,6 +313,7 @@ const styles = StyleSheet.create({
     picker: {
         height: 50,
         width: '100%',
+        color: '#000',
     },
     loadingContainer: {
         padding: 20,

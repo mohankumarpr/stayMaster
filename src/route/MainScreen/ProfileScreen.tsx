@@ -201,24 +201,27 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                             title="Monthly Statements"
                             onPress={() => {
                                 // navigation.navigate('Statements');
+                                navigation.navigate('MonthlyStatementsScreen');
                             }}
                         />
                         <SettingsItem
                             title="Refer a Property"
                             onPress={() => {
                                 // navigation.navigate('ReferProperty');
+                                navigation.navigate('PropertyReferralScreen');
                             }}
                         />
-                        <SettingsItem
+                        {/* <SettingsItem
                             title="View your listings"
                             onPress={() => {
                                 // navigation.navigate('Listings');
                             }}
-                        />
+                        /> */}
                         <SettingsItem
                             title="Support"
                             onPress={() => {
                                 // navigation.navigate('Support');
+                                navigation.navigate('SupportScreen');
                             }}
                         />
                         <SettingsItem

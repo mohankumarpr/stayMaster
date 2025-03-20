@@ -11,9 +11,12 @@ import EarningsScreen from '../route/MainScreen/EarningsScreen';
 import CalendarScreen from '../route/MainScreen/CalendarScreen';
 import ProfileScreen from '../route/MainScreen/ProfileScreen';
 import WorkingScreen from '../route/Home/WorkingScreen';
-import PropertyDetails from '../route/MainScreen/PropertyDetails';
-import RatingsScreen from '../route/ProfileSub/RatingScreen';
+import PropertyDetails from '../route/MainScreen/PropertyDetails'; 
 import RatingsScree from '../route/ProfileSub/RatingScree';
+import RatingsScreen from '../route/ProfileSub/RatingScreen';
+import MonthlyStatementsScreen from '../route/ProfileSub/MonthlyStatement';
+import PropertyReferralScreen from '../route/ProfileSub/ReferPropertyDetails';
+import SupportScreen from '../route/ProfileSub/SupportScreen';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -30,7 +33,11 @@ export type RootStackParamList = {
   Listings: undefined;
   Support: undefined; 
   RatingsScree: undefined;
+  MonthlyStatementsScreen: undefined;
+  PropertySelector: undefined;
   PropertyDetails: { propertyId: string };
+  PropertyReferralScreen: undefined;
+  SupportScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -93,8 +100,11 @@ const AppNavigator = () => {
         <Stack.Screen name="ReferProperty" component={ReferPropertyScreen} />
         <Stack.Screen name="Listings" component={ListingsScreen} />
         <Stack.Screen name="Support" component={SupportScreen} /> */}
-        <Stack.Screen name="RatingsScreen" component={RatingsScreen} />
+        <Stack.Screen name="RatingsScreen" component={RatingsScreen}  />
         <Stack.Screen name="RatingsScree" component={RatingsScree} />
+        <Stack.Screen name="MonthlyStatementsScreen" component={MonthlyStatementsScreen} />
+        <Stack.Screen name="PropertyReferralScreen" component={PropertyReferralScreen} />
+        <Stack.Screen name="SupportScreen" component={SupportScreen} />
         <Stack.Screen 
           name="PropertyDetails" 
           component={PropertyDetails}

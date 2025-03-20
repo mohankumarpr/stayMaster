@@ -1,6 +1,16 @@
+import { ReactNode } from "react";
+
 export interface Property {
-  id: number;
+  [x: string]: ReactNode;
+  average_rating: any;
+  total_reviews: any; 
+  id: string;
   listing_name: string;
+  earnings: any[];
+  location: string;
+  image: string;  
+  amenities: string[];
+  description: string;
   internal_name: string;
   number_of_bedrooms: number;
   number_of_bathrooms: number;
@@ -19,6 +29,46 @@ export interface Property {
   gbv: number;
   nights: number;
 }
+
+export interface PropertyRating {
+  platform: string;
+  logo: string;
+  rating: number;
+  color: string;
+  totalReviews?: number; // Added optional property for total reviews
+  reviewCount?: number; // Added optional property for review count
+}
+
+export interface PropertyAmenity {
+  amenity: string;
+  icon: string;
+}
+
+export interface PropertyDescription {
+  title: string;
+  description: string;
+}
+
+export interface PropertyMedia {
+  type: string;
+  url: string;
+}
+
+export interface PropertyReview {
+  platform: string;
+  rating: number;
+  review: string;
+  date: string;
+}
+
+
+
+ 
+
+
+
+
+
 
 export interface PropertyResponse {
   totalGBV: number;

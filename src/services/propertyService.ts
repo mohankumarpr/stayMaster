@@ -30,6 +30,12 @@ interface CalendarResponse {
 }
 
 class PropertyService {
+  getPropertyStatements(selectedProperty: string) {
+      throw new Error('Method not implemented.');
+  }
+  downloadStatement(selectedProperty: string, selectedYear: number, selectedMonth: string) {
+      throw new Error('Method not implemented.');
+  }
   private static instance: PropertyService;
   private readonly baseUrl = '/hosts/properties';
   private propertiesCache: PropertyResponse | null = null;

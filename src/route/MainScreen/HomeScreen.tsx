@@ -50,6 +50,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   nightsBooked,
   onPress,
 }) => {
+  
+  function formatAmount(bookingValue: number): string {
+    if (bookingValue === undefined) return '0.00';
+    return bookingValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   return (
     <TouchableOpacity style={styles.propertyCard} onPress={onPress}>
       <Image source={{ uri: image }}  style={styles.propertyImage} resizeMode="cover" />
@@ -67,7 +73,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       <View style={styles.metricsContainer}>
         <View>
           <Text style={styles.metricsLabel}>GBV</Text>
-          <Text style={styles.metricsValue}>₹ {bookingValue}</Text>
+          <Text style={styles.metricsValue}>₹ {formatAmount(bookingValue)}</Text>
         </View>
         <View>
           <Text style={styles.metricsLabel}>No. of nights booked</Text>
@@ -115,6 +121,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     fetchProperties();
   }, []);
+
+  function formatAmount(totalGBV: number): string {
+    if (totalGBV === undefined) return '0.00';
+    return totalGBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
   return (
     <View style={styles.container}>
@@ -166,7 +177,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       />
                     </View>
                   </View>
-                  <Text style={styles.bookingValue}> {totalGBV.toFixed(2)}</Text>
+                  <Text style={styles.bookingValue}> {formatAmount(totalGBV)}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -226,7 +237,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     navigation.navigate('Earnings');
                     // Add a small delay to ensure navigation completes before setting the property
                     setTimeout(() => {
-                      setSelectedProperty(property.id);
+                      setSelectedProperty(property.id.toString());
                     }, 100);
                   }}
                 />
@@ -320,8 +331,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   summaryContent: {
-    flex: 1,
-
+    flex: 1, 
   },
   summaryLabel: {
     fontSize: 12,
@@ -370,7 +380,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   bookingValue: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
     paddingTop: 5,
     paddingLeft: 5,
