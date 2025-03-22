@@ -193,7 +193,7 @@ const EarningsScreen: React.FC = () => {
                         <Text style={styles.sectionTitle}>Select property</Text>
                         <View style={styles.pickerContainer}>
                             <Picker
-                                selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id : properties[0].id)}
+                                selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : "")}
                                 mode="dropdown"
                                 dropdownIconColor="#000"
                                 
@@ -205,7 +205,7 @@ const EarningsScreen: React.FC = () => {
                                     <Picker.Item
                                         key={property.id}
                                         label={property.listing_name}
-                                        value={property.id}
+                                        value={property.id.toString()}
                                     />
                                 ))}
                             </Picker>

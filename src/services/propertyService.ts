@@ -23,6 +23,9 @@ interface CalendarBooking {
 }
 
 interface CalendarResponse {
+  booking: any;
+  property: any;
+  guest: any;
   calendar: {
     bookings: CalendarBooking[];
     blocks: any[]; // You can define a more specific type if needed
@@ -273,6 +276,48 @@ class PropertyService {
     } catch (error: any) {
       console.error(`\n❌ Error in getPropertyCalendar:`, {
         propertyId,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
+
+
+  //get booking details
+  async getBookingDetails(bookingId: string, startDate: string, endDate: string): Promise<CalendarResponse> {
+    try {
+      console.log(`\n=== Starting getBookingDetails Request (Booking ID: ${bookingId}, Start Date: ${startDate}, End Date: ${endDate}) ===`);
+      const guestToken = await this.getGuestToken();
+      
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = '/hosts/bookingDetails';
+      console.log(`📡 Making API request to: ${url}`);
+      
+      const response = await api.post<CalendarResponse>(url, {
+        booking_id: bookingId,
+        start_date: startDate,
+        end_date: endDate,
+        guestToken
+      });
+      
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End getBookingDetails Request ===\n`);
+      
+      return response.data;
+    } catch (error: any) {
+      console.error(`\n❌ Error in getBookingDetails:`, {
+        bookingId,
+        startDate,
+        endDate,
         message: error.message,
         status: error.response?.status,
         data: error.response?.data

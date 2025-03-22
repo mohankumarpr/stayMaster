@@ -17,6 +17,7 @@ import RatingsScreen from '../route/ProfileSub/RatingScreen';
 import MonthlyStatementsScreen from '../route/ProfileSub/MonthlyStatement';
 import PropertyReferralScreen from '../route/ProfileSub/ReferPropertyDetails';
 import SupportScreen from '../route/ProfileSub/SupportScreen';
+import CalendarInfo from '../route/MainScreen/CalendarInfo';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -38,6 +39,7 @@ export type RootStackParamList = {
   PropertyDetails: { propertyId: string };
   PropertyReferralScreen: undefined;
   SupportScreen: undefined;
+  CalendarInfo: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -105,6 +107,7 @@ const AppNavigator = () => {
         <Stack.Screen name="MonthlyStatementsScreen" component={MonthlyStatementsScreen} />
         <Stack.Screen name="PropertyReferralScreen" component={PropertyReferralScreen} />
         <Stack.Screen name="SupportScreen" component={SupportScreen} />
+        <Stack.Screen name="CalendarInfo" component={CalendarInfo} />
         <Stack.Screen 
           name="PropertyDetails" 
           component={PropertyDetails}

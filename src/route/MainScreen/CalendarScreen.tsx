@@ -1,19 +1,52 @@
+import BottomSheet from '@gorhom/bottom-sheet';
+import 'react-native-gesture-handler';
 import { Picker } from '@react-native-picker/picker';
-import React, { useEffect, useState } from 'react';
-import { ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    ImageBackground,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    Image
+} from 'react-native';
 import { CalendarList, DateData } from 'react-native-calendars';
 import 'react-native-reanimated';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const CalendarScreen: React.FC = () => {
+interface BookingData {
+    booking_id: string;
+    effectiveDate: string;
+    guest_name?: string;
+    guest_phone?: string;
+    guest_email?: string;
+    checkin_date?: string;
+    checkout_date?: string;
+    duration?: string;
+    maintenance?: boolean;
+    title?: string;
+}
+
+type CalendarScreenProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'Calendar'>;
+};
+
+const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     const { selectedProperty, setSelectedProperty } = useProperty();
     const [properties, setProperties] = useState<Property[]>([]);
     const [markedDates, setMarkedDates] = useState<any>({});
     const [loading, setLoading] = useState(true);
-    const [selectedBooking, setSelectedBooking] = useState<any>(null);
-    const [bookingGroups, setBookingGroups] = useState<{ [key: string]: any[] }>({});
+    const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    const [bookingGroups, setBookingGroups] = useState<{ [key: string]: BookingData[] }>({});
+    const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().split('T')[0].substring(0, 7));
 
     useEffect(() => {
         fetchProperties();
@@ -33,7 +66,7 @@ const CalendarScreen: React.FC = () => {
 
             // Set the first property as default if no property is selected
             if (propertyList.length > 0 && !selectedProperty) {
-                setSelectedProperty(propertyList[0].id.toString());
+                setSelectedProperty(propertyList[0].id);
             }
         } catch (error) {
             console.error('Error fetching properties:', error);
@@ -47,9 +80,9 @@ const CalendarScreen: React.FC = () => {
             setLoading(true);
             const response = await PropertyService.getPropertyCalendar(selectedProperty);
             const bookings = response.calendar.bookings;
-            
+
             // Group bookings by booking_id
-            const groups = bookings.reduce((acc: { [key: string]: any[] }, booking) => {
+            const groups = bookings.reduce((acc: { [key: string]: any[] }, booking: any) => {
                 if (!acc[booking.booking_id]) {
                     acc[booking.booking_id] = [];
                 }
@@ -58,13 +91,13 @@ const CalendarScreen: React.FC = () => {
             }, {});
 
             // Store booking groups in state
-            setBookingGroups(groups);
+            setBookingGroups(groups as any);
 
             // Convert bookings to period marking format
             const marked: any = {};
             Object.values(groups).forEach(bookingGroup => {
                 // Sort dates in the group
-                bookingGroup.sort((a, b) => 
+                bookingGroup.sort((a: { effectiveDate: string | number | Date; }, b: { effectiveDate: string | number | Date; }) =>
                     new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
                 );
 
@@ -72,17 +105,21 @@ const CalendarScreen: React.FC = () => {
                 const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
                 const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
 
+                // Determine if this is a maintenance booking
+                const isMaintenance = bookingGroup[0].maintenance === true;
+                const color = isMaintenance ? '#FFD700' : '#50cebb';
+
                 // Mark first date
                 marked[firstDate] = {
                     startingDay: true,
-                    color: '#50cebb',
+                    color: color,
                     textColor: 'white'
                 };
 
                 // Mark last date
                 marked[lastDate] = {
                     endingDay: true,
-                    color: '#50cebb',
+                    color: color,
                     textColor: 'white'
                 };
 
@@ -90,7 +127,7 @@ const CalendarScreen: React.FC = () => {
                 bookingGroup.slice(1, -1).forEach(booking => {
                     const date = booking.effectiveDate.split('T')[0];
                     marked[date] = {
-                        color: '#50cebb',
+                        color: color,
                         textColor: 'white'
                     };
                 });
@@ -105,19 +142,88 @@ const CalendarScreen: React.FC = () => {
     };
 
     const onDayPress = (day: DateData) => {
+        console.log("Day pressed:", day.dateString);
+        console.log("Day pressed:", day.dateString);
+        let bookingId = null; // Variable to store the booking ID
         const selectedDate = day.dateString;
-        console.log("onDaypress", day, bookingGroups);
-        // Now we can use bookingGroups from state
+        let bookingFound = false; // Flag to check if a booking is found
+
+        // Animate the transition to the CalendarInfo screen
         Object.values(bookingGroups).forEach(bookingGroup => {
             const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
             const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
-            
+
             if (selectedDate >= firstDate && selectedDate <= lastDate) {
-                console.log("bookingGroup[0]", bookingGroup[0]);
-                setSelectedBooking(bookingGroup[0]);
-                // bottomSheetRef.current?.expand();
+                console.log("Booking found for date:", selectedDate);
+                const startDate = bookingGroup[0].effectiveDate.split('T')[0]; // Get the start date
+                const endDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0]; // Get the end date
+                bookingId = bookingGroup[0].booking_id; // Assuming the booking ID is stored in the first booking of the group
+
+                console.log("Booking ID:", bookingId);
+                console.log("Start Date:", startDate);
+                console.log("End Date:", endDate);
+
+                // Animate the transition to the CalendarInfo screen with booking ID
+                navigation.navigate('CalendarInfo', { bookingId, startDate, endDate } as any);
+                bookingFound = true; // Set flag to true if booking is found
             }
         });
+
+        // If no booking is found, you may want to handle that case
+        if (!bookingFound) {
+            console.warn("No booking found for the selected date.");
+        }
+        
+
+        // Find any booking that includes this date
+       /*  Object.values(bookingGroups).forEach(bookingGroup => {
+            const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
+            const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
+
+            if (selectedDate >= firstDate && selectedDate <= lastDate) {
+                console.log("Booking found for date:", selectedDate);
+                // Enhance booking data with additional info from the sample image
+                const enhancedBooking = {
+                    ...bookingGroup[0],
+                    guest_name: bookingGroup[0].guest_name || "Arun Rajendran",
+                    guest_phone: bookingGroup[0].guest_phone || "+91 12345 54321",
+                    guest_email: bookingGroup[0].guest_email || "arun@example.com",
+                    checkin_date: firstDate,
+                    checkout_date: lastDate,
+                    duration: `${firstDate} - ${lastDate}`,
+                    maintenance: bookingGroup[0].maintenance || false,
+                    title: bookingGroup[0].title || "Guest Booking Info"
+                };
+
+                setSelectedBooking(enhancedBooking);
+                bookingFound = true; // Set flag to true if booking is found
+            }
+        });
+
+        // Expand bottom sheet only if a booking was found
+        if (bottomSheetRef.current) {
+            bottomSheetRef.current.expand();
+        } else {
+            console.warn("BottomSheet reference is null");
+        }  */
+
+    };
+
+    const onMonthChange = (month: any) => {
+        setSelectedMonth(month.dateString.substring(0, 7));
+    };
+
+    // Get current visible month in text format
+    const getCurrentMonthText = () => {
+        const month = new Date(selectedMonth + "-01").toLocaleString('default', { month: 'long' });
+        const year = selectedMonth.split('-')[0];
+        return `${month} ${year}`;
+    };
+
+    const renderSelectedPropertyName = () => {
+        if (!selectedProperty) return "Select Property";
+        const property = properties.find(p => p.id === selectedProperty);
+        return property ? property.listing_name : "Select Property";
     };
 
     return (
@@ -133,11 +239,7 @@ const CalendarScreen: React.FC = () => {
                 >
                     <SafeAreaView>
                         <View style={styles.header}>
-                            <View style={styles.userInfo}>
-                                <View>
-                                    <Text style={styles.welcomeText}>Calendar</Text>
-                                </View>
-                            </View>
+                            <Text style={styles.headerText}>Calendar</Text>
                         </View>
                     </SafeAreaView>
                 </ImageBackground>
@@ -152,9 +254,7 @@ const CalendarScreen: React.FC = () => {
                             selectedValue={selectedProperty}
                             onValueChange={(itemValue) => setSelectedProperty(itemValue)}
                             style={styles.picker}
-                            mode="dropdown"
                             dropdownIconColor="#000"
-                            
                         >
                             <Picker.Item label="Select a property" value="" />
                             {properties.map((property) => (
@@ -175,9 +275,13 @@ const CalendarScreen: React.FC = () => {
 
                     {selectedProperty && !loading && (
                         <View style={styles.calendarContainer}>
+                            <View style={styles.monthHeader}>
+                                <Text style={styles.monthText}>{getCurrentMonthText()}</Text>
+                            </View>
                             <CalendarList
                                 style={styles.calendar}
                                 onDayPress={onDayPress}
+                                onMonthChange={onMonthChange}
                                 markingType={'period'}
                                 markedDates={markedDates}
                                 pastScrollRange={12}
@@ -186,6 +290,7 @@ const CalendarScreen: React.FC = () => {
                                 showScrollIndicator={true}
                                 calendarHeight={360}
                                 firstDay={0}
+                                hideExtraDays={false}
                                 theme={{
                                     backgroundColor: '#ffffff',
                                     calendarBackground: '#ffffff',
@@ -199,54 +304,141 @@ const CalendarScreen: React.FC = () => {
                                     selectedDotColor: '#ffffff',
                                     arrowColor: '#50cebb',
                                     monthTextColor: '#2d4150',
-                                    textDayFontFamily: 'monospace',
-                                    textMonthFontFamily: 'monospace',
-                                    textDayHeaderFontFamily: 'monospace',
-                                    textDayFontSize: 16,
                                     textMonthFontSize: 16,
-                                    textDayHeaderFontSize: 16
+                                    textDayFontSize: 14,
+                                    textDayHeaderFontSize: 14
                                 }}
-                                /* dayNames={['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']}
-                                dayNamesShort={['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']} */
                             />
                         </View>
                     )}
                 </View>
             </View>
+
             {/* Bottom Sheet */}
             {/* <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={['25%', '60%']}
+        enablePanDownToClose
+        backgroundStyle={styles.bottomSheetBackground}
+      >
+        <View style={styles.bottomSheetContent}>
+          {selectedBooking ? (
+            <>
+              <View style={styles.bookingHeader}>
+                <Text style={styles.bookingTitle}>{selectedBooking.title || "Booking Details"}</Text>
+                <TouchableOpacity 
+                  style={styles.closeButton}
+                  onPress={() => bottomSheetRef.current?.close()}
+                >
+                  <Text style={styles.closeButtonText}>×</Text>
+                </TouchableOpacity>
+              </View>
+
+              {selectedBooking.maintenance ? (
+                <View style={styles.maintenanceContainer}>
+                  <View style={styles.maintenanceMarker}>
+                    <Text style={styles.maintenanceMarkerText}>M</Text>
+                  </View>
+                  <Text style={styles.maintenanceText}>Maintenance Block</Text>
+                </View>
+              ) : null}
+
+              <View style={styles.divider} />
+              
+              {!selectedBooking.maintenance && (
+                <View style={styles.guestSection}>
+                  <View style={styles.bookingDetail}>
+                    <Text style={styles.label}>Guest</Text>
+                    <Text style={styles.value}>{selectedBooking.guest_name}</Text>
+                  </View>
+                  
+                  <View style={styles.bookingDetail}>
+                    <Text style={styles.label}>Phone</Text>
+                    <Text style={styles.value}>{selectedBooking.guest_phone}</Text>
+                  </View>
+                  
+                  <View style={styles.bookingDetail}>
+                    <Text style={styles.label}>Email</Text>
+                    <Text style={styles.value}>{selectedBooking.guest_email}</Text>
+                  </View>
+                </View>
+              )}
+              
+              {selectedBooking.maintenance && (
+                <View style={styles.maintenanceSection}>
+                  <View style={styles.bookingDetail}>
+                    <Text style={styles.label}>Title</Text>
+                    <Text style={styles.value}>{renderSelectedPropertyName()}</Text>
+                  </View>
+                  
+                  <View style={styles.bookingDetail}>
+                    <Text style={styles.label}>Duration info</Text>
+                    <Text style={styles.value}>{selectedBooking.guest_phone}</Text>
+                  </View>
+                </View>
+              )}
+              
+              <View style={styles.divider} />
+              
+              <View style={styles.dateSection}>
+                <Text style={styles.dateRangeText}>
+                  {new Date(selectedBooking.checkin_date || "").toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - {new Date(selectedBooking.checkout_date || "").toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
+                </Text>
+                <TouchableOpacity style={styles.editButton}>
+                  <Text style={styles.editButtonText}>Edit</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <Text style={styles.noBookingText}>No booking details available</Text>
+          )}
+        </View>
+      </BottomSheet> */}
+
+
+            <BottomSheet
                 ref={bottomSheetRef}
                 index={-1}
-                snapPoints={['50%']}
-                enablePanDownToClose
-                backgroundStyle={styles.bottomSheetBackground}
+                snapPoints={['25%', '50%']}
             >
-                <View style={styles.bottomSheetContent}>
-                    {selectedBooking ? (
-                        <>
-                            <Text style={styles.bookingTitle}>Booking Details</Text>
-                            <View style={styles.bookingDetail}>
-                                <Text style={styles.label}>Booking ID:</Text>
-                                <Text style={styles.value}>{selectedBooking.booking_id}</Text>
-                            </View>
-                            <View style={styles.bookingDetail}>
-                                <Text style={styles.label}>Check-in:</Text>
-                                <Text style={styles.value}>
-                                    {new Date(selectedBooking.effectiveDate).toLocaleDateString()}
-                                </Text>
-                            </View>
-                            <TouchableOpacity 
-                                style={styles.closeButton}
-                                onPress={() => bottomSheetRef.current?.close()}
-                            >
-                                <Text style={styles.closeButtonText}>Close</Text>
-                            </TouchableOpacity>
-                        </>
-                    ) : (
-                        <Text style={styles.noBookingText}>No booking details available</Text>
-                    )}
+                <View>
+                    <Text>{selectedBooking?.title || 'Booking Details'}</Text>
                 </View>
-            </bottomSheet> */}
+            </BottomSheet>
+
+
+            {/* Bottom Tab Navigation */}
+            <View style={styles.tabContainer}>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Image
+                        source={require('../../assets/images/calender.png')}
+                        style={styles.tabIcon}
+                        resizeMode="contain"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Image
+                        source={require('../../assets/images/calender.png')}
+                        style={styles.tabIcon}
+                        resizeMode="contain"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.tabItem, styles.activeTab]}>
+                    <Image
+                        source={require('../../assets/images/calender.png')}
+                        style={[styles.tabIcon, styles.activeTabIcon]}
+                        resizeMode="contain"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Image
+                        source={require('../../assets/images/calender.png')}
+                        style={styles.tabIcon}
+                        resizeMode="contain"
+                    />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -257,7 +449,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
     },
     topContainer: {
-        height: 80,
+        height: 120,
     },
     topBackground: {
         width: '100%',
@@ -265,17 +457,13 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 20,
-        paddingTop: 20,
+        paddingTop: 40,
         paddingBottom: 15,
     },
-    userInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    welcomeText: {
+    headerText: {
         color: 'white',
-        fontSize: 14,
-        opacity: 0.9,
+        fontSize: 22,
+        fontWeight: 'bold',
     },
     contentArea: {
         flex: 1,
@@ -290,8 +478,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontSize: 16,
+        fontWeight: '600',
         marginBottom: 15,
         marginLeft: 5,
         color: '#333',
@@ -334,6 +522,15 @@ const styles = StyleSheet.create({
         elevation: 3,
         flex: 1,
     },
+    monthHeader: {
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    monthText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+    },
     calendar: {
         marginBottom: 10,
     },
@@ -345,44 +542,130 @@ const styles = StyleSheet.create({
     bottomSheetContent: {
         padding: 20,
     },
+    bookingHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
     bookingTitle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 20,
         color: '#333',
+    },
+    closeButton: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: '#f0f0f0',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    closeButtonText: {
+        fontSize: 22,
+        color: '#666',
+        fontWeight: 'bold',
+    },
+    maintenanceContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    maintenanceMarker: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#FFD700',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    maintenanceMarkerText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    maintenanceText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#e0e0e0',
+        marginVertical: 15,
+    },
+    guestSection: {
+        marginBottom: 10,
+    },
+    maintenanceSection: {
+        marginBottom: 10,
     },
     bookingDetail: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 15,
-        paddingHorizontal: 10,
     },
     label: {
-        fontSize: 16,
+        fontSize: 15,
         color: '#666',
         fontWeight: '500',
     },
     value: {
-        fontSize: 16,
+        fontSize: 15,
         color: '#333',
+        fontWeight: '500',
     },
-    closeButton: {
-        backgroundColor: '#50cebb',
-        padding: 15,
-        borderRadius: 10,
+    dateSection: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 20,
     },
-    closeButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
+    dateRangeText: {
+        fontSize: 15,
+        color: '#333',
+        fontWeight: '500',
+    },
+    editButton: {
+        backgroundColor: '#e0e0e0',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    editButtonText: {
+        color: '#333',
+        fontSize: 14,
+        fontWeight: '500',
     },
     noBookingText: {
         textAlign: 'center',
         fontSize: 16,
         color: '#666',
     },
+    tabContainer: {
+        flexDirection: 'row',
+        height: 60,
+        backgroundColor: '#fff',
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+    },
+    tabItem: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    activeTab: {
+        borderTopWidth: 2,
+        borderTopColor: '#008489',
+    },
+    tabIcon: {
+        width: 24,
+        height: 24,
+        opacity: 0.6,
+    },
+    activeTabIcon: {
+        opacity: 1,
+    }
 });
 
 export default CalendarScreen;
