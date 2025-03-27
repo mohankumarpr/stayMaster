@@ -52,8 +52,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   
   function formatAmount(bookingValue: number): string {
-    if (bookingValue === undefined) return '0.00';
-    return bookingValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (bookingValue === undefined) return '0';
+    return bookingValue.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).replace(/\.00$/, '');
   }
 
   return (
@@ -124,7 +124,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   function formatAmount(totalGBV: number): string {
     if (totalGBV === undefined) return '0.00';
-    return totalGBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return totalGBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
   }
 
   return (
@@ -205,7 +205,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       />
                     </View>
                   </View>
-                  <Text style={styles.bookingValue}>{totalNights} days</Text>
+                  <Text style={styles.bookingValue}>{formatAmount(totalNights)} days</Text>
                 </View>
               </TouchableOpacity> 
             </View>

@@ -13,12 +13,13 @@ import {
     Image
 } from 'react-native';
 import { CalendarList, DateData } from 'react-native-calendars';
-import 'react-native-reanimated';
+// import 'react-native-reanimated';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { ActivityIndicator } from 'react-native';
 
 interface BookingData {
     booking_id: string;
@@ -62,11 +63,11 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         try {
             const response = await PropertyService.getAllProperties();
             const propertyList = response.properties || [];
-            setProperties(propertyList);
+            setProperties(propertyList); 
 
             // Set the first property as default if no property is selected
             if (propertyList.length > 0 && !selectedProperty) {
-                setSelectedProperty(propertyList[0].id);
+                setSelectedProperty(propertyList[0].id.toString());
             }
         } catch (error) {
             console.error('Error fetching properties:', error);
@@ -79,7 +80,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         try {
             setLoading(true);
             const response = await PropertyService.getPropertyCalendar(selectedProperty);
-            const bookings = response.calendar.bookings;
+            const bookings = response.calendar;
 
             // Group bookings by booking_id
             const groups = bookings.reduce((acc: { [key: string]: any[] }, booking: any) => {
@@ -92,7 +93,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
             // Store booking groups in state
             setBookingGroups(groups as any);
-
             // Convert bookings to period marking format
             const marked: any = {};
             Object.values(groups).forEach(bookingGroup => {
@@ -115,14 +115,12 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     color: color,
                     textColor: 'white'
                 };
-
                 // Mark last date
                 marked[lastDate] = {
                     endingDay: true,
                     color: color,
                     textColor: 'white'
                 };
-
                 // Mark middle dates
                 bookingGroup.slice(1, -1).forEach(booking => {
                     const date = booking.effectiveDate.split('T')[0];
@@ -167,8 +165,8 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 navigation.navigate('CalendarInfo', { bookingId, startDate, endDate } as any);
                 bookingFound = true; // Set flag to true if booking is found
             }
-        });
-
+        }); 
+        
         // If no booking is found, you may want to handle that case
         if (!bookingFound) {
             console.warn("No booking found for the selected date.");
@@ -251,17 +249,18 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     <Text style={styles.sectionTitle}>Select property</Text>
                     <View style={styles.pickerContainer}>
                         <Picker
-                            selectedValue={selectedProperty}
+                            selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id : '')}
+                            mode="dropdown"
+                            dropdownIconColor="#000"
                             onValueChange={(itemValue) => setSelectedProperty(itemValue)}
                             style={styles.picker}
-                            dropdownIconColor="#000"
                         >
-                            <Picker.Item label="Select a property" value="" />
+                            <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
                             {properties.map((property) => (
                                 <Picker.Item
                                     key={property.id}
                                     label={property.listing_name}
-                                    value={property.id}
+                                    value={property.id.toString()}
                                 />
                             ))}
                         </Picker>
@@ -269,7 +268,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
                     {loading && (
                         <View style={styles.loadingContainer}>
-                            <Text>Loading calendar...</Text>
+                            <ActivityIndicator size="large" color="#008489" />
                         </View>
                     )}
 
@@ -499,7 +498,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     picker: {
-        height: 50,
+        height: 60,
         width: '100%',
         color: '#000',
     },

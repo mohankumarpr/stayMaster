@@ -21,23 +21,39 @@ interface CalendarBooking {
   children: number;
   value: number;
 }
+interface RatingResponse {
+  ratings: {
+    Airbnb: number;
+    Booking: number;
+    MakeMyTrip: number;
+    Expedia: number;
+    Agoda: number;
+    Hostelworld: number;
+  };
+  property: any;
+  guest: any;
+}
 
 interface CalendarResponse {
   booking: any;
   property: any;
   guest: any;
-  calendar: {
-    bookings: CalendarBooking[];
-    blocks: any[]; // You can define a more specific type if needed
-  }
+  calendar: Array<{
+    id: number;
+    start: string;
+    end: string;
+    currentStatus: string;
+    status: string;
+    type: string;
+  }>;
 }
 
 class PropertyService {
   getPropertyStatements(selectedProperty: string) {
-      throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
   downloadStatement(selectedProperty: string, selectedYear: number, selectedMonth: string) {
-      throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
   private static instance: PropertyService;
   private readonly baseUrl = '/hosts/properties';
@@ -45,7 +61,7 @@ class PropertyService {
   private lastFetchTime: number = 0;
   private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): PropertyService {
     if (!PropertyService.instance) {
@@ -92,21 +108,21 @@ class PropertyService {
         url: this.baseUrl,
         method: 'POST'
       });
-      
+
       const response = await api.post<PropertyResponse>(this.baseUrl, {
         guestToken
       });
-      
+
       // Cache the response
       this.propertiesCache = response.data;
       this.lastFetchTime = now;
-      
+
       console.log('✅ API Response received and cached');
       console.log('Status:', response.status);
       console.log('Headers:', response.headers);
       console.log('Data:', JSON.stringify(response.data, null, 2));
       // console.log('=== End getAllProperties Request ===\n');
-      
+
       return response.data;
     } catch (error: any) {
       console.error('\n❌ Error in getAllProperties:', {
@@ -129,7 +145,7 @@ class PropertyService {
     try {
       console.log(`\n=== Starting getPropertyById Request (ID: ${id}) ===`);
       const guestToken = await this.getGuestToken();
-      
+
       if (!guestToken) {
         console.error('❌ Guest token not found in storage');
         throw new Error('Guest token not found');
@@ -138,16 +154,16 @@ class PropertyService {
 
       const url = `${this.baseUrl}/${id}`;
       console.log(`📡 Making API request to: ${url}`);
-      
+
       const response = await api.post<Property>(url, {
         guestToken
       });
-      
+
       console.log('✅ API Response received');
       console.log('Status:', response.status);
       console.log('Data:', JSON.stringify(response.data, null, 2));
       console.log(`=== End getPropertyById Request ===\n`);
-      
+
       return response.data;
     } catch (error: any) {
       console.error(`\n❌ Error in getPropertyById:`, {
@@ -216,7 +232,7 @@ class PropertyService {
     try {
       console.log(`\n=== Starting getEarningsByMonth Request (Property ID: ${propertyId}) ===`);
       const guestToken = await this.getGuestToken();
-      
+
       if (!guestToken) {
         console.error('❌ Guest token not found in storage');
         throw new Error('Guest token not found');
@@ -225,17 +241,17 @@ class PropertyService {
 
       const url = '/hosts/earningsByMonth';
       console.log(`📡 Making API request to: ${url}`);
-      
+
       const response = await api.post<EarningsByMonth>(url, {
         property_id: propertyId,
         guestToken
       });
-      
+
       console.log('✅ API Response received');
       console.log('Status:', response.status);
       console.log('Data:', JSON.stringify(response.data, null, 2));
       console.log(`=== End getEarningsByMonth Request ===\n`);
-      
+
       return response.data;
     } catch (error: any) {
       console.error(`\n❌ Error in getEarningsByMonth:`, {
@@ -252,7 +268,7 @@ class PropertyService {
     try {
       console.log(`\n=== Starting getPropertyCalendar Request (Property ID: ${propertyId}) ===`);
       const guestToken = await this.getGuestToken();
-      
+
       if (!guestToken) {
         console.error('❌ Guest token not found in storage');
         throw new Error('Guest token not found');
@@ -261,17 +277,17 @@ class PropertyService {
 
       const url = '/hosts/calendar';
       console.log(`📡 Making API request to: ${url}`);
-      
+
       const response = await api.post<CalendarResponse>(url, {
         property_id: propertyId,
         guestToken
       });
-      
+
       console.log('✅ API Response received');
       console.log('Status:', response.status);
       console.log('Data:', JSON.stringify(response.data, null, 2));
       console.log(`=== End getPropertyCalendar Request ===\n`);
-      
+
       return response.data;
     } catch (error: any) {
       console.error(`\n❌ Error in getPropertyCalendar:`, {
@@ -290,7 +306,7 @@ class PropertyService {
     try {
       console.log(`\n=== Starting getBookingDetails Request (Booking ID: ${bookingId}, Start Date: ${startDate}, End Date: ${endDate}) ===`);
       const guestToken = await this.getGuestToken();
-      
+
       if (!guestToken) {
         console.error('❌ Guest token not found in storage');
         throw new Error('Guest token not found');
@@ -299,25 +315,62 @@ class PropertyService {
 
       const url = '/hosts/bookingDetails';
       console.log(`📡 Making API request to: ${url}`);
-      
+
       const response = await api.post<CalendarResponse>(url, {
         booking_id: bookingId,
         start_date: startDate,
         end_date: endDate,
         guestToken
       });
-      
+
       console.log('✅ API Response received');
       console.log('Status:', response.status);
       console.log('Data:', JSON.stringify(response.data, null, 2));
       console.log(`=== End getBookingDetails Request ===\n`);
-      
+
       return response.data;
     } catch (error: any) {
       console.error(`\n❌ Error in getBookingDetails:`, {
         bookingId,
         startDate,
         endDate,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
+
+
+  // get rating details
+  async getRatingDetails(propertyId: string): Promise<Record<string, number>> {
+    try {
+      console.log(`\n=== Starting getRatingDetails Request (Property ID: ${propertyId}) ===`);
+      const guestToken = await this.getGuestToken();
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = '/hosts/ratings';
+      console.log(`📡 Making API request to: ${url}`);
+
+      const response = await api.post<Record<string, number>>(url, {
+        property_id: propertyId,
+        guestToken
+      });
+
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End getRatingDetails Request ===\n`);
+
+      return response.data;
+    } catch (error: any) {
+      console.error(`\n❌ Error in getRatingDetails:`, {
+        propertyId,
         message: error.message,
         status: error.response?.status,
         data: error.response?.data

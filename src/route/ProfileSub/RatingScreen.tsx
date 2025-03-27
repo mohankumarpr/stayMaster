@@ -16,6 +16,9 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Picker } from '@react-native-picker/picker';
 import { useProperty } from '../../context/PropertyContext';
+import { ActivityIndicator } from 'react-native';
+import PropertyService from '../../services/propertyService';
+import { Property } from '../../types/property';
 
 type RatingsScreenProps = {
     navigation: StackNavigationProp<RootStackParamList, 'RatingsScreen'>;
@@ -39,7 +42,11 @@ interface PropertyRating {
     totalReviews?: number;
 }
 
-interface Property {
+interface RatingDetailsResponse {
+    [platform: string]: number;
+}
+
+interface Propertys {
     id: string;
     name: string;
     location: string;
@@ -51,69 +58,49 @@ interface Property {
 
 const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
     // Sample properties data
-    const sampleProperties = [
-        {
-            id: '1',
-            name: 'Iconic Vally',
-            location: 'Fira, Thira 84700, Greece',
-            image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2340&auto=format&fit=crop',
-            averageRating: 4.8,
-            totalReviews: 4339,
-            ratings: [
-                { platform: 'Airbnb', logo: 'md-globe-outline', rating: 4.8, color: '#FF5A5F' },
-                { platform: 'Makemytrip', logo: 'md-globe-outline', rating: 4.0, color: '#EB2026' },
-                { platform: 'Booking.com', logo: 'booking', rating: 4.8, color: '#003580' },
-            ]
-        },
-        {
-            id: '2',
-            name: 'Sunset Villa',
-            location: 'Oia, Santorini, Greece',
-            image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2340&auto=format&fit=crop',
-            averageRating: 4.6,
-            totalReviews: 3102,
-            ratings: [
-                { platform: 'Airbnb', logo: 'md-globe-outline', rating: 4.7, color: '#FF5A5F' },
-                { platform: 'Makemytrip', logo: 'md-globe-outline', rating: 4.2, color: '#EB2026' },
-                { platform: 'Booking.com', logo: 'booking', rating: 4.5, color: '#003580' },
-            ]
-        }
-    ];
+    
 
     const [selectedPropertyId, setSelectedPropertyId] = useState('1');
-    const [properties, setPropertiesvalue] = useState<Property[]>(sampleProperties);
+    const [properties, setPropertiesvalue] = useState<Property[]>([]);
     const { selectedProperty, setSelectedProperty } = useProperty();
-
-
     const [loading, setLoading] = useState(false);
-
-
+    const [ratingDetails, setRatingDetails] = useState<RatingDetailsResponse | null>(null);
 
 
     // Find the selected property object
-    const selectedPropertys = properties.find(p => p.id === selectedPropertyId) || properties[0];
+    const selectedPropertys = properties.find(p => p.id.toString() === selectedPropertyId.toString()) || properties[0];
 
-    // Load properties data
-    useEffect(() => {
-        // Simulate loading data
-        setLoading(true);
-        // In a real app, you would fetch data from an API here
-        setTimeout(() => {
-            setPropertiesvalue(sampleProperties);
-            setLoading(false);
-        }, 1000);
-    }, []);
+    console.log("selectedPropertys", selectedPropertys);
 
 
     useEffect(() => {
         fetchProperties();
     }, []);
 
+
+    useEffect(() => {
+        if (selectedProperty && !loading) {
+            setLoading(true);
+            setSelectedPropertyId(selectedProperty);
+            console.log("selectedPropertyId", selectedPropertyId);
+            fetchRatingDetails(selectedPropertyId);
+
+            setLoading(false);
+        }
+    }, [selectedProperty, loading]);
+
+
+    useEffect(() => {
+        if (selectedPropertyId) {
+            fetchRatingDetails(selectedPropertyId);
+        }
+    }, [selectedPropertyId]);
+
+
     const fetchProperties = async () => {
         try {
-            const response = await fetch('/api/properties'); // Adjust the API endpoint as necessary
-            const data = await response.json();
-            const propertyList = data.properties || [];
+            const response = await PropertyService.getAllProperties();
+            const propertyList = response.properties || [];
             setPropertiesvalue(propertyList);
 
             // Set the first property as default if no property is selected
@@ -127,6 +114,20 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
         }
     };
 
+    async function fetchRatingDetails(selectedPropertyId: string) {
+        console.log("selectedPropertyId for rating details", selectedPropertyId);
+        try {
+            const response = await PropertyService.getRatingDetails(selectedPropertyId);
+            console.log("rating details response", response);
+            setRatingDetails(response as unknown as RatingDetailsResponse);
+            console.log("rating details", ratingDetails);
+
+        } catch (error) {
+            console.error('Error fetching rating details:', error);
+        }
+    }
+
+
     const renderStars = (rating: number) => {
         const stars = [];
         const fullStars = Math.floor(rating);
@@ -136,7 +137,7 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
             if (i < fullStars) {
                 stars.push(<AntDesign key={`star-${i}`} name="star" size={14} color="#FFD700" style={styles.star} />);
             } else if (i === fullStars && halfStar) {
-                stars.push(<AntDesign key={`star-${i}`} name="starhalfalt" size={14} color="#FFD700" style={styles.star} />);
+                stars.push(<AntDesign key={`star-${i}`} name="starhalf" size={14} color="#FFD700" style={styles.star} />);
             } else {
                 stars.push(<AntDesign key={`star-${i}`} name="staro" size={14} color="#FFD700" style={styles.star} />);
             }
@@ -152,16 +153,34 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                         <Text style={styles.logoText}>A</Text>
                     </View>
                 );
-            case 'Makemytrip':
+            case 'MakeMyTrip':
                 return (
                     <View style={[styles.logoBox, { backgroundColor: '#EB2026' }]}>
                         <Text style={styles.logoText}>MMT</Text>
                     </View>
                 );
-            case 'Booking.com':
+            case 'Booking':
                 return (
                     <View style={[styles.logoBox, { backgroundColor: '#003580' }]}>
                         <Text style={styles.logoText}>B</Text>
+                    </View>
+                );
+            case 'Expedia':
+                return (
+                    <View style={[styles.logoBox, { backgroundColor: '#FF6A00' }]}>
+                        <Text style={styles.logoText}>E</Text>
+                    </View>
+                );
+            case 'Hostelworld':
+                return (
+                    <View style={[styles.logoBox, { backgroundColor: '#00A3E0' }]}>
+                        <Text style={styles.logoText}>H</Text>
+                    </View>
+                );
+            case 'Agoda':
+                return (
+                    <View style={[styles.logoBox, { backgroundColor: '#FF6F20' }]}>
+                        <Text style={styles.logoText}>A</Text>
                     </View>
                 );
             default:
@@ -189,12 +208,12 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                     <View style={styles.pickerContainer}>
                         {loading ? (
                             <View style={styles.loadingContainer}>
-                                <Text>Loading property details...</Text>
+                                <ActivityIndicator size="large" color="#008489" />
                             </View>
                         ) : (
                             <Picker
                                 selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : '')}
-                                 mode="dropdown"
+                                mode="dropdown"
                                 dropdownIconColor="#000"
                                 onValueChange={(itemValue) => {
                                     console.log('Selected property id:', itemValue.toString());
@@ -202,13 +221,18 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                 }}
                                 style={styles.picker}
                             >
-                                {properties.map((property) => (
-                                    <Picker.Item
-                                        key={property.id}
-                                        label={property.name}
-                                        value={property.id}
-                                    />
-                                ))}
+                                <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
+                                {properties.map((property) => {
+                                    console.log("property", property);
+                                    console.log("property.id", property.id);
+
+                                    return (
+                                        <Picker.Item
+                                            key={property.id}
+                                            label={property.listing_name}
+                                            value={property.id.toString()} />
+                                    );
+                                })}
                             </Picker>
                         )}
                     </View>
@@ -220,50 +244,50 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                         <View style={styles.propertyCardContainer}>
                             <View style={styles.propertyCard}>
                                 <Image
-                                    source={{ uri: selectedPropertys.image }}
+                                    source={{ uri: selectedPropertys.url }}
                                     style={styles.propertyImage}
                                     resizeMode="cover"
                                 />
-
                                 <View style={styles.propertyInfo}>
                                     <View style={styles.nameRatingRow}>
-                                        <Text style={styles.propertyName}>{selectedPropertys.name}</Text>
+                                        <Text style={styles.propertyName}>{selectedPropertys.listing_name}</Text>
                                         <View style={styles.ratingBadge}>
                                             <AntDesign name="star" size={12} color="#FFD700" />
                                             <Text style={styles.ratingText}>
-                                                {selectedPropertys.averageRating.toFixed(1)}
+                                                {selectedPropertys.averageRating?.toString()}
                                             </Text>
                                         </View>
                                     </View>
-
                                     <Text style={styles.propertyLocation}>
-                                        {selectedPropertys.location}
+                                        {selectedPropertys.address_line_1}
+                                    </Text>
+                                    <Text style={styles.reviewCount}>
+                                        ({selectedPropertys.totalReviews?.toLocaleString()})
                                     </Text>
 
-                                    <Text style={styles.reviewCount}>
-                                        ({selectedPropertys.totalReviews.toLocaleString()})
-                                    </Text>
+                                    <View style={styles.ratingsListContainer}>
+
+                                        {ratingDetails && Object.entries(ratingDetails).map(([platform, rating]) => {
+                                            return (
+                                                <View key={platform} style={styles.ratingItem}>
+                                                    <View style={[styles.platformInfo, { elevation: 6, padding: 4 }]}>
+                                                        {getLogo(platform)}
+                                                    </View>
+                                                    <View style={[styles.platformInfotext]}>
+                                                        <Text style={styles.platformName}>{platform}</Text>
+                                                    </View>
+
+                                                    <View style={styles.ratingStars}>
+                                                        {renderStars(Number(rating))}
+                                                        <Text style={styles.ratingValue}>{rating.toFixed(1)}</Text>
+                                                    </View>
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-
-                        {/* Ratings List */}
-                        <View style={styles.ratingsListContainer}>
-                            <Text style={styles.ratingsTitle}>Platform Ratings</Text>
-                            {selectedPropertys.ratings.map((item, index) => (
-                                <View key={index} style={styles.ratingItem}>
-                                    <View style={styles.platformInfo}>
-                                        {getLogo(item.platform)}
-                                        <Text style={styles.platformName}>{item.platform}</Text>
-                                    </View>
-
-                                    <View style={styles.ratingStars}>
-                                        {renderStars(item.rating)}
-                                        <Text style={styles.ratingValue}>{item.rating.toFixed(1)}</Text>
-                                    </View>
-                                </View>
-                            ))}
-                        </View>
+                        </View> 
                     </>
                 )}
             </ScrollView>
@@ -275,6 +299,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F8F8F8',
+    },
+    ratingDetailsContainer: {
+        padding: 16,
     },
     scrollContent: {
         paddingBottom: 20,
@@ -304,10 +331,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 3,
-        color: '#000', 
+        color: '#000',
     },
     picker: {
-        height: 50,
+        height: 55,
         width: '100%',
         color: '#000', // Added text color black
     },
@@ -326,7 +353,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: '#000000',
-        
+
     },
     placeholder: {
         width: 24,
@@ -334,6 +361,7 @@ const styles = StyleSheet.create({
     propertyCardContainer: {
         paddingHorizontal: 16,
         marginBottom: 16,
+
         borderTopLeftRadius: 150,
         borderTopRightRadius: 150,
     },
@@ -391,6 +419,7 @@ const styles = StyleSheet.create({
     ratingsListContainer: {
         backgroundColor: '#FFFFFF',
         paddingHorizontal: 16,
+
     },
     ratingsTitle: {
         fontSize: 16,
@@ -409,12 +438,21 @@ const styles = StyleSheet.create({
     platformInfo: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+
+    },
+    platformInfotext: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        flex: 1,
+        paddingLeft: 10,
     },
     platformName: {
         fontSize: 16,
         fontWeight: '500',
-        marginLeft: 12,
         color: '#000000',
+        textAlign: 'left',
     },
     ratingStars: {
         flexDirection: 'row',
@@ -444,3 +482,4 @@ const styles = StyleSheet.create({
 });
 
 export default RatingsScreen;
+

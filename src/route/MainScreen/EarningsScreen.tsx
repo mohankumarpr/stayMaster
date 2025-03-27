@@ -15,6 +15,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
+import { ActivityIndicator } from 'react-native';
 
 // const { width } = Dimensions.get('window');
 // const cardWidth = width * 0.8;
@@ -200,7 +201,7 @@ const EarningsScreen: React.FC = () => {
                                 onValueChange={(itemValue) => setSelectedProperty(itemValue)}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id : ""} />
+                                <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
                                 {properties.map((property) => (
                                     <Picker.Item
                                         key={property.id}
@@ -213,7 +214,7 @@ const EarningsScreen: React.FC = () => {
 
                         {loading && (
                             <View style={styles.loadingContainer}>
-                                <Text>Loading property details...</Text>
+                                <ActivityIndicator size="large" color="#008489" />
                             </View>
                         )}
                     </View>

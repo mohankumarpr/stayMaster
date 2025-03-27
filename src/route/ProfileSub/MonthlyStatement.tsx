@@ -7,6 +7,7 @@ import PropertyService from '../../services/propertyService';
 import { StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native'; 
 import Icon from 'react-native-vector-icons/Ionicons';
+import { ActivityIndicator } from 'react-native';
 
 const MonthlyStatements = ({ navigation }: { navigation: any }) => {
     const { selectedProperty, setSelectedProperty } = useProperty();
@@ -58,7 +59,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                     <View style={styles.pickerContainerlist}>
                         {loading ? (
                             <View style={styles.loadingContainer}>
-                                <Text>Loading property details...</Text>
+                                <ActivityIndicator size="large" color="#008489" />
                             </View>
                         ) : (
                             <Picker
@@ -71,7 +72,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                     <Picker.Item
                                         key={property.id}
                                         label={property.listing_name}
-                                        value={property.id}
+                                        value={property.id.toString()}
                                     />
                                 ))}
                             </Picker>
