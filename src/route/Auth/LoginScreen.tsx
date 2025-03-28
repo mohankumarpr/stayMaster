@@ -5,6 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import api from '../../api/api'; 
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
+import Toast from 'react-native-toast-message';
 
 type LoginScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Login'>;
@@ -43,13 +44,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     // Check network status
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
-      Alert.alert('No Internet Connection', 'Please check your internet connection and try again.');
+      showToast('error', 'No Internet Connection', 'Please check your internet connection and try again.');
       return;
     }
 
     // Validate mobile number
     if (mobileNumber.length < 10) {
-      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number.');
+      showToast('error', 'Invalid Number', 'Please enter a valid 10-digit mobile number.');
       return;
     }
 
@@ -66,10 +67,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       if (response.data != null && response.data.otp) {
         navigation.navigate('OTP', { mobileNumber });
       } else {
-        Alert.alert('Error', 'Failed to generate OTP. Please try again.');
+        showToast('error', 'Failed to generate OTP. Please try again.', '');
       }
     } catch (error) {
-      Alert.alert('Error', `An error occurred while generating OTP. Please try again. ${error}`);
+      showToast('error', 'Mobile number is not valid. Please try again.', '');
     } finally {
       // Hide loading indicator
       setLoading(false);
@@ -252,3 +253,7 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
+
+function showToast(arg0: string, arg1: string, arg2: string) {
+  throw new Error('Function not implemented.');
+}

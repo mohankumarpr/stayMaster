@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useProperty } from '../../context/PropertyContext';
 import { Property } from '../../types/property';
 import PropertyService from '../../services/propertyService';
 import { StatusBar } from 'react-native';
-import { SafeAreaView } from 'react-native'; 
+import { SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ActivityIndicator } from 'react-native';
+
+
+interface MonthlyStatement {
+    name: string; // e.g., "2024_11.pdf"
+    year: string; // e.g., "2024"
+    month: string; // e.g., "11"
+}
+
 
 const MonthlyStatements = ({ navigation }: { navigation: any }) => {
     const { selectedProperty, setSelectedProperty } = useProperty();
@@ -15,12 +23,19 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
     const [selectedMonth, setSelectedMonth] = useState('October');
     const [loading, setLoading] = useState(false);
     const [properties, setProperties] = useState<Property[]>([]);
+    const [monthlyStatements, setMonthlyStatements] = useState<MonthlyStatement[]>([]);
 
 
 
     useEffect(() => {
         fetchProperties();
     }, []);
+
+    useEffect(() => {
+        if (selectedProperty) {
+            fetchMonthlyStatement(selectedProperty);
+        }
+    }, [selectedProperty]);
 
 
 
@@ -33,6 +48,8 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
             // Set the first property as default if no property is selected
             if (propertyList.length > 0 && !selectedProperty) {
                 setSelectedProperty(propertyList[0].id.toString());
+                fetchMonthlyStatement(propertyList[0].id.toString());
+
             }
         } catch (error) {
             console.error('Error fetching properties:', error);
@@ -41,7 +58,55 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
         }
     };
 
+    const fetchMonthlyStatement = async (propertyId: string) => {
+        try {
+            const response = await PropertyService.getMonthlyStatement(propertyId);
+            console.log(response);
+            setMonthlyStatements(response);
+        } catch (error) {
+            console.error('Error fetching monthly statement:', error);
+        }
+    };
 
+    // Add these helper functions to get unique years and months
+    const getUniqueYears = () => {
+        const years = monthlyStatements.map(statement => statement.year);
+        return [...new Set(years)].sort((a, b) => b.localeCompare(a)); // Sort descending
+    };
+
+    const getMonthsForSelectedYear = () => {
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        const monthsInYear = monthlyStatements
+            .filter(statement => statement.year === selectedYear)
+            .map(statement => ({
+                number: statement.month,
+                name: monthNames[parseInt(statement.month) - 1]
+            }));
+
+        return monthsInYear.sort((a, b) => parseInt(b.number) - parseInt(a.number));
+    };
+
+    // Update useEffect to set initial year and month
+    useEffect(() => {
+        if (monthlyStatements.length > 0) {
+            const years = getUniqueYears();
+            if (years.length > 0) {
+                setSelectedYear(years[0]);
+                const monthsForYear = getMonthsForSelectedYear();
+                if (monthsForYear.length > 0) {
+                    setSelectedMonth(monthsForYear[0].number);
+                }
+            }
+        }
+    }, [monthlyStatements]);
+
+    function showToast(arg0: { text1: string; type: string; }) {
+        throw new Error('Function not implemented.');
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -66,6 +131,8 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                 selectedValue={selectedProperty}
                                 onValueChange={(itemValue) => setSelectedProperty(itemValue)}
                                 style={styles.picker}
+                                mode="dropdown"
+                                dropdownIconColor="#000"
                             >
                                 <Picker.Item label="Select a property" value="" />
                                 {properties && properties.length > 0 && properties.map((property) => (
@@ -90,9 +157,25 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                             <View style={styles.pickerContainer1}>
                                 <Picker
                                     selectedValue={selectedYear}
-                                    onValueChange={(itemValue) => setSelectedYear(itemValue)}>
-                                    <Picker.Item label="2024" value="2024" style={styles.pickerItem} />
-                                    <Picker.Item label="2023" value="2023" style={styles.pickerItem} />
+                                    mode="dropdown"
+                                    dropdownIconColor="#000"
+                                    onValueChange={(itemValue) => {
+                                        setSelectedYear(itemValue);
+                                        // Reset month when year changes
+                                        const monthsForYear = monthlyStatements
+                                            .filter(statement => statement.year === itemValue);
+                                        if (monthsForYear.length > 0) {
+                                            setSelectedMonth(monthsForYear[0].month);
+                                        }
+                                    }}
+                                    style={styles.picker}>
+                                    {getUniqueYears().map((year) => (
+                                        <Picker.Item
+                                            key={year}
+                                            label={year}
+                                            value={year}
+                                        />
+                                    ))}
                                 </Picker>
                             </View>
                         </View>
@@ -102,16 +185,52 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                             <View style={styles.pickerContainer1}>
                                 <Picker
                                     selectedValue={selectedMonth}
-                                    onValueChange={(itemValue) => setSelectedMonth(itemValue)}>
-                                    <Picker.Item label="October" value="October" style={styles.pickerItem} />
-                                    <Picker.Item label="November" value="November" style={styles.pickerItem} />
+                                    mode="dropdown"
+                                    onValueChange={(itemValue) => setSelectedMonth(itemValue)}
+                                    style={styles.picker}>
+                                    {getMonthsForSelectedYear().map((month) => (
+                                        <Picker.Item
+                                            key={month.number}
+                                            label={month.name}
+                                            value={month.number}
+                                        />
+                                    ))}
                                 </Picker>
                             </View>
                         </View>
                     </View>
                 </ScrollView>
 
-                <TouchableOpacity style={styles.downloadButton}>
+                <TouchableOpacity
+                    style={styles.downloadButton}
+                    onPress={async () => {
+                        const statement = monthlyStatements.find(
+                            s => s.year === selectedYear && s.month === selectedMonth
+                        );
+                        if (statement) {
+                            // Handle download using statement.name
+                            console.log(`Downloading statement: ${statement.name}`);
+                            setLoading(true); // Start loading state
+                            try {
+                                const downloadUrl = await PropertyService.downloadMonthlyStatement(selectedProperty, statement.name);
+                                const fileUrl = downloadUrl; // Extract the URL from the response
+                                console.log('File URL:', fileUrl);
+                                // Use the download URL directly instead of creating an object URL
+                                Linking.openURL(downloadUrl.url).catch(err => console.error('Error opening URL:', err));
+
+                                console.log(`Statement downloaded: ${downloadUrl}`);
+                                // Optionally, you can handle the download URL here (e.g., open it)
+                            } finally {
+                                setLoading(false); // End loading state
+                            }
+                        } else {
+                            console.log('No statement found');
+                            showToast({
+                                text1: 'No statement found',
+                                type: 'error',
+                            });
+                        }
+                    }}>
                     <Text style={styles.downloadButtonText}>Download Statement</Text>
                 </TouchableOpacity>
             </View>
@@ -123,7 +242,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     picker: { color: '#000', fontSize: 14 },
-  
+
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -144,7 +263,7 @@ const styles = StyleSheet.create({
 
     pickerItem: { color: '#000', fontSize: 14 },
     container: { flex: 1, backgroundColor: '#F5F5F5' },
-    scrollContent: { flexGrow: 1, padding: 20 }, 
+    scrollContent: { flexGrow: 1, padding: 20 },
     label: { fontSize: 14, color: '#666', marginBottom: 5 },
     input: { backgroundColor: '#FFF', padding: 12, borderRadius: 8, marginBottom: 20 },
     grossValueCard: { backgroundColor: '#008281', padding: 20, borderRadius: 8, marginBottom: 20 },

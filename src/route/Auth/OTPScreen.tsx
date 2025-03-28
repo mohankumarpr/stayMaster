@@ -24,6 +24,14 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<TextInput[]>([]);
+  const [timer, setTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+
+  useEffect(() => {
+    // Start initial timer
+    setTimer(60);
+    setCanResend(false);
+  }, []); // Empty dependency array means this runs once when component mounts
 
   useEffect(() => {
     const enteredOtp = otp.join('');
@@ -97,17 +105,41 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
           routes: [{ name: 'Welcome' }],
         });
       } else {
-        Alert.alert('Error', `Failed to verify OTP. Please try again. ${data.message}`);
+        showToast('error', 'Error', `Failed to verify OTP. Please try again. ${data.message}`);
       }
     } catch (error) {
       // Debugging: Log the error
       console.error('Error:', error);
-      Alert.alert('Error', 'An error occurred while verifying OTP. Please try again.');
+      showToast('error', 'Error', 'An error occurred while verifying OTP. Please try again.');
     } finally {
       // Hide loading indicator
       setLoading(false);
     }
   };
+
+  const handleResendOTP = async () => {
+    if (!canResend) return;
+
+    try {
+      setCanResend(false);
+      setTimer(60);
+      const response = await api.post('/hosts/generateOTP', {
+        phone: `91${mobileNumber}`
+      }); 
+
+      if (response.data != null && response.data.otp) {
+        showToast('success', 'Success', 'OTP sent successfully');
+      } else {
+        showToast('error', 'Error', 'Failed to generate OTP. Please try again.');
+      }
+    } catch (error) {
+      showToast('error', 'Error', 'Failed to generate OTP. Please try again.');
+      setCanResend(true);
+      setTimer(0);
+    }
+  };
+
+
 
 
   return (
@@ -141,8 +173,18 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
         {loading && <ActivityIndicator size="large" color="#007BFF" style={styles.loading} />}
         <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
           <Text style={[styles.subtitle1, { textAlign: 'center' }]}>Didn't receive the OTP?</Text>
-          <TouchableOpacity onPress={() => { /* Handle resend OTP */ }}>
-            <Text style={[styles.resendotp, { textDecorationLine: 'underline' }]}>Resend</Text>
+          <TouchableOpacity 
+            onPress={handleResendOTP}
+            disabled={!canResend}
+            style={styles.resendContainer}
+          >
+            <Text style={[
+              styles.resendotp, 
+              { textDecorationLine: 'underline' },
+              !canResend && styles.resendDisabled
+            ]}>
+              {canResend ? 'Resend OTP' : `Resend OTP in ${timer}s`}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -154,7 +196,10 @@ const showToast = (type: string, title: string, message: string) => {
   Toast.show({
     type: type,
     text1: title,
-    text2: message
+    text2: message,
+    visibilityTime: 4000, // Duration for which the toast is visible
+    autoHide: true, // Automatically hide the toast after the visibility time
+    topOffset: 30, // Offset from the top of the screen
   });
 };
 
@@ -178,6 +223,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     width: 40,
     height: 40,
+  },
+  resendContainer: {
+    padding: 10,
+  },
+  resendDisabled: {
+    opacity: 0.6,
   },
   resendotp: {
     color: '#FFFFFF',

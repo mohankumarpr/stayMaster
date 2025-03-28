@@ -51,33 +51,57 @@ const EarningsScreen: React.FC = () => {
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
 
-        return months.map((month, index) => {
-            const monthData = details.earnings.find(e => {
-                const [month, year] = e.date.split('-');
-                return parseInt(month, 10) - 1 === index && parseInt(year, 10) === currentYear;
-            });
+        const monthsRange = Array.from({ length: 8 }, (_, i) => {
+            const monthOffset = i - 5;
+            const month = (currentMonth + monthOffset + 12) % 12;
+            const year = currentYear + Math.floor((currentMonth + monthOffset) / 12);
+            return { month, year };
+        });
 
-            const nightsData = details.nights.find(n => {
-                const [month, year] = n.date.split('-');
-                return parseInt(month, 10) - 1 === index && parseInt(year, 10) === currentYear;
-            });
+        console.log(monthsRange);
 
-            let type = 'upcoming';
-            if (index === currentMonth) {
-                type = 'current';
-            } else if (index < currentMonth) {
-                type = 'checkedOut';
+        return monthsRange.flatMap(({ month, year }) => {
+            const getData = (data: any, month: any, year: any) =>
+                data.find((e: any) => {
+                    const [m, y] = e.date.split('-').map(Number);
+                    return (m - 1 + 12) % 12 === month && y === year;
+                }) || { amount: 0, count: 0 };
+
+            const currentMonthData = getData(details.earnings, month, year);
+            const currentNightsData = getData(details.nights, month, year);
+
+            const type = year < currentYear || (year === currentYear && month < currentMonth)
+                ? 'checkedOut'
+                : month === currentMonth && year === currentYear
+                    ? 'current'
+                    : 'upcoming';
+
+            // Return only the required months within the selected range
+            if (
+                (year === currentYear && month >= currentMonth - 5 && month <= currentMonth + 2) ||
+                (year === currentYear - 1 && month >= 12 - (5 - currentMonth)) // Handle last year's months
+            ) {
+                return {
+                    month: `${months[month]} ${year}`,
+                    bookings: currentNightsData.count,
+                    type,
+                    totalNights: currentNightsData.count,
+                    totalEarnings: currentMonthData.amount
+                };
             }
-
-            return {
-                month,
-                bookings: nightsData?.count || 0,
-                type,
-                totalNights: nightsData?.count || 0,
-                totalEarnings: monthData?.amount || 0
-            };
+            return [];
+        }).sort((a, b) => {
+            const [monthA, yearA] = a.month.split(' ').map((val, index) =>
+                index === 0 ? months.indexOf(val) : Number(val)
+            );
+            const [monthB, yearB] = b.month.split(' ').map((val, index) =>
+                index === 0 ? months.indexOf(val) : Number(val)
+            );
+            return yearA === yearB ? monthA - monthB : yearA - yearB;
         });
     };
+
+
 
     // Replace static bookingsData with transformed API data
     const bookingsData = transformPropertyDataToChartFormat(propertyDetails);
@@ -197,7 +221,7 @@ const EarningsScreen: React.FC = () => {
                                 selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : "")}
                                 mode="dropdown"
                                 dropdownIconColor="#000"
-                                
+
                                 onValueChange={(itemValue) => setSelectedProperty(itemValue)}
                                 style={styles.picker}
                             >
@@ -257,7 +281,7 @@ const EarningsScreen: React.FC = () => {
                             >
                                 <View style={styles.barChart}>
                                     {/* Add horizontal grid lines */}
-                                    {[0, 1, 2, 3, 4].map((line) => (
+                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((line) => (
                                         <View
                                             key={`grid-${line}`}
                                             style={[
@@ -266,7 +290,6 @@ const EarningsScreen: React.FC = () => {
                                             ]}
                                         />
                                     ))}
-
                                     {bookingsData.map((item, index) => (
                                         <TouchableOpacity
                                             key={index}
@@ -339,7 +362,7 @@ const styles = StyleSheet.create({
         elevation: 0,
     },
     topContainer: {
-        height: 200,
+        height: 180,
     },
     topBackground: {
         width: '100%',
@@ -349,7 +372,7 @@ const styles = StyleSheet.create({
         marginTop: -10,
     },
     scrollContent: {
-        paddingBottom: 25,
+        paddingBottom: 10,
     },
     header: {
         paddingHorizontal: 20,
@@ -369,7 +392,8 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         color: 'white',
-        fontSize: 14,
+        fontSize: 18,
+        fontWeight: 'bold',
         opacity: 0.9,
     },
     userName: {
@@ -428,13 +452,13 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         paddingHorizontal: 15,
-        paddingTop: 20,
+        paddingTop: 0,
         flex: 1,
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 15,
+        marginBottom: 10,
         marginLeft: 5,
         color: '#333',
     },
@@ -466,7 +490,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 15,
         marginHorizontal: 20,
-        marginTop: 10,
+        marginTop: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -479,7 +503,7 @@ const styles = StyleSheet.create({
     barChart: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        height: 180,
+        height: 150,
         paddingTop: 10,
         paddingBottom: 5,
         position: 'relative',
@@ -511,16 +535,16 @@ const styles = StyleSheet.create({
     bookingSummary: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        paddingVertical: 15,
+        paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
-        marginBottom: 15,
+        marginBottom: 5,
     },
     summaryItem: {
         alignItems: 'center',
     },
     summaryValue: {
-        fontSize: 20,
+        fontSize: 15,
         fontWeight: 'bold',
         marginBottom: 5,
     },
@@ -562,7 +586,7 @@ const styles = StyleSheet.create({
     chartTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 1,
         color: '#333',
     },
     gridLine: {

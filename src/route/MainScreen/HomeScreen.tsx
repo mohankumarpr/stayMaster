@@ -11,6 +11,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
@@ -19,6 +20,7 @@ import PropertyService from '../../services/propertyService';
 import { useProperty } from '../../context/PropertyContext';
 import { Property } from '../../types/property';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
+import Toast from 'react-native-toast-message';
 
 type HomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
@@ -90,6 +92,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [totalGBV, setTotalGBV] = React.useState(0);
   const [totalNights, setTotalNights] = React.useState(0);
   const [userName, setUserName] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchUserData = async () => {
@@ -110,12 +113,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   React.useEffect(() => {
     const fetchProperties = async () => {
       try {
+        setIsLoading(true);
         const response = await PropertyService.getAllProperties();
         setProperties(response.properties || []);
         setTotalGBV(response.totalGBV);
         setTotalNights(response.totalNights);
       } catch (error) {
         console.error('Error fetching properties:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to fetch properties. Please try again.',
+          position: 'bottom',
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -128,125 +140,135 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#008489" />
+    <>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#008489" />
 
-      {/* Top portion with curved image background */}
-      <View style={styles.topContainer}>
-        <ImageBackground
-          source={require('../../assets/images/curved_bg.png')}
-          style={styles.topBackground}
-          resizeMode="cover"
-        >
-          <SafeAreaView>
-            <View style={styles.header}>
-              <View style={styles.userInfo}>
-                <Image
-                  source={require('../../assets/images/logo.png')}
-                  style={styles.avatar}
-                />
-                <View>
-                  <Text style={styles.welcomeText}>Welcome back,</Text>
-                  <Text style={styles.userName}>{userName}</Text>
+        {/* Top portion with curved image background */}
+        <View style={styles.topContainer}>
+          <ImageBackground
+            source={require('../../assets/images/curved_bg.png')}
+            style={styles.topBackground}
+            resizeMode="cover"
+          >
+            <SafeAreaView>
+              <View style={styles.header}>
+                <View style={styles.userInfo}>
+                  <Image
+                    source={require('../../assets/images/logo.png')}
+                    style={styles.avatar}
+                  />
+                  <View>
+                    <Text style={styles.welcomeText}>Welcome back,</Text>
+                    <Text style={styles.userName}>{userName}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
 
-            {/* Summary Cards */}
-            <View style={styles.summaryContainer}>
-              <TouchableOpacity
-                style={styles.summaryCard}
-                onPress={() => {
-                  // return navigation.navigate('BookingDetails');
-                }}
-              >
-                {/* Top Row - Gross Booking Value & Chevron */}
-                <View style={styles.topRow}>
-                  <Text style={styles.summaryLabel}>Gross Booking Value</Text>
-                  <Ionicons name="chevron-forward" size={15} color="#008489" />
-                </View>
-
-                {/* Bottom Row - Image & Booking Value */}
-                <View style={styles.bottomRow}>
-                  <View style={styles.container2}>
-                    <View style={styles.curvedContainer}>
-                      <Image
-                        source={require('../../assets/images/dollar.png')}
-                        style={styles.currencyImage}
-                      />
-                    </View>
-                  </View>
-                  <Text style={styles.bookingValue}> {formatAmount(totalGBV)}</Text>
-                </View>
-              </TouchableOpacity>
-
-
-
-              <TouchableOpacity
-                style={styles.summaryCard}
-                onPress={() => {
-                  // return navigation.navigate('BookingDetails');
-                }}
-              >
-                {/* Top Row - Gross Booking Value & Chevron */}
-                <View style={styles.topRow}>
-                  <Text style={styles.summaryLabel}>No. of Nights Book</Text>
-                  <Ionicons name="chevron-forward" size={15} color="#008489" />
-                </View>
-
-                {/* Bottom Row - Image & Booking Value */}
-                <View style={styles.bottomRow}>
-                  <View style={styles.container2}>
-                    <View style={styles.curvedContainer}>
-                      <Image
-                        source={require('../../assets/images/calender.png')}
-                        style={styles.currencyImage}
-                      />
-                    </View>
-                  </View>
-                  <Text style={styles.bookingValue}>{formatAmount(totalNights)} days</Text>
-                </View>
-              </TouchableOpacity> 
-            </View>
-          </SafeAreaView>
-        </ImageBackground>
-      </View>
-
-      {/* Content Area with Properties */}
-      <View style={styles.contentArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {/* Properties Section */}
-          <View style={styles.propertiesSection}>
-            <Text style={styles.sectionTitle}>Our Property</Text>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.propertiesScrollContent}>
-              {properties.map((property) => (
-                <PropertyCard
-                  key={property.id}
-                  title={property.listing_name}
-                  image={property.url}
-                  guests={property.number_of_guests}
-                  bedrooms={property.number_of_bedrooms}
-                  beds={property.number_of_bedrooms}
-                  bathrooms={property.number_of_bathrooms}
-                  bookingValue={property.gbv || 0}
-                  nightsBooked={property.nights || 0}
+              {/* Summary Cards */}
+              <View style={styles.summaryContainer}>
+                <TouchableOpacity
+                  style={styles.summaryCard}
                   onPress={() => {
-                    // Navigate to Earnings screen and set the selected property
-                    navigation.navigate('Earnings');
-                    // Add a small delay to ensure navigation completes before setting the property
-                    setTimeout(() => {
-                      setSelectedProperty(property.id.toString());
-                    }, 100);
+                    // return navigation.navigate('BookingDetails');
                   }}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        </ScrollView>
+                >
+                  {/* Top Row - Gross Booking Value & Chevron */}
+                  <View style={styles.topRow}>
+                    <Text style={styles.summaryLabel}>Gross Booking Value</Text>
+                    <Ionicons name="chevron-forward" size={15} color="#008489" />
+                  </View>
+
+                  {/* Bottom Row - Image & Booking Value */}
+                  <View style={styles.bottomRow}>
+                    <View style={styles.container2}>
+                      <View style={styles.curvedContainer}>
+                        <Image
+                          source={require('../../assets/images/dollar.png')}
+                          style={styles.currencyImage}
+                        />
+                      </View>
+                    </View>
+                    <Text style={styles.bookingValue}> {formatAmount(totalGBV)}</Text>
+                  </View>
+                </TouchableOpacity>
+
+
+
+                <TouchableOpacity
+                  style={styles.summaryCard}
+                  onPress={() => {
+                    // return navigation.navigate('BookingDetails');
+                  }}
+                >
+                  {/* Top Row - Gross Booking Value & Chevron */}
+                  <View style={styles.topRow}>
+                    <Text style={styles.summaryLabel}>No. of Nights Book</Text>
+                    <Ionicons name="chevron-forward" size={15} color="#008489" />
+                  </View>
+
+                  {/* Bottom Row - Image & Booking Value */}
+                  <View style={styles.bottomRow}>
+                    <View style={styles.container2}>
+                      <View style={styles.curvedContainer}>
+                        <Image
+                          source={require('../../assets/images/calender.png')}
+                          style={styles.currencyImage}
+                        />
+                      </View>
+                    </View>
+                    <Text style={styles.bookingValue}>{formatAmount(totalNights)} days</Text>
+                  </View>
+                </TouchableOpacity> 
+              </View>
+            </SafeAreaView>
+          </ImageBackground>
+        </View>
+
+        {/* Content Area with Properties */}
+        <View style={styles.contentArea}>
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {/* Properties Section */}
+            <View style={styles.propertiesSection}>
+              <Text style={styles.sectionTitle}>Our Property</Text>
+
+              {isLoading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#008489" />
+                  <Text style={styles.loadingText}>Loading properties...</Text>
+                </View>
+              ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.propertiesScrollContent}>
+                  {properties.map((property) => (
+                    <PropertyCard
+                      key={property.id}
+                      title={property.listing_name}
+                      image={property.url}
+                      guests={property.number_of_guests}
+                      bedrooms={property.number_of_bedrooms}
+                      beds={property.number_of_bedrooms}
+                      bathrooms={property.number_of_bathrooms}
+                      bookingValue={property.gbv || 0}
+                      nightsBooked={property.nights || 0}
+                      onPress={() => {
+                        // Navigate to Earnings screen and set the selected property
+                        navigation.navigate('Earnings');
+                        // Add a small delay to ensure navigation completes before setting the property
+                        setTimeout(() => {
+                          setSelectedProperty(property.id.toString());
+                        }, 100);
+                      }}
+                    />
+                  ))}
+                </ScrollView>
+              )}
+            </View>
+          </ScrollView>
+        </View>
       </View>
-    </View>
+      <Toast />
+    </>
   );
 };
 
@@ -477,6 +499,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#666',
+    fontSize: 14,
   },
 });
 

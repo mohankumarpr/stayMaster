@@ -66,6 +66,18 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [ratingDetails, setRatingDetails] = useState<RatingDetailsResponse | null>(null);
 
+    // Add this function to calculate average rating
+    const calculateAverageRating = (ratings: RatingDetailsResponse | null): number => {
+        if (!ratings || Object.keys(ratings).length === 0) return 0;
+        
+        const totalRating = Object.values(ratings).reduce((sum, rating) => sum + rating, 0);
+        const averageRating = totalRating / Object.keys(ratings).length;
+        
+        return Number(averageRating.toFixed(1));
+    };
+
+    // Add state for average rating
+    const [averageRating, setAverageRating] = useState<number>(0);
 
     // Find the selected property object
     const selectedPropertys = properties.find(p => p.id.toString() === selectedPropertyId.toString()) || properties[0];
@@ -95,6 +107,14 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
             fetchRatingDetails(selectedPropertyId);
         }
     }, [selectedPropertyId]);
+
+    // Update useEffect to calculate average when rating details change
+    useEffect(() => {
+        if (ratingDetails) {
+            const avgRating = calculateAverageRating(ratingDetails);
+            setAverageRating(avgRating);
+        }
+    }, [ratingDetails]);
 
 
     const fetchProperties = async () => {
@@ -254,16 +274,32 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                         <View style={styles.ratingBadge}>
                                             <AntDesign name="star" size={12} color="#FFD700" />
                                             <Text style={styles.ratingText}>
-                                                {selectedPropertys.averageRating?.toString()}
+                                                {averageRating > 0 ? averageRating : 'N/A'}
                                             </Text>
                                         </View>
                                     </View>
                                     <Text style={styles.propertyLocation}>
                                         {selectedPropertys.address_line_1}
                                     </Text>
-                                    <Text style={styles.reviewCount}>
-                                        ({selectedPropertys.totalReviews?.toLocaleString()})
-                                    </Text>
+                                    {/* <Text style={styles.reviewCount}>
+                                        ( )
+                                    </Text> */}
+
+                                    {/* Add Average Rating Card */}
+                                   {/*  <View style={styles.averageRatingCard}>
+                                        <Text style={styles.averageRatingTitle}>Average Rating</Text>
+                                        <View style={styles.averageRatingContent}>
+                                            <View style={styles.ratingStars}>
+                                                {renderStars(averageRating)}
+                                            </View>
+                                            <Text style={styles.averageRatingValue}>
+                                                {averageRating > 0 ? averageRating : 'N/A'}
+                                            </Text>
+                                        </View>
+                                        <Text style={styles.totalPlatforms}>
+                                            {ratingDetails ? `From ${Object.keys(ratingDetails).length} platforms` : 'No ratings yet'}
+                                        </Text>
+                                    </View> */}
 
                                     <View style={styles.ratingsListContainer}>
 
@@ -307,10 +343,14 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     earningsSection: {
-        padding: 16,
+        padding: 0,
+        paddingLeft: 16,
+        paddingRight: 16,
+        top: 10,
+        paddingBottom: 14,
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: 'bold',
         marginBottom: 15,
         color: '#333',
@@ -322,7 +362,7 @@ const styles = StyleSheet.create({
     pickerContainer: {
         backgroundColor: '#fff',
         borderRadius: 10,
-        marginBottom: 15,
+        marginBottom: 5,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -478,6 +518,35 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 12,
         fontWeight: 'bold',
+    },
+    averageRatingCard: {
+        backgroundColor: '#F8F8F8',
+        borderRadius: 8,
+        padding: 16,
+        marginVertical: 12,
+        alignItems: 'center',
+    },
+    averageRatingTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 8,
+    },
+    averageRatingContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    averageRatingValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#000',
+        marginLeft: 12,
+    },
+    totalPlatforms: {
+        fontSize: 12,
+        color: '#666',
+        marginTop: 4,
     },
 });
 

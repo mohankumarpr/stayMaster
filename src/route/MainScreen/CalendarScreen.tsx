@@ -147,7 +147,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         let bookingFound = false; // Flag to check if a booking is found
 
         // Animate the transition to the CalendarInfo screen
-        Object.values(bookingGroups).forEach(bookingGroup => {
+        Object.values(bookingGroups).forEach(bookingGroup => {  
             const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
             const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
 

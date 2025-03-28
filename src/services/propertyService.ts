@@ -48,6 +48,12 @@ interface CalendarResponse {
   }>;
 }
 
+interface MonthlyStatement {
+  name: string; // e.g., "2024_11.pdf"
+  year: string; // e.g., "2024"
+  month: string; // e.g., "11"
+}
+
 class PropertyService {
   getPropertyStatements(selectedProperty: string) {
     throw new Error('Method not implemented.');
@@ -57,6 +63,7 @@ class PropertyService {
   }
   private static instance: PropertyService;
   private readonly baseUrl = '/hosts/properties';
+  private readonly baseUrl2 = '/hosts';
   private propertiesCache: PropertyResponse | null = null;
   private lastFetchTime: number = 0;
   private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -140,6 +147,142 @@ class PropertyService {
       throw error;
     }
   }
+
+  //get monthly statement
+  async getMonthlyStatement(propertyId: string): Promise<{ name: string; year: string; month: string }[]> {
+    try {
+      console.log(`\n=== Starting getMonthlyStatement Request (Property ID: ${propertyId}) ===`);
+      const guestToken = await this.getGuestToken();
+
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = `${this.baseUrl2}/monthlyStatements`;
+      console.log(`📡 Making API request to: ${url}`);
+
+      const response = await api.post<{ name: string; year: string; month: string }[]>(url, {
+        property_id: propertyId,
+        guestToken,
+      });
+
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End getMonthlyStatement Request ===\n`);
+
+      return response.data.map(({ name, year, month }) => ({ name, year, month }));
+    } catch (error: any) {
+      console.error(`\n❌ Error in getMonthlyStatement:`, {
+        propertyId,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
+
+
+  // download monthly statement
+  async downloadMonthlyStatement(propertyId: string, filename: string): Promise<{ url: string }> {
+    try {
+      console.log(`\n=== Starting downloadMonthlyStatement Request (Property ID: ${propertyId}) ===`);
+      const guestToken = await this.getGuestToken();
+
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = `${this.baseUrl2}/downloadStatement`;
+      console.log(`📡 Making API request to: ${url}`);
+
+      const response = await api.post<{ url: string }>(url, {
+        property_id: propertyId,
+        guestToken,
+        filename: filename
+      });
+
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:**', JSON.stringify(response.data, null, 2));
+      console.log(`=== End downloadMonthlyStatement Request ===\n`);
+
+      return response.data; // Return the URL directly
+    } catch (error: any) {
+      console.error(`\n❌ Error in downloadMonthlyStatement:`, {
+        propertyId,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
+
+
+
+  // refer a property
+  async referProperty(owner_name: string, property_name: string, property_type: string, rooms: number, pool: string, owner_phone: string, url_address: string): Promise<{ url: string }> {
+    try {
+      console.log(`\n=== Starting referProperty Request ===`);
+      const guestToken = await this.getGuestToken();
+
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = `${this.baseUrl2}/referAProperty`;
+      console.log(`📡 Making API request to: ${url}`);
+
+      const response = await api.post<{
+        status: { url: string; } | PromiseLike<{ url: string; }>; url: string
+      }>(url, {
+        guestToken: guestToken,
+        owner_name: owner_name,
+        property_name: property_name,
+        property_type: property_type,
+        rooms: rooms,
+        pool: pool,
+        owner_contact: owner_phone,
+        url_address: url_address
+      });
+
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:**', JSON.stringify(response.data, null, 2));
+      console.log(`=== End referProperty Request ===\n`);
+      if (response.status === 200 || response.status === 301) {
+        showToast({
+          text1: 'Property Referred Successfully',
+          type: 'success',
+        });
+      } else {
+        showToast({
+          text1: 'Property Referral Failed',
+          type: 'error',
+        });
+      }
+
+      return response.data.status; // Return the URL directly
+    } catch (error: any) {
+      console.error(`\n❌ Error in referProperty:`, {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
+
+
+
 
   async getPropertyById(id: string): Promise<Property> {
     try {
@@ -394,3 +537,7 @@ class PropertyService {
 
 const propertyService = PropertyService.getInstance();
 export default propertyService;
+
+function showToast(arg0: { text1: string; type: string; }) {
+  throw new Error('Function not implemented.');
+}
