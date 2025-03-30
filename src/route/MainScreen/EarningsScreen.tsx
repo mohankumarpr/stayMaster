@@ -1,6 +1,9 @@
+import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons/faChevronCircleRight';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Image,
     ImageBackground,
     SafeAreaView,
@@ -11,11 +14,9 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
-import { ActivityIndicator } from 'react-native';
 
 // const { width } = Dimensions.get('window');
 // const cardWidth = width * 0.8;
@@ -191,7 +192,7 @@ const EarningsScreen: React.FC = () => {
                             <TouchableOpacity style={[styles.summaryCard, styles.singleCard]}>
                                 <View style={styles.topRow}>
                                     <Text style={styles.summaryLabel}>Gross Booking Value (current month)</Text>
-                                    <Ionicons name="chevron-forward" size={15} color="#008489" />
+                                    <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                                 </View>
 
                                 <View style={styles.bottomRow}>
@@ -202,7 +203,9 @@ const EarningsScreen: React.FC = () => {
                                                 style={styles.currencyImage}
                                             />
                                         </View>
-                                        <Text style={styles.bookingValue}> {formatAmount(propertyDetails?.earnings.reduce((total, item) => total + item.amount, 0))}</Text>
+                                        <Text style={styles.bookingValue}>
+                                            {formatAmount(propertyDetails?.earnings.reduce((total, item) => total + item.amount, 0))}
+                                        </Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -362,14 +365,14 @@ const styles = StyleSheet.create({
         elevation: 0,
     },
     topContainer: {
-        height: 180,
+        height: 220,
     },
     topBackground: {
         width: '100%',
     },
     contentArea: {
         flex: 1,
-        marginTop: -10,
+        marginTop: -20,
     },
     scrollContent: {
         paddingBottom: 10,
@@ -406,6 +409,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         justifyContent: 'space-between',
         marginTop: 5,
+        marginBottom: 20,
+        zIndex: 1,
     },
     summaryCard: {
         backgroundColor: '#fff',
@@ -415,6 +420,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 3,
+        zIndex: 2,
     },
     summaryLabel: {
         fontSize: 12,
@@ -431,11 +437,13 @@ const styles = StyleSheet.create({
     bottomRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        zIndex: 3,
     },
     leftContent: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
+        zIndex: 4,
     },
     currencyImage: {
         width: 15,
@@ -446,6 +454,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         paddingTop: 5,
+        zIndex: 5,
     },
     earningsSection: {
         backgroundColor: '#f8f8f8',
