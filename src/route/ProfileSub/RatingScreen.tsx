@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
 import {
-    View,
-    Text,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    SafeAreaView,
-    StatusBar,
-    ScrollView
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { RootStackParamList } from '../../navigation/AppNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
+    faChevronCircleLeft,
+    faGlobe,
+    faStarHalfAlt,
+    faStar as faStarSolid,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Picker } from '@react-native-picker/picker';
+import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import { useProperty } from '../../context/PropertyContext';
-import { ActivityIndicator } from 'react-native';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
 
@@ -155,11 +160,35 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
 
         for (let i = 0; i < 5; i++) {
             if (i < fullStars) {
-                stars.push(<AntDesign key={`star-${i}`} name="star" size={14} color="#FFD700" style={styles.star} />);
+                stars.push(
+                    <FontAwesomeIcon 
+                        key={`star-${i}`} 
+                        icon={faStarSolid} 
+                        size={14} 
+                        color="#FFD700" 
+                        style={styles.star} 
+                    />
+                );
             } else if (i === fullStars && halfStar) {
-                stars.push(<AntDesign key={`star-${i}`} name="starhalf" size={14} color="#FFD700" style={styles.star} />);
+                stars.push(
+                    <FontAwesomeIcon 
+                        key={`star-${i}`} 
+                        icon={faStarHalfAlt} 
+                        size={14} 
+                        color="#FFD700" 
+                        style={styles.star} 
+                    />
+                );
             } else {
-                stars.push(<AntDesign key={`star-${i}`} name="staro" size={14} color="#FFD700" style={styles.star} />);
+                stars.push(
+                    <FontAwesomeIcon 
+                        key={`star-${i}`} 
+                        icon={faStarRegular} 
+                        size={14} 
+                        color="#FFD700" 
+                        style={styles.star} 
+                    />
+                );
             }
         }
         return stars;
@@ -204,7 +233,7 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                     </View>
                 );
             default:
-                return <Icon name="md-globe-outline" size={20} color="#000" />;
+                return <FontAwesomeIcon icon={faGlobe} size={20} color="#000" />;
         }
     };
 
@@ -215,7 +244,7 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Icon name="chevron-back" size={24} color="#000" />
+                    <FontAwesomeIcon icon={faChevronCircleLeft} size={24} color="#000" />
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { textAlign: 'left' }]}>My Ratings</Text>
                 <View style={styles.placeholder} />
@@ -272,7 +301,7 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                     <View style={styles.nameRatingRow}>
                                         <Text style={styles.propertyName}>{selectedPropertys.listing_name}</Text>
                                         <View style={styles.ratingBadge}>
-                                            <AntDesign name="star" size={12} color="#FFD700" />
+                                            <FontAwesomeIcon icon={faStarSolid} size={12} color="#FFD700" />
                                             <Text style={styles.ratingText}>
                                                 {averageRating > 0 ? averageRating : 'N/A'}
                                             </Text>

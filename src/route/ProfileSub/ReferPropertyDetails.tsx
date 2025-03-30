@@ -1,20 +1,23 @@
+import {
+  faCheckCircle,
+  faChevronLeft,
+  faShare
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import {
-  View,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  Share,
-  Platform,
-  StatusBar,
-  Image,
+  View
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import PropertyService from '../../services/propertyService';
-import { Picker } from '@react-native-picker/picker';
 
 const dummyBanners = [
   {
@@ -140,7 +143,7 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="chevron-back" size={24} color="#000" />
+          <FontAwesomeIcon icon={faChevronLeft} size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Refer a Property</Text>
       </View>
@@ -160,7 +163,7 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             onPress={() => setSelectedBanner('custom')}
           >
             <View style={styles.customBannerContent}>
-              <Icon name="add-circle-outline" size={24} color="#666" />
+              <FontAwesomeIcon icon={faPlusCircle} size={24} color="#666" />
               <Text style={styles.customBannerText}>Custom Upload</Text>
             </View>
           </TouchableOpacity> */}
@@ -180,7 +183,7 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               </View>
               {selectedBanner === banner.id && (
                 <View style={styles.selectedIndicator}>
-                  <Icon name="checkmark-circle" size={24} color="#7ECEC4" />
+                  <FontAwesomeIcon icon={faCheckCircle} size={24} color="#7ECEC4" />
                 </View>
               )}
             </TouchableOpacity>
@@ -284,7 +287,7 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon name="share" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <FontAwesomeIcon icon={faShare} size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
             <Text style={styles.submitButtonText}>Refer a Property</Text>
           </View>
         </TouchableOpacity>

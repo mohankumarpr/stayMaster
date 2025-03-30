@@ -1,6 +1,8 @@
+import { faLocation } from '@fortawesome/free-solid-svg-icons/faLocation';
+import { faMap } from '@fortawesome/free-solid-svg-icons/faMap';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native'; 
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface BookingDetailsProps {
   onBack: () => void;
@@ -51,10 +53,10 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = (props) => {
           <View style={styles.propertyHeader}>
             <Text style={styles.propertyName}>{alpineBlissBooking.property.name}</Text>
             <View style={styles.locationRow}>
-              <Ionicons name="location" size={16} color="#4A90E2" />
+              <FontAwesomeIcon icon={faLocation} size={16} color="#4A90E2" />
               <Text style={styles.propertyLocation}>Address</Text>
               <TouchableOpacity style={styles.mapButton}>
-                <Ionicons name="map-outline" size={16} color="#4A90E2" />
+                <FontAwesomeIcon icon={faMap} size={16} color="#4A90E2" />
               </TouchableOpacity>
             </View>
            {/*  <View style={styles.statusBadge}>

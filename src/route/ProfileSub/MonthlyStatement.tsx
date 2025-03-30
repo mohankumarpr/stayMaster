@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import { faChevronCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { Picker } from '@react-native-picker/picker';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Linking, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useProperty } from '../../context/PropertyContext';
-import { Property } from '../../types/property';
 import PropertyService from '../../services/propertyService';
-import { StatusBar } from 'react-native';
-import { SafeAreaView } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { ActivityIndicator } from 'react-native';
+import { Property } from '../../types/property';
 
 
 interface MonthlyStatement {
@@ -113,7 +111,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
             <StatusBar barStyle="dark-content" />
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Icon name="chevron-back" size={24} color="#000" />
+                    <FontAwesomeIcon icon={faChevronCircleLeft} size={24} color="#000" />
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { textAlign: 'left' }]}>Monthly Statements</Text>
                 <View style={styles.placeholder} />

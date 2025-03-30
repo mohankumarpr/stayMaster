@@ -1,15 +1,18 @@
+import {
+  faChevronLeft,
+  faPhone
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
   Linking,
-  Platform,
+  SafeAreaView,
   StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 
 // Contact information
 const SUPPORT_PHONE = '18604550203';
@@ -50,8 +53,8 @@ const SupportScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       
       {/* Header */}
       <View style={styles.header}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} >
-            <Icon name="chevron-back" size={24} color="#000" />
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} >
+          <FontAwesomeIcon icon={faChevronLeft} size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Support</Text>
       </View>
@@ -77,7 +80,7 @@ const SupportScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             onPress={handleCallSupport}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Icon name="call-outline" size={24} color="#000" style={{ marginRight: 8 }} />
+              <FontAwesomeIcon icon={faPhone} size={24} color="#000" style={{ marginRight: 8 }} />
               <Text style={styles.phoneButtonText}>{SUPPORT_PHONE}</Text>
             </View>
           </TouchableOpacity>
