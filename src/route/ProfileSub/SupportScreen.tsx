@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React from 'react';
 import {
   Linking,
+  PermissionsAndroid,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -15,23 +16,50 @@ import {
 } from 'react-native';
 
 // Contact information
-const SUPPORT_PHONE = '18604550203';
-const SUPPORT_EMAIL = 'support@example.com'; // Adding email as a typical option when "Write to us" is clicked
+const SUPPORT_PHONE = '7709790669';
+const SUPPORT_EMAIL = 'supply@thestaymaster.com'; // Adding email as a typical option when "Write to us" is clicked
 
 const SupportScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   // Handle phone call action
-  const handleCallSupport = () => {
+  const handleCallSupport = async () => {
     const phoneUrl = `tel:${SUPPORT_PHONE}`;
-    Linking.canOpenURL(phoneUrl)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(phoneUrl);
-        } else {
-          console.log("Phone calls are not supported on this device");
-        }
-      })
-      .catch((err) => console.error('An error occurred', err));
+    const permissionGranted = await askForCallPermission(); // Function to ask for permission
+    if (!permissionGranted) {
+      console.log("Permission to make calls was denied.");
+      return;
+    }
+    try {
+      const supported = await Linking.canOpenURL(phoneUrl);
+      if (supported) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        console.log("This device does not support making phone calls. Please check your device settings or try a different method to contact support.");
+      }
+    } catch (err) {
+      console.error('An error occurred while trying to make a call', err);
+    }
   };
+
+  const askForCallPermission = async () => {
+    // Logic to ask for permission (this is a placeholder, implement as needed)
+    // For example, using a library or custom modal to request permission
+    const permission = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CALL_PHONE,
+      {
+        title: 'Call Permission',
+        message: 'This app needs access to make phone calls. Please grant permission to proceed.',
+        buttonPositive: 'OK',
+        buttonNegative: 'Cancel',
+      }
+    );
+    if (permission !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("Permission to make calls was denied. Please enable it in settings.");
+      return false;
+    }
+    return true;
+  };
+
+
 
   // Handle email action
   const handleEmailSupport = () => {
@@ -66,7 +94,7 @@ const SupportScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </Text>
         
         <View style={styles.contactOptionsContainer}>
-          {/* Write to us button */}
+          {/* Supply@thestaymaster.com  Write to us button */}
           <TouchableOpacity 
             style={styles.writeButton} 
             onPress={handleEmailSupport}
@@ -74,7 +102,8 @@ const SupportScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={styles.writeButtonText}>Write to us</Text>
           </TouchableOpacity>
           
-          {/* Phone button */}
+          {/* 77097 90669  Phone button */}
+          
           <TouchableOpacity 
             style={styles.phoneButton} 
             onPress={handleCallSupport}
