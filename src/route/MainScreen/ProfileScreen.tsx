@@ -1,3 +1,5 @@
+import { faChevronCircleRight, faShareNodes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import {
@@ -11,7 +13,6 @@ import {
     View,
     ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { default as PropertyService, default as propertyService } from '../../services/propertyService';
 import { Property } from '../../types/property';
@@ -57,7 +58,7 @@ const PropertyCard: React.FC<Propertys> = ({
             <Image source={{ uri: url }} style={styles.propertyImage} resizeMode="cover" />
             <TouchableOpacity style={styles.propertyTitleContainer} onPress={onPress}>
                 <Text style={styles.propertyTitle}>{listing_name}</Text>
-                <Icon name="chevron-forward" size={20} color="#008489" />
+                <FontAwesomeIcon icon={faChevronCircleRight} size={20} color="#008489" />
             </TouchableOpacity>
 
             <Text style={styles.propertyDetails}>
@@ -70,7 +71,7 @@ const PropertyCard: React.FC<Propertys> = ({
             <View style={{ height: 40 }} />
             <View style={{ alignItems: 'center' }}>
                 {<TouchableOpacity style={[styles.button, { alignItems: 'center' }]}>
-                    <Icon name="share-social-outline" size={18} color="#666" />
+                    <FontAwesomeIcon icon={faShareNodes} size={18} color="#666" />
                     <Text style={styles.shareText}>Share</Text>
                 </TouchableOpacity>}
             </View>
@@ -86,7 +87,7 @@ const SettingsItem: React.FC<{ title: string; onPress: () => void }> = ({
     return (
         <TouchableOpacity style={styles.settingsItem} onPress={onPress}>
             <Text style={styles.settingsItemText}>{title}</Text>
-            <Icon name="chevron-forward" size={20} color="#999" />
+            <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#999" />
         </TouchableOpacity>
     );
 };
@@ -176,7 +177,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         )}
                         <Text style={styles.userEmail}></Text>
                     </View>
-                    <Icon name="chevron-forward" size={20} color="#999" />
+                    <FontAwesomeIcon icon={faChevronCircleRight} size={20} color="#999" />
                 </TouchableOpacity>
 
                 {/* Properties Section */}

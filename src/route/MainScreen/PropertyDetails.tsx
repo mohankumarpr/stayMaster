@@ -1,21 +1,29 @@
+import {
+  faArrowLeft,
+  faBed,
+  faLocationDot,
+  faPeopleGroup,
+  faShower,
+  faUserPlus
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import NetInfo from '@react-native-community/netinfo';
+import { RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
   ActivityIndicator,
   Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import propertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
-import NetInfo from '@react-native-community/netinfo';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Helper function to format currency
 const formatCurrency = (amount: number): string => {
@@ -84,7 +92,7 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ navigation, route }) 
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#008489" />
+          <FontAwesomeIcon icon={faArrowLeft} size={24} color="#008489" />
         </TouchableOpacity>
         <Text style={styles.title}>{property.listing_name}</Text>
       </View>
@@ -95,19 +103,19 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ navigation, route }) 
         <Text style={styles.sectionTitle}>Property Details</Text>
         <View style={styles.detailsGrid}>
           <View style={styles.detailItem}>
-            <Ionicons name="people-outline" size={24} color="#008489" />
+            <FontAwesomeIcon icon={faPeopleGroup} size={24} color="#008489" />
             <Text style={styles.detailValue}>{property.number_of_guests} guests</Text>
           </View>
           <View style={styles.detailItem}>
-            <Ionicons name="bed-outline" size={24} color="#008489" />
+            <FontAwesomeIcon icon={faBed} size={24} color="#008489" />
             <Text style={styles.detailValue}>{property.number_of_bedrooms} bedrooms</Text>
           </View>
           <View style={styles.detailItem}>
-            <Ionicons name="water-outline" size={24} color="#008489" />
+            <FontAwesomeIcon icon={faShower} size={24} color="#008489" />
             <Text style={styles.detailValue}>{property.number_of_bathrooms} bathroom</Text>
           </View>
           <View style={styles.detailItem}>
-            <Ionicons name="person-add-outline" size={24} color="#008489" />
+            <FontAwesomeIcon icon={faUserPlus} size={24} color="#008489" />
             <Text style={styles.detailValue}>{property.number_of_extra_guests} extra guests</Text>
           </View>
         </View>
@@ -117,7 +125,7 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ navigation, route }) 
         <Text style={styles.sectionTitle}>Location</Text>
         <View style={styles.locationContainer}>
           <View style={styles.addressItem}>
-            <Ionicons name="location-outline" size={24} color="#008489" />
+            <FontAwesomeIcon icon={faLocationDot} size={24} color="#008489" />
             <View style={styles.addressDetails}>
               <Text style={styles.addressText}>{property.address_line_1}</Text>
               {property.address_line_2 && (

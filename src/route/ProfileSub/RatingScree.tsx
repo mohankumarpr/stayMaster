@@ -1,15 +1,16 @@
+import { faChevronCircleLeft, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  StyleSheet, 
-  TouchableOpacity, 
-  SafeAreaView, 
-  StatusBar, 
-  ScrollView 
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -81,7 +82,7 @@ const RatingsScreen: React.FC = () => {
           </View>
         );
       default:
-        return <Icon name="md-globe-outline" size={20} color="#000" />;
+        return <FontAwesomeIcon icon={faGlobe} size={20} color="#000" />;
     }
   };
 
@@ -92,7 +93,7 @@ const RatingsScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton}>
-          <Icon name="chevron-back" size={24} color="#000" />
+          <FontAwesomeIcon icon={faChevronCircleLeft} size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Ratings</Text>
         <View style={styles.placeholder} />

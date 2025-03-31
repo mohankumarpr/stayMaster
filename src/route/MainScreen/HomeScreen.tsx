@@ -1,6 +1,9 @@
+import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons/faChevronCircleRight';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   ImageBackground,
@@ -11,16 +14,14 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import PropertyService from '../../services/propertyService';
 // import Storage from '../../services/storageService';
+import Toast from 'react-native-toast-message';
 import { useProperty } from '../../context/PropertyContext';
 import { Property } from '../../types/property';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
-import Toast from 'react-native-toast-message';
 
 type HomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
@@ -64,7 +65,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       <View style={styles.propertyTitleContainer}>
         <Text style={styles.propertyTitle}>{title}</Text>
         <TouchableOpacity>
-          <Ionicons name="chevron-forward" size={20} color="#008489" />
+          <FontAwesomeIcon icon={faChevronCircleRight} size={20} color="#008489" />
         </TouchableOpacity>
       </View>
       <Text style={styles.propertyDetails}>
@@ -177,7 +178,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   {/* Top Row - Gross Booking Value & Chevron */}
                   <View style={styles.topRow}>
                     <Text style={styles.summaryLabel}>Gross Booking Value</Text>
-                    <Ionicons name="chevron-forward" size={15} color="#008489" />
+                    <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
 
                   {/* Bottom Row - Image & Booking Value */}
@@ -205,7 +206,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   {/* Top Row - Gross Booking Value & Chevron */}
                   <View style={styles.topRow}>
                     <Text style={styles.summaryLabel}>No. of Nights Book</Text>
-                    <Ionicons name="chevron-forward" size={15} color="#008489" />
+                    <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
 
                   {/* Bottom Row - Image & Booking Value */}
@@ -299,14 +300,14 @@ const styles = StyleSheet.create({
     elevation: 0, // For Android shadow
   },
   topContainer: {
-    height: 200, // Adjust this height to match your curved image
+    height: 260, // Increased from 220 to give even more space
   },
   topBackground: {
     width: '100%',
   },
   contentArea: {
     flex: 1,
-    marginTop: -10, // Create overlap to hide any potential gap
+    marginTop: -20, // Keeping this the same to maintain the curved overlap effect
   },
   scrollContent: {
     paddingBottom: 30,
@@ -342,6 +343,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     justifyContent: 'space-between',
     marginTop: 5,
+    marginBottom: 30, // Increased from 20 to give more breathing room
+    zIndex: 1,
   },
   summaryCard: {
     backgroundColor: '#fff',

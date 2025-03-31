@@ -1,7 +1,8 @@
+import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons/faChevronCircleRight';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
@@ -47,7 +48,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
               routes: [{ name: 'Working' }],
             });
           }}>
-            <Ionicons name="chevron-forward-outline" size={24} color="white" />
+            <FontAwesomeIcon icon={faChevronCircleRight} size={24} color="#008489" />
           </TouchableOpacity>
           <View style={styles.Space} />
         </View>
