@@ -9,6 +9,7 @@ import {
     Text,
     TouchableOpacity,
     View,
+    ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
@@ -93,8 +94,12 @@ const SettingsItem: React.FC<{ title: string; onPress: () => void }> = ({
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const [properties, setProperties] = React.useState<Property[]>([]);
     const [userName, setUserName] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isUserLoading, setIsUserLoading] = React.useState(true);
+
     React.useEffect(() => {
         const fetchUserData = async () => {
+            setIsUserLoading(true);
             try {
                 const userData = await Storage.getObject<{ firstname?: string }>(STORAGE_KEYS.USER_DATA);
                 console.log("userData", userData);
@@ -103,6 +108,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 }
             } catch (error) {
                 console.error('Error fetching user data:', error);
+            } finally {
+                setIsUserLoading(false);
             }
         };
 
@@ -111,11 +118,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     React.useEffect(() => {
         const fetchProperties = async () => {
+            setIsLoading(true);
             try {
                 const response = await PropertyService.getAllProperties();
                 setProperties(response.properties || []);
             } catch (error) {
                 console.error('Error fetching properties:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -157,7 +167,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         style={styles.profileImage}
                     />
                     <View style={styles.userInfo}>
-                        <Text style={styles.userName}>{userName}</Text>
+                        {isUserLoading ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="small" color="#008489" />
+                            </View>
+                        ) : (
+                            <Text style={styles.userName}>{userName}</Text>
+                        )}
                         <Text style={styles.userEmail}></Text>
                     </View>
                     <Icon name="chevron-forward" size={20} color="#999" />
@@ -167,23 +183,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Our Property</Text>
 
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.propertiesScrollContent}>
-                        {properties.map((propertys) => (
-                            <PropertyCard
-                                key={propertys.id.toString()}
-                                id={propertys.id.toString()}
-                                listing_name={propertys.listing_name}
-                                url={propertys.url}
-                                number_of_guests={propertys.number_of_guests}
-                                number_of_bedrooms={propertys.number_of_bedrooms}
-                                number_of_beds={propertys.number_of_beds}
-                                number_of_bathrooms={propertys.number_of_bathrooms}
-                                onPress={() => {
-                                    // return navigation.navigate('PropertyDetails', { propertyId: propertys.id });
-                                }}
-                            />
-                        ))}
-                    </ScrollView>
+                    {isLoading ? (
+                        <View style={styles.loadingPropertiesContainer}>
+                            <ActivityIndicator size="large" color="#008489" />
+                            <Text style={styles.loadingText}>Loading properties...</Text>
+                        </View>
+                    ) : (
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.propertiesScrollContent}>
+                            {properties.map((propertys) => (
+                                <PropertyCard
+                                    key={propertys.id.toString()}
+                                    id={propertys.id.toString()}
+                                    listing_name={propertys.listing_name}
+                                    url={propertys.url}
+                                    number_of_guests={propertys.number_of_guests}
+                                    number_of_bedrooms={propertys.number_of_bedrooms}
+                                    number_of_beds={propertys.number_of_beds}
+                                    number_of_bathrooms={propertys.number_of_bathrooms}
+                                    onPress={() => {
+                                        // return navigation.navigate('PropertyDetails', { propertyId: propertys.id });
+                                    }}
+                                />
+                            ))}
+                        </ScrollView>
+                    )}
                 </View>
 
                 {/* Settings Section */}
@@ -390,6 +413,28 @@ const styles = StyleSheet.create({
     settingsItemText: {
         fontSize: 16,
         color: '#333',
+    },
+    loadingContainer: {
+        height: 20,
+        justifyContent: 'center',
+    },
+    loadingPropertiesContainer: {
+        height: 70, // Same height as property card
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F9F5F3',
+        marginHorizontal: 20,
+        borderRadius: 10,
+        // shadowColor: '#000',
+        // shadowOffqqset: { width: 0, height: 1 },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 3,
+        // elevation: 2,
+    },
+    loadingText: {
+        marginTop: 12,
+        color: '#666',
+        fontSize: 14,
     },
 });
 
