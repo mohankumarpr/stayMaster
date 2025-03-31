@@ -21,21 +21,43 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ActivityIndicator } from 'react-native';
 
-interface BookingData {
-    booking_id: string;
+
+
+/* booking_id: string;
     effectiveDate: string;
     guest_name?: string;
     guest_phone?: string;
     guest_email?: string;
     checkin_date?: string;
     checkout_date?: string;
-    duration?: string;
+    duration?: string; */
+interface BookingData {
+    end: any;
+    start: any;
+    currentStatus: any;
+    id: any;
     maintenance?: boolean;
     title?: string;
+    status?: string;
+    type?: string;
 }
 
 type CalendarScreenProps = {
     navigation: StackNavigationProp<RootStackParamList, 'Calendar'>;
+};
+
+const getTimeSession = (): string => {
+    const hour = new Date().getHours();
+    
+    if (hour >= 5 && hour < 12) {
+        return 'Morning';
+    } else if (hour >= 12 && hour < 17) {
+        return 'Afternoon';
+    } else if (hour >= 17 && hour < 20) {
+        return 'Evening';
+    } else {
+        return 'Night';
+    }
 };
 
 const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
@@ -48,6 +70,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
     const [bookingGroups, setBookingGroups] = useState<{ [key: string]: BookingData[] }>({});
     const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().split('T')[0].substring(0, 7));
+    const [timeSession, setTimeSession] = useState<string>(getTimeSession());
 
     useEffect(() => {
         fetchProperties();
@@ -59,11 +82,19 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         }
     }, [selectedProperty]);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimeSession(getTimeSession());
+        }, 60000); // Update every minute
+
+        return () => clearInterval(interval);
+    }, []);
+
     const fetchProperties = async () => {
         try {
             const response = await PropertyService.getAllProperties();
             const propertyList = response.properties || [];
-            setProperties(propertyList); 
+            setProperties(propertyList);
 
             // Set the first property as default if no property is selected
             if (propertyList.length > 0 && !selectedProperty) {
@@ -84,30 +115,27 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
             // Group bookings by booking_id
             const groups = bookings.reduce((acc: { [key: string]: any[] }, booking: any) => {
-                if (!acc[booking.booking_id]) {
-                    acc[booking.booking_id] = [];
+                if (!acc[booking.id]) {
+                    acc[booking.id] = [];
                 }
-                acc[booking.booking_id].push(booking);
+                acc[booking.id].push(booking);
                 return acc;
             }, {});
 
             // Store booking groups in state
             setBookingGroups(groups as any);
             // Convert bookings to period marking format
-            const marked: any = {};
+            const marked: any = {}; 
+           
             Object.values(groups).forEach(bookingGroup => {
-                // Sort dates in the group
-                bookingGroup.sort((a: { effectiveDate: string | number | Date; }, b: { effectiveDate: string | number | Date; }) =>
-                    new Date(a.effectiveDate).getTime() - new Date(b.effectiveDate).getTime()
-                );
-
-                // Get first and last dates
-                const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
-                const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
-
                 // Determine if this is a maintenance booking
+               
                 const isMaintenance = bookingGroup[0].maintenance === true;
                 const color = isMaintenance ? '#FFD700' : '#50cebb';
+
+                // Get start and end dates from server data
+                const firstDate = bookingGroup[0].start; // Assuming startDate is provided by the server
+                const lastDate = bookingGroup[0].end; // Assuming endDate is provided by the server
 
                 // Mark first date
                 marked[firstDate] = {
@@ -122,13 +150,18 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     textColor: 'white'
                 };
                 // Mark middle dates
-                bookingGroup.slice(1, -1).forEach(booking => {
-                    const date = booking.effectiveDate.split('T')[0];
-                    marked[date] = {
-                        color: color,
-                        textColor: 'white'
-                    };
-                });
+                const currentDate = new Date(firstDate);
+                const endDate = new Date(lastDate);
+                while (currentDate <= endDate) {
+                    const dateString = currentDate.toISOString().split('T')[0];
+                    if (dateString !== firstDate && dateString !== lastDate) {
+                        marked[dateString] = {
+                            color: color,
+                            textColor: 'white'
+                        };
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
             });
 
             setMarkedDates(marked);
@@ -147,15 +180,15 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         let bookingFound = false; // Flag to check if a booking is found
 
         // Animate the transition to the CalendarInfo screen
-        Object.values(bookingGroups).forEach(bookingGroup => {  
-            const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
-            const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
+        Object.values(bookingGroups).forEach(bookingGroup => {
+            const firstDate = bookingGroup[0].start;
+            const lastDate = bookingGroup[bookingGroup.length - 1].end;
 
             if (selectedDate >= firstDate && selectedDate <= lastDate) {
                 console.log("Booking found for date:", selectedDate);
-                const startDate = bookingGroup[0].effectiveDate.split('T')[0]; // Get the start date
-                const endDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0]; // Get the end date
-                bookingId = bookingGroup[0].booking_id; // Assuming the booking ID is stored in the first booking of the group
+                const startDate = bookingGroup[0].start; // Get the start date
+                const endDate = bookingGroup[bookingGroup.length - 1].end; // Get the end date
+                bookingId = bookingGroup[0].id; // Assuming the booking ID is stored in the first booking of the group
 
                 console.log("Booking ID:", bookingId);
                 console.log("Start Date:", startDate);
@@ -165,45 +198,45 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 navigation.navigate('CalendarInfo', { bookingId, startDate, endDate } as any);
                 bookingFound = true; // Set flag to true if booking is found
             }
-        }); 
-        
+        });
+
         // If no booking is found, you may want to handle that case
         if (!bookingFound) {
             console.warn("No booking found for the selected date.");
         }
-        
+
 
         // Find any booking that includes this date
-       /*  Object.values(bookingGroups).forEach(bookingGroup => {
-            const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
-            const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
-
-            if (selectedDate >= firstDate && selectedDate <= lastDate) {
-                console.log("Booking found for date:", selectedDate);
-                // Enhance booking data with additional info from the sample image
-                const enhancedBooking = {
-                    ...bookingGroup[0],
-                    guest_name: bookingGroup[0].guest_name || "Arun Rajendran",
-                    guest_phone: bookingGroup[0].guest_phone || "+91 12345 54321",
-                    guest_email: bookingGroup[0].guest_email || "arun@example.com",
-                    checkin_date: firstDate,
-                    checkout_date: lastDate,
-                    duration: `${firstDate} - ${lastDate}`,
-                    maintenance: bookingGroup[0].maintenance || false,
-                    title: bookingGroup[0].title || "Guest Booking Info"
-                };
-
-                setSelectedBooking(enhancedBooking);
-                bookingFound = true; // Set flag to true if booking is found
-            }
-        });
-
-        // Expand bottom sheet only if a booking was found
-        if (bottomSheetRef.current) {
-            bottomSheetRef.current.expand();
-        } else {
-            console.warn("BottomSheet reference is null");
-        }  */
+        /*  Object.values(bookingGroups).forEach(bookingGroup => {
+             const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
+             const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
+ 
+             if (selectedDate >= firstDate && selectedDate <= lastDate) {
+                 console.log("Booking found for date:", selectedDate);
+                 // Enhance booking data with additional info from the sample image
+                 const enhancedBooking = {
+                     ...bookingGroup[0],
+                     guest_name: bookingGroup[0].guest_name || "Arun Rajendran",
+                     guest_phone: bookingGroup[0].guest_phone || "+91 12345 54321",
+                     guest_email: bookingGroup[0].guest_email || "arun@example.com",
+                     checkin_date: firstDate,
+                     checkout_date: lastDate,
+                     duration: `${firstDate} - ${lastDate}`,
+                     maintenance: bookingGroup[0].maintenance || false,
+                     title: bookingGroup[0].title || "Guest Booking Info"
+                 };
+ 
+                 setSelectedBooking(enhancedBooking);
+                 bookingFound = true; // Set flag to true if booking is found
+             }
+         });
+ 
+         // Expand bottom sheet only if a booking was found
+         if (bottomSheetRef.current) {
+             bottomSheetRef.current.expand();
+         } else {
+             console.warn("BottomSheet reference is null");
+         }  */
 
     };
 
@@ -237,7 +270,8 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 >
                     <SafeAreaView>
                         <View style={styles.header}>
-                            <Text style={styles.headerText}>Calendar</Text>
+                            {/* <Text style={styles.headerText}>Good {timeSession}</Text> */}
+                            <Text style={styles.subHeaderText}>Calendar</Text>
                         </View>
                     </SafeAreaView>
                 </ImageBackground>
@@ -275,7 +309,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     {selectedProperty && !loading && (
                         <View style={styles.calendarContainer}>
                             <View style={styles.monthHeader}>
-                                <Text style={styles.monthText}>{getCurrentMonthText()}</Text>
+                                {/* <Text style={styles.monthText}>{getCurrentMonthText()}</Text> */}
                             </View>
                             <CalendarList
                                 style={styles.calendar}
@@ -290,6 +324,9 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                 calendarHeight={360}
                                 firstDay={0}
                                 hideExtraDays={false}
+                                showSixWeeks={true}
+                                disableMonthChange={false}
+                                enableSwipeMonths={true}
                                 theme={{
                                     backgroundColor: '#ffffff',
                                     calendarBackground: '#ffffff',
@@ -304,8 +341,10 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                     arrowColor: '#50cebb',
                                     monthTextColor: '#2d4150',
                                     textMonthFontSize: 16,
-                                    textDayFontSize: 14,
-                                    textDayHeaderFontSize: 14
+                                    textDayFontSize: 12,
+                                    textDayHeaderFontSize: 12,
+                                    // Removed dayNames as it does not exist on the CalendarListProps
+                                    // dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] // Commented out as it does not exist
                                 }}
                             />
                         </View>
@@ -396,7 +435,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
       </BottomSheet> */}
 
 
-            <BottomSheet
+         {/*    <BottomSheet
                 ref={bottomSheetRef}
                 index={-1}
                 snapPoints={['25%', '50%']}
@@ -404,7 +443,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 <View>
                     <Text>{selectedBooking?.title || 'Booking Details'}</Text>
                 </View>
-            </BottomSheet>
+            </BottomSheet> */}
 
 
             {/* Bottom Tab Navigation */}
@@ -461,6 +500,12 @@ const styles = StyleSheet.create({
     },
     headerText: {
         color: 'white',
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 5,
+    },
+    subHeaderText: {
+        color: 'white',
         fontSize: 22,
         fontWeight: 'bold',
     },
@@ -508,22 +553,23 @@ const styles = StyleSheet.create({
     },
     calendarContainer: {
         backgroundColor: '#fff',
-        borderRadius: 10,
-        padding: 15,
-        marginHorizontal: 5,
+        // borderRadius: 10,
+        padding: 0,
+        marginHorizontal: 0,
         shadowColor: '#000',
-        shadowOffset: {
+       /*  shadowOffset: {
             width: 0,
             height: 2,
-        },
-        shadowOpacity: 0.1,
+        }, */
+       /*  shadowOpacity: 0.1,
         shadowRadius: 3,
-        elevation: 3,
-        flex: 1,
+        elevation: 3, */
+        flex: 2,
     },
     monthHeader: {
         alignItems: 'center',
         marginBottom: 10,
+        paddingRight: 15,
     },
     monthText: {
         fontSize: 18,
@@ -531,7 +577,9 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     calendar: {
-        marginBottom: 10,
+        marginBottom: 0, 
+        paddingRight: 20,
+        paddingLeft: 0,
     },
     bottomSheetBackground: {
         backgroundColor: '#ffffff',

@@ -25,7 +25,7 @@ const dummyBanners = [
     title: 'Luxury Villa',
     image: require('../../assets/images/property.png'),
   },
-  {
+  /* {
     id: '2',
     title: 'Beach House',
     image: require('../../assets/images/property.png'),
@@ -34,7 +34,7 @@ const dummyBanners = [
     id: '3',
     title: 'Mountain Cabin',
     image: require('../../assets/images/property.png'),
-  },
+  }, */
 ];
 
 // Define interfaces for our form data
@@ -387,10 +387,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   bannerItem: {
-    width: 160,
-    height: 90,
+    width: 350,
+    height: 160,
     marginRight: 12,
     borderRadius: 8,
+    alignContent: 'center',  
     overflow: 'hidden',
     position: 'relative',
     borderWidth: 1,

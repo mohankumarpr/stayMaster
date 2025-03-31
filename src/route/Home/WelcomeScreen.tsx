@@ -17,6 +17,35 @@ interface UserData {
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
   const [firstName, setFirstName] = useState<string>('');
+  const [timeSession, setTimeSession] = useState<string>('');
+
+  // Function to get the appropriate greeting based on time
+  const getTimeSession = (): string => {
+    const hour = new Date().getHours();
+    
+    if (hour >= 5 && hour < 12) {
+      return 'Morning';
+    } else if (hour >= 12 && hour < 17) {
+      return 'Afternoon';
+    } else if (hour >= 17 && hour < 20) {
+      return 'Evening';
+    } else {
+      return 'Evening';
+    }
+  };
+
+  useEffect(() => {
+    // Update time session
+    setTimeSession(getTimeSession());
+
+    // Update session every minute
+    const intervalId = setInterval(() => {
+      setTimeSession(getTimeSession());
+    }, 60000); // Update every minute
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const getUserName = async () => {
@@ -39,16 +68,20 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
       <View style={styles.container}>
         <View style={styles.Space} />
         <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Text style={[styles.subtitle1, { textAlign: 'center', color: 'white', fontSize: 22, fontFamily: 'Inter', fontWeight: '500', lineHeight: 30.80, }]}>Good Evening, {firstName}</Text>
+          <Text style={styles.greetingText}>Good {timeSession},</Text>
+          <Text style={styles.nameText}>{firstName}</Text>
 
           <View style={styles.bottomSpace} />
-          <TouchableOpacity style={styles.fab} onPress={() => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Working' }],
-            });
-          }}>
-            <FontAwesomeIcon icon={faChevronCircleRight} size={24} color="#008489" />
+          <TouchableOpacity 
+            style={styles.fab} 
+            onPress={() => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Working' }],
+              });
+            }}
+          >
+            <FontAwesomeIcon icon={faChevronCircleRight} size={24} color="white" />
           </TouchableOpacity>
           <View style={styles.Space} />
         </View>
@@ -107,6 +140,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     position: 'absolute',
     bottom: -20,
+  },
+  greetingText: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 22,
+    fontFamily: 'Inter',
+    fontWeight: '500',
+    lineHeight: 30.80,
+    marginBottom: 5,
+  },
+  nameText: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 24,
+    fontFamily: 'Inter',
+    fontWeight: '600',
+    lineHeight: 30.80,
+    marginBottom: 20,
   },
 });
 

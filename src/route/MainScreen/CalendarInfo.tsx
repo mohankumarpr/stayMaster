@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+
 interface BookingDetailsProps {
   onBack: () => void;
 }
@@ -52,13 +53,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = (props) => {
         <View style={styles.mainCard}>
           <View style={styles.propertyHeader}>
             <Text style={styles.propertyName}>{alpineBlissBooking.property.name}</Text>
-            <View style={styles.locationRow}>
-              <FontAwesomeIcon icon={faLocation} size={16} color="#4A90E2" />
-              <Text style={styles.propertyLocation}>Address</Text>
-              <TouchableOpacity style={styles.mapButton}>
-                <FontAwesomeIcon icon={faMap} size={16} color="#4A90E2" />
-              </TouchableOpacity>
-            </View>
+            
            {/*  <View style={styles.statusBadge}>
               <Text style={styles.statusText}>{alpineBlissBooking.status}</Text>
             </View> */}
@@ -73,20 +68,20 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = (props) => {
                 <Text style={styles.guestInfoLabel}>Booking ID:</Text>
                 <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.bookingId}</Text>
               </View>
-             {/*  <TouchableOpacity style={styles.guestDetailsButton}>
+             { <TouchableOpacity style={styles.guestDetailsButton}>
                 <Text style={styles.guestDetailsText}>Guest Details</Text>
-              </TouchableOpacity> */}
+              </TouchableOpacity>}
             </View>
           </View>
 
           {/* Check-in/out Section */}
           <View style={styles.datesSection}>
             <View style={styles.dateColumn}>
-              <Text style={styles.dateLabel}>Check-in date | time</Text>
+              <Text style={styles.dateLabel}>Check-in Date | Time</Text>
               <Text style={styles.dateValue}>{alpineBlissBooking.checkInDateTime}</Text>
             </View>
             <View style={styles.dateColumn}>
-              <Text style={styles.dateLabel}>Check-out date | time</Text>
+              <Text style={styles.dateLabel}>Check-out Date | Time</Text>
               <Text style={styles.dateValue}>{alpineBlissBooking.checkOutDateTime}</Text>
             </View>
           </View>
@@ -206,7 +201,7 @@ const styles = StyleSheet.create({
   propertyName: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#2E3A59',
+    color: '#50cebb', // primary color of our app
     marginBottom: 6,
   },
   locationRow: {

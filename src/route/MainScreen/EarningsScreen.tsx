@@ -83,7 +83,7 @@ const EarningsScreen: React.FC = () => {
                 (year === currentYear - 1 && month >= 12 - (5 - currentMonth)) // Handle last year's months
             ) {
                 return {
-                    month: `${months[month]} ${year}`,
+                    month: `${months[month]} ${year.toString().slice(-2)}`,
                     bookings: currentNightsData.count,
                     type,
                     totalNights: currentNightsData.count,
@@ -214,127 +214,133 @@ const EarningsScreen: React.FC = () => {
                 </ImageBackground>
             </View>
 
-            {/* Content Area */}
-            <View style={styles.contentArea}>
-                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                    <View style={styles.earningsSection}>
-                        <Text style={styles.sectionTitle}>Select property</Text>
-                        <View style={styles.pickerContainer}>
-                            <Picker
-                                selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : "")}
-                                mode="dropdown"
-                                dropdownIconColor="#000"
+            {/* Content Area with enhanced ScrollView */}
+            <ScrollView 
+                style={styles.contentArea}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                bounces={true}
+                overScrollMode="always"
+                nestedScrollEnabled={true}
+            >
+                <View style={styles.earningsSection}>
+                    <Text style={styles.sectionTitle}>Select property</Text>
+                    <View style={styles.pickerContainer}>
+                        <Picker
+                            selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : "")}
+                            mode="dropdown"
+                            dropdownIconColor="#000"
 
-                                onValueChange={(itemValue) => setSelectedProperty(itemValue)}
-                                style={styles.picker}
-                            >
-                                <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
-                                {properties.map((property) => (
-                                    <Picker.Item
-                                        key={property.id}
-                                        label={property.listing_name}
-                                        value={property.id.toString()}
-                                    />
-                                ))}
-                            </Picker>
-                        </View>
-
-                        {loading && (
-                            <View style={styles.loadingContainer}>
-                                <ActivityIndicator size="large" color="#008489" />
-                            </View>
-                        )}
+                            onValueChange={(itemValue) => setSelectedProperty(itemValue)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
+                            {properties.map((property) => (
+                                <Picker.Item
+                                    key={property.id}
+                                    label={property.listing_name}
+                                    value={property.id.toString()}
+                                />
+                            ))}
+                        </Picker>
                     </View>
 
-                    {/* Only show statistics if a property is selected */}
-                    {propertyDetails && (
-                        <View style={styles.chartContainer}>
-                            <Text style={styles.chartTitle}>Statistics</Text>
-                            <View style={styles.bookingSummary}>
-                                <View style={styles.summaryItem}>
-                                    <Text style={styles.summaryValue}>
-                                        {totals.checkedOut || 0}
-                                    </Text>
-                                    <Text style={[styles.summaryLabel, styles.checkedOutText]}>
-                                        Checked Out
-                                    </Text>
-                                </View>
-                                <View style={styles.summaryItem}>
-                                    <Text style={styles.summaryValue}>
-                                        {totals.current || 0}
-                                    </Text>
-                                    <Text style={[styles.summaryLabel, styles.currentText]}>
-                                        Current
-                                    </Text>
-                                </View>
-                                <View style={styles.summaryItem}>
-                                    <Text style={styles.summaryValue}>
-                                        {totals.upcoming || 0}
-                                    </Text>
-                                    <Text style={[styles.summaryLabel, styles.upcomingText]}>
-                                        Upcoming
-                                    </Text>
-                                </View>
-                            </View>
+                    {loading && (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#008489" />
+                        </View>
+                    )}
+                </View>
 
-                            <ScrollView
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={styles.barChartScrollContent}
-                            >
-                                <View style={styles.barChart}>
-                                    {/* Add horizontal grid lines */}
-                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((line) => (
+                {/* Statistics Section */}
+                {propertyDetails && (
+                    <View style={styles.chartContainer}>
+                        <Text style={styles.chartTitle}>Statistics</Text>
+                        <View style={styles.bookingSummary}>
+                            <View style={styles.summaryItem}>
+                                <Text style={styles.summaryValue}>
+                                    {totals.checkedOut || 0}
+                                </Text>
+                                <Text style={[styles.summaryLabel, styles.checkedOutText]}>
+                                    Checked Out
+                                </Text>
+                            </View>
+                            <View style={styles.summaryItem}>
+                                <Text style={styles.summaryValue}>
+                                    {totals.current || 0}
+                                </Text>
+                                <Text style={[styles.summaryLabel, styles.currentText]}>
+                                    Current
+                                </Text>
+                            </View>
+                            <View style={styles.summaryItem}>
+                                <Text style={styles.summaryValue}>
+                                    {totals.upcoming || 0}
+                                </Text>
+                                <Text style={[styles.summaryLabel, styles.upcomingText]}>
+                                    Upcoming
+                                </Text>
+                            </View>
+                        </View>
+
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.barChartScrollContent}
+                        >
+                            <View style={styles.barChart}>
+                                {/* Add horizontal grid lines */}
+                                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((line) => (
+                                    <View
+                                        key={`grid-${line}`}
+                                        style={[
+                                            styles.gridLine,
+                                            { bottom: (line * 30) + 25 }
+                                        ]}
+                                    />
+                                ))}
+                                {bookingsData.map((item, index) => (
+                                    <TouchableOpacity
+                                        key={index}
+                                        style={styles.barWrapper}
+                                        onPress={() => setSelectedMonth(index)}
+                                    >
                                         <View
-                                            key={`grid-${line}`}
                                             style={[
-                                                styles.gridLine,
-                                                { bottom: (line * 30) + 25 }
+                                                styles.bar,
+                                                item.type === 'current' ? styles.current :
+                                                    item.type === 'upcoming' ? styles.upcoming :
+                                                        styles.checkedOut,
+                                                { height: (item.bookings / maxBookings) * 150 }
                                             ]}
                                         />
-                                    ))}
-                                    {bookingsData.map((item, index) => (
-                                        <TouchableOpacity
-                                            key={index}
-                                            style={styles.barWrapper}
-                                            onPress={() => setSelectedMonth(index)}
-                                        >
-                                            <View
-                                                style={[
-                                                    styles.bar,
-                                                    item.type === 'current' ? styles.current :
-                                                        item.type === 'upcoming' ? styles.upcoming :
-                                                            styles.checkedOut,
-                                                    { height: (item.bookings / maxBookings) * 150 }
-                                                ]}
-                                            />
-                                            <Text style={styles.barLabel}>{item.month}</Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </ScrollView>
-                        </View>
-                    )}
+                                        <Text style={styles.barLabel}>{item.month}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </ScrollView>
+                    </View>
+                )}
 
-                    {selectedMonth !== null && (
-                        <View style={[styles.detailsCard, { marginHorizontal: 20, marginBottom: 40 }]}>
-                            <View style={styles.detailsRow}>
-                                <Text style={styles.detailsMonth}>
-                                    {bookingsData[selectedMonth].month}
-                                </Text>
-                            </View>
-                            <View style={styles.detailsRow}>
-                                <Text style={styles.detailsNights}>
-                                    {bookingsData[selectedMonth].totalNights} nights booked
-                                </Text>
-                                <Text style={styles.detailsEarnings}>
-                                    {(bookingsData[selectedMonth].totalEarnings.toLocaleString())}
-                                </Text>
-                            </View>
+                {/* Details Card */}
+                {selectedMonth !== null && (
+                    <View style={[styles.detailsCard, { marginHorizontal: 20, marginBottom: 80 }]}>
+                        <View style={styles.detailsRow}>
+                            <Text style={styles.detailsMonth}>
+                                {bookingsData[selectedMonth].month}
+                            </Text>
                         </View>
-                    )}
-                </ScrollView>
-            </View>
+                        <View style={styles.detailsRow}>
+                            <Text style={styles.detailsNights}>
+                                {bookingsData[selectedMonth].totalNights} nights booked
+                            </Text>
+                            <Text style={styles.detailsEarnings}>
+                                {(bookingsData[selectedMonth].totalEarnings.toLocaleString())}
+                            </Text>
+                        </View>
+                    </View>
+                )}
+            </ScrollView>
         </View>
     );
 };
@@ -366,6 +372,7 @@ const styles = StyleSheet.create({
     },
     topContainer: {
         height: 220,
+        zIndex: 1,
     },
     topBackground: {
         width: '100%',
@@ -375,7 +382,8 @@ const styles = StyleSheet.create({
         marginTop: -20,
     },
     scrollContent: {
-        paddingBottom: 10,
+        paddingBottom: 30,  // Increased padding for better scroll experience
+        flexGrow: 1,       // Ensures content can grow
     },
     header: {
         paddingHorizontal: 20,
@@ -462,7 +470,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 25,
         paddingHorizontal: 15,
         paddingTop: 0,
-        flex: 1,
+        paddingBottom: 15,  // Added padding bottom
     },
     sectionTitle: {
         fontSize: 18,
@@ -500,6 +508,7 @@ const styles = StyleSheet.create({
         padding: 15,
         marginHorizontal: 20,
         marginTop: 5,
+        marginBottom: 15,  // Added margin bottom
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -522,7 +531,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 8,
     },
     bar: {
-        width: 30,
+        width: 15,
         borderRadius: 5,
         marginHorizontal: 5,
         zIndex: 2,
@@ -568,6 +577,7 @@ const styles = StyleSheet.create({
     },
     detailsCard: {
         marginTop: 15,
+        marginBottom: 30,  // Increased margin bottom
         padding: 15,
         backgroundColor: '#3A3B3F',
         borderRadius: 10,
