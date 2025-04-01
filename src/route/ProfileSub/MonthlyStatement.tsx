@@ -245,8 +245,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    picker: { color: '#000', fontSize: 14 },
-
+    picker: { color: '#000', fontSize: 14 }, 
     header: {
         flexDirection: 'row',
         alignItems: 'center',

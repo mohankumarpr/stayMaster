@@ -255,5 +255,12 @@ const styles = StyleSheet.create({
 export default LoginScreen;
 
 function showToast(arg0: string, arg1: string, arg2: string) {
-  throw new Error('Function not implemented.');
+  Toast.show({
+    type: arg0,
+    text1: arg1,
+    text2: arg2,
+    visibilityTime: 4000, // Duration for which the toast is visible
+    autoHide: true, // Automatically hide the toast after the visibility time
+    topOffset: 30, // Offset from the top of the screen
+  });
 }

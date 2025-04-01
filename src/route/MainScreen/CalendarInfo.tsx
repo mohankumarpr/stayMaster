@@ -1,62 +1,124 @@
 import { faLocation } from '@fortawesome/free-solid-svg-icons/faLocation';
 import { faMap } from '@fortawesome/free-solid-svg-icons/faMap';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import PropertyService from '../../services/propertyService';
+import day from 'react-native-calendars/src/calendar/day';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
 interface BookingDetailsProps {
-  onBack: () => void;
+  [x: string]: any; 
+}
+
+interface BookingDetails {
+  data: any;
+  booking: any;
+  property: any;
+  guest: any;
+  rentalInfo: any;
+  tariff: any;
+  calendar: Array<{
+    id: number;
+    start: string;
+    end: string; 
+    currentStatus: string;
+    status: string;
+    type: string;
+  }>;
 }
 
 const BookingDetailsScreen: React.FC<BookingDetailsProps> = (props) => {
+  const { bookingId, startDate, endDate } = props.route.params;
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
+  const [guestDetails, setGuestDetails] = useState<any>(null);
+  const [visibleRentInfo, setVisibleRentInfo] = useState(false);
+
+  console.log("Booking ID:", bookingId);
+  console.log("Start Date:", startDate);
+  console.log("End Date:", endDate);
+
+
+  useEffect(() => {
+    fetchBookingDetails();
+  }, []);
+
+
+  const fetchBookingDetails = async () => {
+    try {
+      const response = await PropertyService.getBookingDetails(bookingId, startDate, endDate);
+      const bookings = response;
+      setBookingDetails(bookings);
+      console.log("Booking Details:", bookings);
+    } catch (error) {
+      console.error('Error fetching calendar data:', error);
+    }
+  };
+  console.log("Booking Details:", bookingDetails);
+
   const alpineBlissBooking = {
     bookingDate: 'February 5',
     guest: {
-      name: 'Paras Patel',
-      bookingId: '1146453',
+      name: bookingDetails?.guest.firstname  + ' ' + bookingDetails?.guest.lastname,
+      bookingId: bookingDetails?.booking.id,
     },
     property: {
-      name: 'Alpine Bliss - mussoorie',
-      location: 'Mussoorie',
+      name: bookingDetails?.property.listing_name,
+      location: '',
     },
-    contact: '+91 12345 54321',
-    checkInDateTime: 'Nov 02, 2024 | 02:00 pm',
-    checkOutDateTime: 'Nov 05, 2024 | 11:00 am',
-    nights: 3,
+    contact: '',
+    checkInDateTime: bookingDetails?.booking.start,
+    checkOutDateTime: bookingDetails?.booking.end,
+    checkInDate: bookingDetails?.booking.arrivalTime,
+    checkOutDate: bookingDetails?.booking.departureTime,
+    nights: bookingDetails?.rentalInfo.length - 1,
     guests: {
-      adults: 12,
-      children: 2,
-      total: 14,
+      adults: '',
+      children: '',
+      total: '',
     },
+    rentalInfo: bookingDetails?.rentalInfo,
     rooms: 5,
-    securityDeposit: 0,
+    securityDeposit: bookingDetails?.tariff.totalAmountBeforeTax,
     petCount: 0,
     staffCount: 0,
-    source: 'Airbnb',
+    source: bookingDetails?.booking.source,
     secondarySource: 'OYO Platform',
     status: 'Confirmed'
   };
 
+  function formatNumber(securityDeposit: any): React.ReactNode {
+    if (securityDeposit === undefined) return '0.00';
+    return securityDeposit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
+  }
+
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-       {/*  <TouchableOpacity onPress={() => props.onBack()} style={styles.backButton}>
+        {/*  <TouchableOpacity onPress={() => props.onBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity> */}
-       {/*  <Text style={styles.headerTitle}>Booking Details</Text> */}
-       {/*  <View style={styles.placeholderView} /> */}
+        {/*  <Text style={styles.headerTitle}>Booking Details</Text> */}
+        {/*  <View style={styles.placeholderView} /> */}
       </View>
 
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+        contentContainerStyle={styles.scrollViewContent}
+      >
         {/* Main Booking Card */}
         <View style={styles.mainCard}>
           <View style={styles.propertyHeader}>
             <Text style={styles.propertyName}>{alpineBlissBooking.property.name}</Text>
-            
-           {/*  <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{alpineBlissBooking.status}</Text>
-            </View> */}
+            <View style={styles.statusBadge}>
+              <TouchableOpacity onPress={() => props.navigation.goBack()}>
+                <FontAwesome name={"remove"} size={22} color="#000" /> 
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Guest Info Card */}
@@ -64,25 +126,28 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = (props) => {
             <View style={styles.guestInfoContent}>
               <View style={styles.guestInfoColumn}>
                 <Text style={styles.guestInfoLabel}>Guest name:</Text>
-                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.name}</Text>
+                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.name ?? '...'}</Text>
                 <Text style={styles.guestInfoLabel}>Booking ID:</Text>
-                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.bookingId}</Text>
+                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.bookingId ?? '...'}</Text>
               </View>
-             { <TouchableOpacity style={styles.guestDetailsButton}>
+            {/*   <TouchableOpacity style={styles.guestDetailsButton} onPress={() => {
+                // Toggle visibility of rental info
+                setVisibleRentInfo(prev => !prev);
+              }}>
                 <Text style={styles.guestDetailsText}>Guest Details</Text>
-              </TouchableOpacity>}
+              </TouchableOpacity> */}
             </View>
           </View>
 
-          {/* Check-in/out Section */}
+          {/* Check-in/out Section  connvert into 13/03/2025 to Nov 02, 2024 | 02:00 pm*/}
           <View style={styles.datesSection}>
             <View style={styles.dateColumn}>
               <Text style={styles.dateLabel}>Check-in Date | Time</Text>
-              <Text style={styles.dateValue}>{alpineBlissBooking.checkInDateTime}</Text>
+              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkInDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} | ${alpineBlissBooking.checkInDate}`}</Text>
             </View>
             <View style={styles.dateColumn}>
               <Text style={styles.dateLabel}>Check-out Date | Time</Text>
-              <Text style={styles.dateValue}>{alpineBlissBooking.checkOutDateTime}</Text>
+              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkOutDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} | ${alpineBlissBooking.checkOutDate}`}</Text>
             </View>
           </View>
 
@@ -90,48 +155,81 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = (props) => {
           <View style={styles.metricsRow}>
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { textAlign: 'center' }]}>No.of nights</Text>
-              <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.nights} </Text>
+              <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.nights ?? '...'}</Text>
             </View>
-            <View style={styles.metricItem}>
+           {/*  <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { textAlign: 'center' }]}>Guests</Text>
               <Text style={[styles.metricValue, { textAlign: 'center' }]}>
-                {alpineBlissBooking.guests.total} 
+                {alpineBlissBooking.guests.total}
               </Text>
-            </View>
+            </View> */}
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { textAlign: 'center' }]}>No. of Rooms</Text>
-              <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.rooms}</Text>
+              <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.rooms ?? '...'}</Text>
             </View>
           </View>
-          <View style={styles.infoRow}>
+         {/*  <View style={styles.infoRow}>
             <Text style={[styles.infoLabel, { textAlign: 'center' }]}>Guests</Text>
             <Text style={[styles.infoValue, { textAlign: 'center' }]}>
-              {alpineBlissBooking.guests.adults} adults, {alpineBlissBooking.guests.children} children
+              {alpineBlissBooking.guests.adults} adults, {'0'} children
             </Text>
-          </View>
+          </View> */}
 
           {/* Additional Information */}
           <View style={styles.additionalInfoSection}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Security Deposit</Text>
-              <Text style={styles.infoValue}>₹ {alpineBlissBooking.securityDeposit}</Text>
+              <Text style={styles.infoValue}>₹ {formatNumber(alpineBlissBooking.securityDeposit ?? 0)}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Pet Count</Text>
-              <Text style={styles.infoValue}>{alpineBlissBooking.petCount}</Text>
+              <Text style={styles.infoValue}>{alpineBlissBooking.petCount ?? '...'}</Text>
             </View>
-            
+
           </View>
 
           {/* Source Information */}
           <View style={styles.sourceSection}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Primary Source</Text>
-              <Text style={styles.infoValue}>{alpineBlissBooking.source}</Text>
+              <Text style={styles.infoValue}>{alpineBlissBooking.source ?? '...'}</Text>
             </View>
-            
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Booking Information</Text>
+              <TouchableWithoutFeedback onPress={() => {
+                setVisibleRentInfo(prev => !prev);
+              }}>
+                <FontAwesome name={visibleRentInfo ? "chevron-up" : "chevron-down"} size={22} color="#000" /> 
+              </TouchableWithoutFeedback>
+            </View>
           </View>
         </View>
+
+
+        {/* Rental Info Section */}
+        {visibleRentInfo && alpineBlissBooking.rentalInfo != null && (
+          <View style={styles.rentalInfoSection}>
+            <Text style={styles.sectionTitle}>Booking Information</Text>
+            <View style={styles.rentalInfoHeader}>
+              <Text style={styles.columnHeader}>Sl.No</Text>
+              <Text style={styles.columnHeader}>Date</Text>
+              <Text style={styles.columnHeader}>Adults</Text>
+              <Text style={styles.columnHeader}>Children</Text>
+              <Text style={[styles.columnHeader, { textAlign: 'right' }]}>Rent</Text>
+            </View>
+            {alpineBlissBooking.rentalInfo.map((info: { effectiveDate: string; adults: number; children: number; rent: number }, index: number) => (
+              <View key={index} style={styles.rentalInfoRow}>
+                <Text style={styles.columnData}>{index + 1}</Text>
+                <Text style={styles.columnData}>{new Date(info.effectiveDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}</Text>
+                <Text style={styles.columnData}>{info.adults}</Text>
+                <Text style={styles.columnData}>{info.children}</Text>
+                <Text style={[{ textAlign: 'right', fontWeight: 'bold', fontSize: 13 }]}>₹ {formatNumber(info.rent)}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
 
         {/* Quick Action Buttons */}
         {/* <View style={styles.actionButtonsContainer}>
@@ -158,6 +256,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  rentalInfoSection: {
+    paddingTop: 16,
+    paddingRight: 4, 
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -182,7 +289,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollViewContent: {
     padding: 16,
+    paddingBottom: 32, // Add extra padding at bottom for better scrolling
   },
   mainCard: {
     backgroundColor: '#FFFFFF', // White color
@@ -220,8 +330,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     position: 'absolute',
     right: 0,
-    top: 0,
-    backgroundColor: '#4CD964',
+    top: 0, 
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 12,
@@ -355,6 +464,31 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: '#4A90E2',
     fontWeight: '500',
+  },
+  rentalInfoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E9F0',
+  },
+  columnHeader: {
+    fontWeight: 'bold',
+    flex: 0.5,
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  rentalInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  columnData: {
+    flex: 0.5,
+    textAlign: 'center',
+    fontSize: 13,
   },
 });
 

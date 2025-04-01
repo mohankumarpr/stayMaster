@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 
 // Contact information
-const SUPPORT_PHONE = '7709790669';
+const SUPPORT_PHONE = '+91 7709790669';
 const SUPPORT_EMAIL = 'supply@thestaymaster.com'; // Adding email as a typical option when "Write to us" is clicked
 
 const SupportScreen: React.FC<{ navigation: any }> = ({ navigation }) => {

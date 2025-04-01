@@ -35,8 +35,11 @@ interface RatingResponse {
 }
 
 interface CalendarResponse {
+  data: any;
   booking: any;
   property: any;
+  rentalInfo: any;
+  tariff: any;
   guest: any;
   calendar: Array<{
     id: number;
@@ -47,6 +50,21 @@ interface CalendarResponse {
     type: string;
   }>;
 }
+
+interface BlockBookingResponse {
+  success: boolean;
+  status: number;
+  blocks: Array<{
+    block_id: number;
+    property: string;
+    start: string;
+    end: string;
+    room_id: string;
+    blockType: string;
+  }>;
+}
+
+
 
 interface MonthlyStatement {
   name: string; // e.g., "2024_11.pdf"
@@ -443,6 +461,69 @@ class PropertyService {
     }
   }
 
+  //block booking
+  async blockBooking(propertyId: string, blockType: string, startDate: string, endDate: string): Promise<BlockBookingResponse> {
+    try {
+      console.log(`\n=== Starting blockBooking Request (Booking Type: ${blockType}, Start Date: ${startDate}, End Date: ${endDate}) Property ID: ${propertyId} ===`);
+      const guestToken = await this.getGuestToken();
+
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully');
+
+      const url = '/hosts/block';
+      console.log(`📡 Making API request to: ${url}`);
+
+      const response = await api.post<BlockBookingResponse>(url, {
+        property_id: propertyId,
+        blockType: blockType,
+        start: startDate,
+        end: endDate,
+        reason: 'testing',
+        guestToken
+      });
+
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End blockBooking Request ===\n`);
+
+      if (response.status === 200 || response.status === 301 || response.status === 400) {
+        if (response.status === 200 || response.status === 301) {
+          showToast({
+            text1: 'Blocked Successfully',
+            type: 'success',
+          });
+        } else if (response.status === 400) {
+          showToast({
+            text1: 'This Room block reason is not available in PMS.',
+            type: 'error',
+          });
+        }
+      }
+      return response.data;
+    } catch (error: any) {
+      console.log(error.response.status);
+      if (error.response?.status === 400) {
+        // console.error('❌ Block reason is not available in PMS.');
+        // Allow this condition to proceed without throwing an error
+        return { success: true, status: 400, blocks: [] }; // or handle it as needed
+      }
+      console.error(`\n❌ Error in blockBooking:`, {
+        blockType,
+        startDate,
+        endDate,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+
+      throw error;
+    }
+  }
+
 
   //get booking details
   async getBookingDetails(bookingId: string, startDate: string, endDate: string): Promise<CalendarResponse> {
@@ -461,8 +542,8 @@ class PropertyService {
 
       const response = await api.post<CalendarResponse>(url, {
         booking_id: bookingId,
-        start_date: startDate,
-        end_date: endDate,
+        start: startDate,
+        end: endDate,
         guestToken
       });
 

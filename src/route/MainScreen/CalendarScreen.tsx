@@ -20,6 +20,9 @@ import { Property } from '../../types/property';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ActivityIndicator } from 'react-native';
+import { Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Toast from 'react-native-toast-message';
 
 
 
@@ -48,7 +51,7 @@ type CalendarScreenProps = {
 
 const getTimeSession = (): string => {
     const hour = new Date().getHours();
-    
+
     if (hour >= 5 && hour < 12) {
         return 'Morning';
     } else if (hour >= 12 && hour < 17) {
@@ -59,6 +62,20 @@ const getTimeSession = (): string => {
         return 'Night';
     }
 };
+
+interface LegendItemProps {
+    color: string;
+    label: string;
+}
+const LegendItem: React.FC<LegendItemProps> = ({ color, label }) => {
+    return (
+        <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: color }]} />
+            <Text style={styles.legendText}>{label}</Text>
+        </View>
+    );
+};
+
 
 const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     const { selectedProperty, setSelectedProperty } = useProperty();
@@ -125,11 +142,11 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             // Store booking groups in state
             setBookingGroups(groups as any);
             // Convert bookings to period marking format
-            const marked: any = {}; 
-           
+            const marked: any = {};
+
             Object.values(groups).forEach(bookingGroup => {
                 // Determine if this is a maintenance booking
-               
+
                 const isMaintenance = bookingGroup[0].maintenance === true;
                 const color = isMaintenance ? '#FFD700' : '#50cebb';
 
@@ -206,38 +223,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         }
 
 
-        // Find any booking that includes this date
-        /*  Object.values(bookingGroups).forEach(bookingGroup => {
-             const firstDate = bookingGroup[0].effectiveDate.split('T')[0];
-             const lastDate = bookingGroup[bookingGroup.length - 1].effectiveDate.split('T')[0];
- 
-             if (selectedDate >= firstDate && selectedDate <= lastDate) {
-                 console.log("Booking found for date:", selectedDate);
-                 // Enhance booking data with additional info from the sample image
-                 const enhancedBooking = {
-                     ...bookingGroup[0],
-                     guest_name: bookingGroup[0].guest_name || "Arun Rajendran",
-                     guest_phone: bookingGroup[0].guest_phone || "+91 12345 54321",
-                     guest_email: bookingGroup[0].guest_email || "arun@example.com",
-                     checkin_date: firstDate,
-                     checkout_date: lastDate,
-                     duration: `${firstDate} - ${lastDate}`,
-                     maintenance: bookingGroup[0].maintenance || false,
-                     title: bookingGroup[0].title || "Guest Booking Info"
-                 };
- 
-                 setSelectedBooking(enhancedBooking);
-                 bookingFound = true; // Set flag to true if booking is found
-             }
-         });
- 
-         // Expand bottom sheet only if a booking was found
-         if (bottomSheetRef.current) {
-             bottomSheetRef.current.expand();
-         } else {
-             console.warn("BottomSheet reference is null");
-         }  */
-
     };
 
     const onMonthChange = (month: any) => {
@@ -256,6 +241,16 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         const property = properties.find(p => p.id === selectedProperty);
         return property ? property.listing_name : "Select Property";
     };
+
+    function showToast(arg0: string) {
+        Toast.show({
+            text1: arg0,
+            type: 'error',
+            position: 'bottom',
+            visibilityTime: 3000,
+            autoHide: true,
+        });
+    }
 
     return (
         <View style={styles.container}>
@@ -299,12 +294,35 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                             ))}
                         </Picker>
                     </View>
+                    <View style={styles.legendContainer}>
+                        <LegendItem color="#50cebb" label="Checked-in Bookings" />
+                        <LegendItem color="#FFC107" label="Upcoming Bookings" />
+                        <LegendItem color="#FF5252" label="Current" />
+                    </View>
+                    <View style={[styles.legendContainer2, { alignItems: 'flex-end' }]}>
+                        <TouchableOpacity 
+                            style={styles.addButton} 
+                            onPress={() =>  {
+                                const propertyId = selectedProperty?.toString() || '';
+                                console.log('selectedProperty', selectedProperty);
+                                if (!selectedProperty) {
+                                    showToast('Please select a property');
+                                    return;
+                                }
+                                return navigation.navigate('UnblockBlockScreen', { propertyId } as any);
+                            }} 
+                           
+                        >
+                            <Icon name="add" size={20} color="black" />
+                        </TouchableOpacity>
+                    </View>
 
                     {loading && (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#008489" />
                         </View>
                     )}
+                   
 
                     {selectedProperty && !loading && (
                         <View style={styles.calendarContainer}>
@@ -435,7 +453,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
       </BottomSheet> */}
 
 
-         {/*    <BottomSheet
+            {/*    <BottomSheet
                 ref={bottomSheetRef}
                 index={-1}
                 snapPoints={['25%', '50%']}
@@ -485,6 +503,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8f8f8',
+    },
+    addButton: {
+        padding: 10,
+        borderRadius: 50, 
+        alignItems: 'flex-end',
     },
     topContainer: {
         height: 120,
@@ -557,13 +580,13 @@ const styles = StyleSheet.create({
         padding: 0,
         marginHorizontal: 0,
         shadowColor: '#000',
-       /*  shadowOffset: {
-            width: 0,
-            height: 2,
-        }, */
-       /*  shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3, */
+        /*  shadowOffset: {
+             width: 0,
+             height: 2,
+         }, */
+        /*  shadowOpacity: 0.1,
+         shadowRadius: 3,
+         elevation: 3, */
         flex: 2,
     },
     monthHeader: {
@@ -577,7 +600,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     calendar: {
-        marginBottom: 0, 
+        marginBottom: 0,
         paddingRight: 20,
         paddingLeft: 0,
     },
@@ -712,7 +735,43 @@ const styles = StyleSheet.create({
     },
     activeTabIcon: {
         opacity: 1,
-    }
+    },
+    legendContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        paddingVertical: 5,
+        paddingHorizontal: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+        marginBottom: 10,
+    },
+    legendContainer2: {
+        flexDirection: 'row', 
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        backgroundColor: 'white',
+        paddingVertical: 3,
+        paddingHorizontal: 3,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+        marginBottom: 5,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    legendDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginRight: 6,
+    },
+    legendText: {
+        fontSize: 12,
+        color: '#333333',
+    },
 });
 
 export default CalendarScreen;
