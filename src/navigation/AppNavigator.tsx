@@ -19,6 +19,7 @@ import PropertyReferralScreen from '../route/ProfileSub/ReferPropertyDetails';
 import SupportScreen from '../route/ProfileSub/SupportScreen';
 import CalendarInfo from '../route/MainScreen/CalendarInfo';
 import UnblockBlockScreen from '../route/MainScreen/unblock_blockscreen';
+import BlockInfoScreen from '../route/MainScreen/BlockInfoScreen';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -42,6 +43,7 @@ export type RootStackParamList = {
   SupportScreen: undefined;
   CalendarInfo: undefined;
   UnblockBlockScreen: undefined;
+  BlockInfoScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -111,6 +113,7 @@ const AppNavigator = () => {
         <Stack.Screen name="SupportScreen" component={SupportScreen} />
         <Stack.Screen name="CalendarInfo" component={CalendarInfo} />
         <Stack.Screen name="UnblockBlockScreen" component={UnblockBlockScreen} />
+        <Stack.Screen name="BlockInfoScreen" component={BlockInfoScreen} />
         <Stack.Screen
           name="PropertyDetails"
           component={PropertyDetails}

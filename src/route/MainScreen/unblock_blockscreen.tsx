@@ -9,9 +9,8 @@ import Toast from 'react-native-toast-message';
 
 
 interface UnblockBlockScreenProps {
-  route: any;
+  route: any; 
   navigation: any;
-  propertyId: string;
 }
 
 

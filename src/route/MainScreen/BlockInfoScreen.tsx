@@ -8,7 +8,7 @@ import day from 'react-native-calendars/src/calendar/day';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
-interface CalendarInfoProps {
+interface BlockInfoProps {
   [x: string]: any; 
 }
 
@@ -29,7 +29,7 @@ interface BookingDetails {
   }>;
 }
 
-  const CalendarInfoScreen: React.FC<CalendarInfoProps> = (props) => {
+const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
   const { bookingId, startDate, endDate, numberOfBedrooms, type } = props.route.params;
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [guestDetails, setGuestDetails] = useState<any>(null);
@@ -60,36 +60,46 @@ interface BookingDetails {
   const alpineBlissBooking = {
     bookingDate: 'February 5',
     guest: {
-      name: bookingDetails?.guest.firstname  + ' ' + bookingDetails?.guest.lastname,
-      bookingId: bookingDetails?.booking.id,
+      name: `${bookingDetails?.guest?.firstname ?? ''} ${bookingDetails?.guest?.lastname ?? ''}`,
+      bookingId: bookingDetails?.booking?.id ?? null,
     },
     property: {
-      name: bookingDetails?.property.listing_name ?? '',
+      name: bookingDetails?.property?.listing_name ?? '',
       location: '',
     },
     contact: '',
-    checkInDateTime: bookingDetails?.booking.start,
-    checkOutDateTime: bookingDetails?.booking.end,
-    checkInDate: bookingDetails?.booking.arrivalTime,
-    checkOutDate: bookingDetails?.booking.departureTime,
-    nights: bookingDetails?.rentalInfo.length - 1,
+    checkInDateTime: bookingDetails?.booking?.start ?? null,
+    checkOutDateTime: bookingDetails?.booking?.end ?? null,
+    checkInDate: bookingDetails?.booking?.arrivalTime ?? null,
+    checkOutDate: bookingDetails?.booking?.departureTime ?? null,
+    nights: bookingDetails?.rentalInfo?.length ? bookingDetails.rentalInfo.length - 1 : 0,
     guests: {
       adults: '',
       children: '',
       total: '',
     },
-    rentalInfo: bookingDetails?.rentalInfo,
+    rentalInfo: bookingDetails?.rentalInfo ?? [],
     rooms: numberOfBedrooms ?? 0,
-    securityDeposit: bookingDetails?.tariff.totalAmountBeforeTax,
+    securityDeposit: bookingDetails?.tariff?.totalAmountBeforeTax ?? 0,
     petCount: 0,
     staffCount: 0,
-    source: bookingDetails?.booking.source,
+    source: bookingDetails?.booking?.source ?? '',
     secondarySource: 'OYO Platform',
     status: 'Confirmed'
-  };
+};
 
+
+
+
+
+
+
+
+
+
+  
   function formatNumber(securityDeposit: any): React.ReactNode {
-    if (securityDeposit === undefined) return '0.00';
+    if (securityDeposit == null) return '0.00'; // Check for both null and undefined
     return securityDeposit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
   }
 
@@ -114,7 +124,7 @@ interface BookingDetails {
         <View style={styles.mainCard}>
           <View style={styles.propertyHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ width: 12, height: 12, borderRadius: 10, backgroundColor: '#50cebb' }} />
+              <View style={{ width: 12, height: 12, borderRadius: 10, backgroundColor: type === 'Owner block' ? '#FFC107' : '#FF5252' }} />
               <Text style={styles.propertyName}>{alpineBlissBooking.property.name}</Text>
             </View>
             <View style={styles.statusBadge}>
@@ -205,6 +215,12 @@ interface BookingDetails {
                 <FontAwesome name={visibleRentInfo ? "chevron-up" : "chevron-down"} size={22} color="#000" /> 
               </TouchableWithoutFeedback>
             </View>
+
+          <TouchableOpacity style={styles.actionButton} onPress={() => {
+           
+          }}>
+            <Text style={styles.actionButtonText}>Unblock</Text>
+          </TouchableOpacity>
           </View>
         </View> 
 
@@ -222,7 +238,9 @@ interface BookingDetails {
             {alpineBlissBooking.rentalInfo.map((info: { effectiveDate: string; adults: number; children: number; rent: number }, index: number) => (
               <View key={index} style={styles.rentalInfoRow}>
                 <Text style={styles.columnData}>{index + 1}</Text>
-                <Text style={styles.columnData}>{new Date(info.effectiveDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}</Text>
+                <Text style={styles.columnData}>
+                  {info.effectiveDate ? new Date(info.effectiveDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }) : 'N/A'}
+                </Text>
                 <Text style={styles.columnData}>{info.adults}</Text>
                 <Text style={styles.columnData}>{info.children}</Text>
                 <Text style={[{ textAlign: 'right', fontWeight: 'bold', fontSize: 13 }]}>₹ {formatNumber(info.rent)}</Text>
@@ -496,4 +514,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CalendarInfoScreen;
+export default BlockInfoScreen;

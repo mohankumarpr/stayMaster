@@ -39,6 +39,7 @@ interface BookingData {
     start: any;
     currentStatus: any;
     id: any;
+    number_of_bedrooms?: number;
     maintenance?: boolean;
     title?: string;
     status?: string;
@@ -78,7 +79,7 @@ const LegendItem: React.FC<LegendItemProps> = ({ color, label }) => {
 
 
 const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
-    const { selectedProperty, setSelectedProperty } = useProperty();
+    const { selectedProperty, setSelectedProperty, numberOfBedrooms, setNumberOfBedrooms } = useProperty();
     const [properties, setProperties] = useState<Property[]>([]);
     const [markedDates, setMarkedDates] = useState<any>({});
     const [loading, setLoading] = useState(true);
@@ -111,11 +112,44 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         try {
             const response = await PropertyService.getAllProperties();
             const propertyList = response.properties || [];
+            // Adding the dummy record to the property list
+            propertyList.push({
+                id: "43", // Changed from number to string
+                listing_name: "Test ",
+                internal_name: "Cranberry Corner ",
+                number_of_bedrooms: 4,
+                number_of_bathrooms: 4,
+                number_of_guests: 8,
+                number_of_extra_guests: 2,
+                google_latitude: "15.4612813771341",
+                google_longitude: "73.81050413558205",
+                address_line_1: "Staymaster Cranberry Corner (centre villa) ",
+                address_line_2: "La Citadel Colony  Durgavado",
+                city: "Dona Paula",
+                state: "Goa",
+                country: 14,
+                media_filename: "126_display_image.jpg",
+                url: "https://staymaster.s3.ap-south-1.amazonaws.com/property/126/126_display_image.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2VBA7ZYA7ET7KSK3%2F20250401%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20250401T141447Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFUaCmFwLXNvdXRoLTEiRjBEAiBDjo3l%2Fbt8%2F%2BOX2V%2B9zd15yUh43oTc8QSsigI4dAs09gIgBto7EX5nDHMoco2iBLaRC8vO6Bbq8I2cTtYYzMhINE0qyQUIvv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3MzIzNjExMTcxODUiDAgHN7fKOWfOT0AcWCqdBcnD0T6hTZcQ2JGWFYofI5o%2BM%2F3WUsj6yI7u0YKigRHcA1TkSoa8TpuuzpFHUneM6xYUM%2F%2B1DMs7ocMpFm2LWwK93CSBsJ1u2JQWfXZiKo5s5Wy3EsO1JxAVoIf7rSM0weI2UxYMcpFM%2BftBGj89fDmw5FRtPu2GtKPn3%2BpF%2BLm83zN2cOW0cODsaEk5P6U%2BX6XLLgnGQtwHzG18qUO3XqMxSmwD6NV63x8chqrCqGV%2F%2FoX9TNzTrC05V%2BkOY%2FdL2PYLVg1S2bfPaXy9jX37IJ%2BxsNxhM1TY%2Fz4kRVSeI1MligLQ9t9XWc3LV%2B7Bxr3H9nhEZ2QrY%2BD9TNh3K2PTLTWjha1cnRNTR%2BsIemoQSmhXNWahjrJG0Ru0pzWweYZJFrQuX3b8IWNaR4dU%2Butd%2F%2Fyr2%2BCJ6Rlbek4sYU05SN%2B7IUQFlCx9W6WwDnVvkEqkE7FYEAtIQeYEAjh5e7Mr1NCbkdMKx0rMIYM2yCF41Fq4m%2B5wNJeyVxrdaiKHgk3Me8QJNoyDiaDEBgZM%2BgkU40DX4nKmi6gw6AWitizEy9GAAE2n2a01sAzcJuOgVkd%2FRpT3%2BRtxcicE82LMLXyC%2FvHEhfOKudnelqiLEf6OYYwCoocrlDJcIxrAPiXDMFwgnWQ27yyQkxz8%2Ff6%2B43s%2BqR4apQqlHc5Mzx9mZAasXCO1bz8tyYrnZp24Bfkn7k1pUlH4xHnsBFTCTtE9iqnsC99jXvKwtuqOsrFKzqehkygliQSlaO6O7flfH562rKxs%2F1BhHMOhVZ8Dd3tpxhpF%2FBcI%2FoL1r1JxVIRXbsraEaHVIw1gRl1BtEO8U9LT9rMCJKM468lle1rty6GVpc1T4Uj0e6SwPvMURt0HY0ds6%2BnLHCz09P6qjwOS%2Buw2ITDKy6%2B%2FBjqyAZ6syFLUxm0V%2FikgtNZ295un0D6JvOf1dart0dcpL8heCPHH2rPc5CpYi7XdCZl3tKNgkXfGUbPwU%2BaGKIRBUbiebmsDQJR5AKcqmqO2i01PdTi7QH%2FbzSV1FlBMONJEnZ6bo1TcXMwzudlX1puocWwmn1New0XvYolRw7bNZbe5TKcEuEVvWu1g1HAvojDBWYL0hKF4x7Sw1TByST0yFePDB0%2Fs2JWHkTu38%2FZBlhNVpoI%3D&X-Amz-Signature=d7655d87de54371848cfa5fef5109d5e1df9a95407791539870ee7fb60ed9dc0&X-Amz-SignedHeaders=host",
+                gbv: 1064223,
+                nights: 81,
+                average_rating: undefined,
+                total_reviews: undefined,
+                earnings: [],
+                location: '',
+                image: '',
+                amenities: [],
+                description: '',
+                number_of_beds: 0
+            });
+
             setProperties(propertyList);
 
             // Set the first property as default if no property is selected
             if (propertyList.length > 0 && !selectedProperty) {
                 setSelectedProperty(propertyList[0].id.toString());
+                const property = propertyList[0];
+                setNumberOfBedrooms(property.number_of_bedrooms || 0);
+                console.log("Number of Bedrooms:", numberOfBedrooms);
             }
         } catch (error) {
             console.error('Error fetching properties:', error);
@@ -132,6 +166,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
             // Group bookings by booking_id
             const groups = bookings.reduce((acc: { [key: string]: any[] }, booking: any) => {
+                console.log("booking details in calendar screen", booking);
                 if (!acc[booking.id]) {
                     acc[booking.id] = [];
                 }
@@ -147,8 +182,18 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             Object.values(groups).forEach(bookingGroup => {
                 // Determine if this is a maintenance booking
 
-                const isMaintenance = bookingGroup[0].maintenance === true;
-                const color = isMaintenance ? '#FFD700' : '#50cebb';
+                console.log("bookingGroup", bookingGroup);
+                const type = bookingGroup[0].type;
+                let color = '';
+                if (type === 'Owner block') {
+                    color = '#FFC107';
+                } else if (type === 'Booking') {
+                    color = '#50cebb';
+                } else if (type === 'Maintenance block') {
+                    color = '#FF5252';
+                }
+                console.log("color", color);
+                //'#FFC107' : '#50cebb';
 
                 // Get start and end dates from server data
                 const firstDate = bookingGroup[0].start; // Assuming startDate is provided by the server
@@ -198,6 +243,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
         // Animate the transition to the CalendarInfo screen
         Object.values(bookingGroups).forEach(bookingGroup => {
+            console.log("bookingGroup", bookingGroup);
             const firstDate = bookingGroup[0].start;
             const lastDate = bookingGroup[bookingGroup.length - 1].end;
 
@@ -206,13 +252,21 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 const startDate = bookingGroup[0].start; // Get the start date
                 const endDate = bookingGroup[bookingGroup.length - 1].end; // Get the end date
                 bookingId = bookingGroup[0].id; // Assuming the booking ID is stored in the first booking of the group
+                const type = bookingGroup[0].type;
+
 
                 console.log("Booking ID:", bookingId);
                 console.log("Start Date:", startDate);
                 console.log("End Date:", endDate);
+                console.log("Number of Bedrooms:", numberOfBedrooms);
+                console.log("Type:", type);
 
-                // Animate the transition to the CalendarInfo screen with booking ID
-                navigation.navigate('CalendarInfo', { bookingId, startDate, endDate } as any);
+
+                if (type?.toLowerCase() === 'booking') {
+                    navigation.navigate('CalendarInfo', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
+                } else if (type?.toLowerCase() === 'owner block' || type?.toLowerCase() === 'maintenance block') {
+                    navigation.navigate('BlockInfoScreen', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
+                }
                 bookingFound = true; // Set flag to true if booking is found
             }
         });
@@ -281,7 +335,12 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                             selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id : '')}
                             mode="dropdown"
                             dropdownIconColor="#000"
-                            onValueChange={(itemValue) => setSelectedProperty(itemValue)}
+                            onValueChange={(itemValue) => {
+                                setSelectedProperty(itemValue);
+                                const property = properties.find(p => p.id === itemValue);
+                                setNumberOfBedrooms(property?.number_of_bedrooms || 0);
+                                console.log("Number of Bedrooms:", numberOfBedrooms);
+                            }}
                             style={styles.picker}
                         >
                             <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
@@ -300,9 +359,9 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                         <LegendItem color="#FF5252" label="Current" />
                     </View>
                     <View style={[styles.legendContainer2, { alignItems: 'flex-end' }]}>
-                        <TouchableOpacity 
-                            style={styles.addButton} 
-                            onPress={() =>  {
+                        <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={() => {
                                 const propertyId = selectedProperty?.toString() || '';
                                 console.log('selectedProperty', selectedProperty);
                                 if (!selectedProperty) {
@@ -310,8 +369,8 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                     return;
                                 }
                                 return navigation.navigate('UnblockBlockScreen', { propertyId } as any);
-                            }} 
-                           
+                            }}
+
                         >
                             <Icon name="add" size={20} color="black" />
                         </TouchableOpacity>
@@ -322,7 +381,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                             <ActivityIndicator size="large" color="#008489" />
                         </View>
                     )}
-                   
+
 
                     {selectedProperty && !loading && (
                         <View style={styles.calendarContainer}>
@@ -506,7 +565,7 @@ const styles = StyleSheet.create({
     },
     addButton: {
         padding: 10,
-        borderRadius: 50, 
+        borderRadius: 50,
         alignItems: 'flex-end',
     },
     topContainer: {
@@ -748,7 +807,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     legendContainer2: {
-        flexDirection: 'row', 
+        flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
         backgroundColor: 'white',
