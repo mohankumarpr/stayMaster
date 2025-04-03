@@ -86,16 +86,7 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
     source: bookingDetails?.booking?.source ?? '',
     secondarySource: 'OYO Platform',
     status: 'Confirmed'
-};
-
-
-
-
-
-
-
-
-
+}; 
 
   
   function formatNumber(securityDeposit: any): React.ReactNode {
@@ -125,7 +116,7 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
           <View style={styles.propertyHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ width: 12, height: 12, borderRadius: 10, backgroundColor: type === 'Owner block' ? '#FFC107' : '#FF5252' }} />
-              <Text style={styles.propertyName}>{alpineBlissBooking.property.name}</Text>
+              <Text style={styles.propertyName}>{type === 'Owner block' ? 'Owner Block' : 'Maintenance Block'}</Text>
             </View>
             <View style={styles.statusBadge}>
               <TouchableOpacity onPress={() => props.navigation.goBack()}>
@@ -138,10 +129,10 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
           <View style={styles.infoCard}>
             <View style={styles.guestInfoContent}>
               <View style={styles.guestInfoColumn}>
-                <Text style={styles.guestInfoLabel}>Guest name:</Text>
-                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.name ?? '...'}</Text>
-                <Text style={styles.guestInfoLabel}>Booking ID:</Text>
-                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.bookingId ?? '...'}</Text>
+                <Text style={styles.guestInfoLabel}>Property:</Text>
+                <Text style={styles.guestInfoValue}>{alpineBlissBooking.property.name ?? '...'}</Text>
+                {/* <Text style={styles.guestInfoLabel}>Booking ID:</Text>
+                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.bookingId ?? '...'}</Text> */}
               </View>
             {/*   <TouchableOpacity style={styles.guestDetailsButton} onPress={() => {
                 // Toggle visibility of rental info
@@ -152,71 +143,32 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
             </View>
           </View>
 
+         {/*  <View style={styles.infoDate}>
+            <Text style={styles.infoLabel}>Blocked Dates</Text>
+            <Text style={styles.infoValue}>{alpineBlissBooking.guest.name ?? '...'}</Text>
+          </View> */}
+
           {/* Check-in/out Section  connvert into 13/03/2025 to Nov 02, 2024 | 02:00 pm*/}
           <View style={styles.datesSection}>
             <View style={styles.dateColumn}>
-              <Text style={styles.dateLabel}>Check-in Date | Time</Text>
-              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkInDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} | ${alpineBlissBooking.checkInDate}`}</Text>
+              <Text style={styles.dateLabel}>Start Date</Text>
+              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkInDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} `}</Text>
             </View>
             <View style={styles.dateColumn}>
-              <Text style={styles.dateLabel}>Check-out Date | Time</Text>
-              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkOutDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} | ${alpineBlissBooking.checkOutDate}`}</Text>
+              <Text style={styles.dateLabel}>End Date</Text>
+              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkOutDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`}</Text>
             </View>
-          </View>
-
-          {/* Stay Details Section */}
-          <View style={styles.metricsRow}>
-            <View style={styles.metricItem}>
-              <Text style={[styles.metricLabel, { textAlign: 'center' }]}>No.of nights</Text>
-              <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.nights ?? '...'}</Text>
-            </View>
-           {/*  <View style={styles.metricItem}>
-              <Text style={[styles.metricLabel, { textAlign: 'center' }]}>Guests</Text>
-              <Text style={[styles.metricValue, { textAlign: 'center' }]}>
-                {alpineBlissBooking.guests.total}
-              </Text>
-            </View> */}
-            <View style={styles.metricItem}>
-              <Text style={[styles.metricLabel, { textAlign: 'center' }]}>No. of Rooms</Text>
-              <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.rooms ?? '...'}</Text>
-            </View>
-          </View>
-         {/*  <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { textAlign: 'center' }]}>Guests</Text>
-            <Text style={[styles.infoValue, { textAlign: 'center' }]}>
-              {alpineBlissBooking.guests.adults} adults, {'0'} children
-            </Text>
-          </View> */}
-
-          {/* Additional Information */}
-          <View style={styles.additionalInfoSection}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Security Deposit</Text>
-              <Text style={styles.infoValue}>₹ {formatNumber(alpineBlissBooking.securityDeposit ?? 0)}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Pet Count</Text>
-              <Text style={styles.infoValue}>{alpineBlissBooking.petCount ?? '...'}</Text>
-            </View> 
           </View>
 
           {/* Source Information */}
-          <View style={styles.sourceSection}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Primary Source</Text>
-              <Text style={styles.infoValue}>{alpineBlissBooking.source ?? '...'}</Text>
-            </View>
+          <View style={styles.sourceSection}> 
+          <TouchableOpacity style={styles.actionButton} onPress={async () => {
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Booking Information</Text>
-              <TouchableWithoutFeedback onPress={() => {
-                setVisibleRentInfo(prev => !prev);
-              }}>
-                <FontAwesome name={visibleRentInfo ? "chevron-up" : "chevron-down"} size={22} color="#000" /> 
-              </TouchableWithoutFeedback>
-            </View>
-
-          <TouchableOpacity style={styles.actionButton} onPress={() => {
+             var unblock = await PropertyService.unblockBooking(bookingId);
+             console.log("Unblock", unblock);
+             if(unblock.success === true){
+              props.navigation.goBack();
+             }
            
           }}>
             <Text style={styles.actionButtonText}>Unblock</Text>
@@ -405,6 +357,7 @@ const styles = StyleSheet.create({
   },
   datesSection: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
   },
@@ -447,6 +400,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  infoDate: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    fontSize: 15,
+    color: '#8F9BB3',
   },
   infoLabel: {
     fontSize: 15,

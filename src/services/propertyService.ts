@@ -405,7 +405,7 @@ class PropertyService {
 
       const response = await api.post<EarningsByMonth>(url, {
         property_id: propertyId,
-        guestToken
+        guestToken: guestToken,   
       });
 
       console.log('✅ API Response received');
@@ -441,7 +441,7 @@ class PropertyService {
 
       const response = await api.post<CalendarResponse>(url, {
         property_id: propertyId,
-        guestToken
+        guestToken: guestToken, 
       });
 
       console.log('✅ API Response received');
@@ -477,12 +477,13 @@ class PropertyService {
       console.log(`📡 Making API request to: ${url}`);
 
       const response = await api.post<BlockBookingResponse>(url, {
+        guestToken: guestToken,
         property_id: propertyId,
         blockType: blockType,
         start: startDate,
         end: endDate,
         reason: 'testing',
-        guestToken
+       
       });
 
       console.log('✅ API Response received');
@@ -524,6 +525,43 @@ class PropertyService {
     }
   }
 
+
+  //unblock booking
+  async unblockBooking(blockId: string): Promise<{success: boolean}> {
+    try {
+      console.log(`\n=== Starting unblockBooking Request (Booking ID: ${blockId}) ===`);
+      const guestToken = await this.getGuestToken();  
+
+      if (!guestToken) {
+        console.error('❌ Guest token not found in storage');
+        throw new Error('Guest token not found');
+      }
+      console.log('✅ Guest token retrieved successfully'); 
+
+      const url = '/hosts/unblock';
+      console.log(`📡 Making API request to: ${url}`);
+
+      const response = await api.post<{success: boolean}>(url, {
+        block_id: blockId,
+        guestToken
+      });
+
+      console.log('✅ API Response received');
+      console.log('Status:', response.status);
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      console.log(`=== End unblockBooking Request ===\n`);
+
+      return response.data;
+    } catch (error: any) {
+      console.error(`\n❌ Error in unblockBooking:`, {
+        blockId,
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  }
 
   //get booking details
   async getBookingDetails(bookingId: string, startDate: string, endDate: string): Promise<CalendarResponse> {

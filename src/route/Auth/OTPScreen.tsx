@@ -96,10 +96,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
           await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.webUserToken);
           console.log('Token stored:', data.token);
         }
-        showToast('success', 'Success', 'OTP verified successfully.');
-
-
-
+        showToast('success', 'Success', 'OTP verified successfully.'); 
         navigation.reset({
           index: 0,
           routes: [{ name: 'Welcome' }],

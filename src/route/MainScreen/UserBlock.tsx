@@ -182,13 +182,13 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
               <TouchableOpacity
                 style={[
                   styles.blockTypeButton,
-                  blockType === 'Owner Block' && styles.blockTypeButtonActive
+                  blockType === 'Owner block' && styles.blockTypeButtonActive
                 ]}
-                onPress={() => setBlockType('Owner Block')}
+                onPress={() => setBlockType('Owner block')}
               >
                 <Text style={[
                   styles.blockTypeText,
-                  blockType === 'Owner Block' && styles.blockTypeTextActive
+                  blockType === 'Owner block' && styles.blockTypeTextActive
                 ]}>Owner Block</Text>
               </TouchableOpacity>
             </View>

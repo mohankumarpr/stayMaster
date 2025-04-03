@@ -18,7 +18,7 @@ import MonthlyStatementsScreen from '../route/ProfileSub/MonthlyStatement';
 import PropertyReferralScreen from '../route/ProfileSub/ReferPropertyDetails';
 import SupportScreen from '../route/ProfileSub/SupportScreen';
 import CalendarInfo from '../route/MainScreen/CalendarInfo';
-import UnblockBlockScreen from '../route/MainScreen/unblock_blockscreen';
+import UnblockBlockScreen from '../route/MainScreen/UserBlock';
 import BlockInfoScreen from '../route/MainScreen/BlockInfoScreen';
 
 export type RootStackParamList = {

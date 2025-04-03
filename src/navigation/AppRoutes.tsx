@@ -8,7 +8,7 @@ import CalendarScreen from '../route/MainScreen/CalendarScreen';
 import EarningsScreen from '../route/MainScreen/EarningsScreen';
 import ProfileScreen from '../route/MainScreen/ProfileScreen';
 import BlockInfoScreen from '../route/MainScreen/BlockInfoScreen';
-import UnblockBlockScreen from '../route/MainScreen/unblock_blockscreen';
+import UnblockBlockScreen from '../route/MainScreen/UserBlock';
 
 const AppRoutes = (Stack: ReturnType<typeof createStackNavigator>) => {
   return (
