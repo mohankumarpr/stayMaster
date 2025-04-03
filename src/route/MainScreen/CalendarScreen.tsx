@@ -265,7 +265,12 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 if (type?.toLowerCase() === 'booking') {
                     navigation.navigate('CalendarInfo', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
                 } else if (type?.toLowerCase() === 'owner block' || type?.toLowerCase() === 'maintenance block') {
-                    navigation.navigate('BlockInfoScreen', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
+                    navigation.navigate('BlockInfoScreen', { bookingId, startDate, endDate, numberOfBedrooms, type } as any); 
+                    navigation.addListener('focus', () => {
+                        // Reload the calendar view or refresh data here
+                        // For example, you might want to call a function to fetch the updated calendar data
+                        fetchCalendarData();
+                    });
                 }
                 bookingFound = true; // Set flag to true if booking is found
             }
@@ -368,7 +373,12 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                     showToast('Please select a property');
                                     return;
                                 }
-                                return navigation.navigate('UnblockBlockScreen', { propertyId } as any);
+                                navigation.navigate('UnblockBlockScreen', { propertyId } as any);
+                                navigation.addListener('focus', () => {
+                                    // Reload the calendar view or refresh data here
+                                    // For example, you might want to call a function to fetch the updated calendar data
+                                    fetchCalendarData();
+                                });
                             }}
 
                         >

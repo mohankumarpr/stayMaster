@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import api from '../api/api';
 import { Property, PropertyResponse } from '../types/property';
 import Storage, { STORAGE_KEYS } from '../utils/Storage';
@@ -405,7 +406,7 @@ class PropertyService {
 
       const response = await api.post<EarningsByMonth>(url, {
         property_id: propertyId,
-        guestToken: guestToken,   
+        guestToken: guestToken,
       });
 
       console.log('✅ API Response received');
@@ -441,7 +442,7 @@ class PropertyService {
 
       const response = await api.post<CalendarResponse>(url, {
         property_id: propertyId,
-        guestToken: guestToken, 
+        guestToken: guestToken,
       });
 
       console.log('✅ API Response received');
@@ -483,7 +484,7 @@ class PropertyService {
         start: startDate,
         end: endDate,
         reason: 'testing',
-       
+
       });
 
       console.log('✅ API Response received');
@@ -493,11 +494,21 @@ class PropertyService {
 
       if (response.status === 200 || response.status === 301 || response.status === 400) {
         if (response.status === 200 || response.status === 301) {
+           return response.data;
+         /*  Alert.alert(
+            'Success',
+            'Blocked Successfully',
+            [{ text: 'OK', style: 'default' }],
+
+            { cancelable: false }
+          );
+         
           showToast({
             text1: 'Blocked Successfully',
             type: 'success',
-          });
+          }); */
         } else if (response.status === 400) {
+          return response.data;
           showToast({
             text1: 'This Room block reason is not available in PMS.',
             type: 'error',
@@ -527,21 +538,21 @@ class PropertyService {
 
 
   //unblock booking
-  async unblockBooking(blockId: string): Promise<{success: boolean}> {
+  async unblockBooking(blockId: string): Promise<{ success: boolean }> {
     try {
       console.log(`\n=== Starting unblockBooking Request (Booking ID: ${blockId}) ===`);
-      const guestToken = await this.getGuestToken();  
+      const guestToken = await this.getGuestToken();
 
       if (!guestToken) {
         console.error('❌ Guest token not found in storage');
         throw new Error('Guest token not found');
       }
-      console.log('✅ Guest token retrieved successfully'); 
+      console.log('✅ Guest token retrieved successfully');
 
       const url = '/hosts/unblock';
       console.log(`📡 Making API request to: ${url}`);
 
-      const response = await api.post<{success: boolean}>(url, {
+      const response = await api.post<{ success: boolean }>(url, {
         block_id: blockId,
         guestToken
       });

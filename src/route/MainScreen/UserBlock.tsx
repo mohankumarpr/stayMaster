@@ -9,7 +9,7 @@ import Toast from 'react-native-toast-message';
 
 
 interface UnblockBlockScreenProps {
-  route: any; 
+  route: any;
   navigation: any;
 }
 
@@ -64,49 +64,57 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
 
     setIsLoading(true); // Start loading
 
-    try {
-      const blockData = {
-        propertyId: propertyId,
-        blockType: blockType,
-        start: startDate.toISOString(),
-        end: endDate.toISOString(),
-        reason: 'Testing the block functionality',
-      };
+    // try {
+    const blockData = {
+      propertyId: propertyId,
+      blockType: blockType,
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
+      reason: 'Testing the block functionality',
+    };
 
-      const formattedStartDate = startDate.toISOString().split('T')[0];
-      const formattedEndDate = endDate.toISOString().split('T')[0];
+    const formattedStartDate = startDate.toISOString().split('T')[0];
+    const formattedEndDate = endDate.toISOString().split('T')[0];
 
-      const response = await PropertyService.blockBooking(
-        blockData.propertyId,
-        blockData.blockType,
-        formattedStartDate,
-        formattedEndDate
-      );
+    const response = await PropertyService.blockBooking(
+      blockData.propertyId,
+      blockData.blockType,
+      formattedStartDate,
+      formattedEndDate
+    );
+    console.log('response handleBlockSubmit', response);
 
-      if (response.status === 200 || response.status === 301) {
-        Alert.alert(
-          'Success',
-          'Blocked Successfully',
-          [{ text: 'OK', style: 'default' }],
-          { cancelable: false }
-        );
-        props.navigation.goBack(); // Navigate back after success
-      } else if (response.status === 400) {
+    if (response && (response.success === true)) {
+
+      if (response.status === 400) {
         Alert.alert(
           'Notice',
           'This Room block reason is not available in PMS.',
-          [{ text: 'OK', style: 'destructive' }],
+          [{ text: 'OK', style: 'destructive', onPress: () => props.navigation.goBack() }],
           { cancelable: false }
         );
+       
       } else {
-        showToast('error', 'Error', 'Failed to create block');
+        showToast('success', 'Success', 'Blocked Successfully');
+        props.navigation.goBack(); // Navigate back after success
       }
-    } catch (error) {
-      console.error('Error creating block:', error);
-      showToast('error', 'Error', 'Failed to process request');
-    } finally {
-      setIsLoading(false); // Stop loading regardless of outcome
+
+    } else if (response && response.success === false) {
+      Alert.alert(
+        'Notice',
+        'This Room block reason is not available in PMS.',
+        [{ text: 'OK', style: 'destructive' }],
+        { cancelable: false }
+      );
+    } else {
+      showToast('error', 'Error', 'Failed to create block');
     }
+    /*  } catch (error: any) {
+       console.error('Error creating block:', error);
+       showToast('error', 'Error', 'Failed to process request');
+     } finally {
+       setIsLoading(false); // Stop loading regardless of outcome
+     } */
   };
 
   return (
@@ -339,10 +347,5 @@ function showToast(type: string, title: string, message: string) {
     visibilityTime: 4000, // Duration for which the toast is visible
     autoHide: true, // Automatically hide the toast after the visibility time
     topOffset: 30, // Offset from the top of the screen
-    bottomOffset: 40,
-    position: 'bottom',
-    // Adding additional properties to ensure the toast works correctly
-    onShow: () => console.log('Toast shown'), // Callback when the toast is shown
-    onHide: () => console.log('Toast hidden'), // Callback when the toast is hidden
   });
 }
