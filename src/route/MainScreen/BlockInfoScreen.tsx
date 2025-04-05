@@ -1,11 +1,8 @@
-import { faLocation } from '@fortawesome/free-solid-svg-icons/faLocation';
-import { faMap } from '@fortawesome/free-solid-svg-icons/faMap';
+import { faRemove } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import PropertyService from '../../services/propertyService';
-import day from 'react-native-calendars/src/calendar/day';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
 interface BlockInfoProps {
@@ -120,7 +117,7 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
             </View>
             <View style={styles.statusBadge}>
               <TouchableOpacity onPress={() => props.navigation.goBack()}>
-                <FontAwesome name={"remove"} size={22} color="#000" /> 
+                <FontAwesomeIcon icon={faRemove} size={22} color="#000" /> 
               </TouchableOpacity>
             </View>
           </View>

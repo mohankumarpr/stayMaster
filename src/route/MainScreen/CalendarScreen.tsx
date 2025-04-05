@@ -1,28 +1,29 @@
 import BottomSheet from '@gorhom/bottom-sheet';
-import 'react-native-gesture-handler';
-import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+    Image,
     ImageBackground,
     SafeAreaView,
     StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
-    Image
+    View
 } from 'react-native';
 import { CalendarList, DateData } from 'react-native-calendars';
+import 'react-native-gesture-handler';
 // import 'react-native-reanimated';
-import { useProperty } from '../../context/PropertyContext';
-import PropertyService from '../../services/propertyService';
-import { Property } from '../../types/property';
-import { RootStackParamList } from '../../navigation/AppNavigator';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ActivityIndicator } from 'react-native';
-import { Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import RNPickerSelect from 'react-native-picker-select';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useProperty } from '../../context/PropertyContext';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import PropertyService from '../../services/propertyService';
+import { Property } from '../../types/property';
 
 
 
@@ -311,6 +312,13 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         });
     }
 
+    // Format items for picker
+    const pickerItems = properties.map(property => ({
+        label: property.listing_name || 'Unnamed Property',
+        value: property.id.toString(),
+        key: property.id.toString()
+    }));
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#008489" />
@@ -335,28 +343,34 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             <View style={styles.contentArea}>
                 <View style={styles.calendarSection}>
                     <Text style={styles.sectionTitle}>Select property</Text>
-                    <View style={styles.pickerContainer}>
-                        <Picker
-                            selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id : '')}
-                            mode="dropdown"
-                            dropdownIconColor="#000"
-                            onValueChange={(itemValue) => {
-                                setSelectedProperty(itemValue);
-                                const property = properties.find(p => p.id === itemValue);
-                                setNumberOfBedrooms(property?.number_of_bedrooms || 0);
-                                console.log("Number of Bedrooms:", numberOfBedrooms);
+                    <View style={styles.pickerWrapper}>
+                        <RNPickerSelect
+                            onValueChange={(value) => {
+                                if (value) {
+                                    setSelectedProperty(value);
+                                    const property = properties.find(p => p.id.toString() === value);
+                                    setNumberOfBedrooms(property?.number_of_bedrooms || 0);
+                                    console.log("Number of Bedrooms:", property?.number_of_bedrooms);
+                                }
                             }}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
-                            {properties.map((property) => (
-                                <Picker.Item
-                                    key={property.id}
-                                    label={property.listing_name}
-                                    value={property.id.toString()}
+                            items={pickerItems}
+                            value={selectedProperty}
+                            style={pickerSelectStyles}
+                            useNativeAndroidPickerStyle={false}
+                            placeholder={{
+                                label: 'Select a property',
+                                value: null,
+                                color: '#9EA0A4',
+                            }}
+                            Icon={() => (
+                                <FontAwesomeIcon 
+                                    icon={faChevronDown} 
+                                    size={16} 
+                                    color="#666"
+                                    style={{ marginRight: 12 }}
                                 />
-                            ))}
-                        </Picker>
+                            )}
+                        />
                     </View>
                     <View style={styles.legendContainer}>
                         <LegendItem color="#50cebb" label="Checked-in Bookings" />
@@ -568,6 +582,40 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     );
 };
 
+const pickerSelectStyles = {
+    inputIOS: {
+        fontSize: 14,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30,
+        height: 55,
+    },
+    inputAndroid: {
+        fontSize: 14,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30,
+        height: 55,
+    },
+    iconContainer: {
+        top: 15,
+        right: 12,
+    },
+    placeholder: {
+        color: '#9EA0A4',
+    },
+};
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -612,6 +660,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingTop: 20,
         flex: 1,
+        zIndex: 1000,
     },
     sectionTitle: {
         fontSize: 16,
@@ -620,9 +669,7 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         color: '#333',
     },
-    pickerContainer: {
-        backgroundColor: '#fff',
-        borderRadius: 10,
+    pickerWrapper: {
         marginHorizontal: 5,
         marginBottom: 15,
         shadowColor: '#000',
@@ -633,11 +680,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 3,
-    },
-    picker: {
-        height: 60,
-        width: '100%',
-        color: '#000',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        zIndex: 2000,
     },
     loadingContainer: {
         padding: 20,

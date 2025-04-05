@@ -1,6 +1,6 @@
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons/faChevronCircleRight';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -14,6 +14,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
@@ -42,6 +43,7 @@ const EarningsScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
     const [propertyDetails, setPropertyDetails] = useState<EarningsByMonth | null>(null);
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
 
     // Add new function to transform API data into chart format
     const transformPropertyDataToChartFormat = (details: EarningsByMonth | null) => {
@@ -167,6 +169,12 @@ const EarningsScreen: React.FC = () => {
         return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // Format items for picker
+    const pickerItems = properties.map(property => ({
+        label: property.listing_name,
+        value: property.id.toString(),
+    }));
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#008489" />
@@ -225,24 +233,23 @@ const EarningsScreen: React.FC = () => {
             >
                 <View style={styles.earningsSection}>
                     <Text style={styles.sectionTitle}>Select property</Text>
-                    <View style={styles.pickerContainer}>
-                        <Picker
-                            selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : "")}
-                            mode="dropdown"
-                            dropdownIconColor="#000"
-
-                            onValueChange={(itemValue) => setSelectedProperty(itemValue)}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
-                            {properties.map((property) => (
-                                <Picker.Item
-                                    key={property.id}
-                                    label={property.listing_name}
-                                    value={property.id.toString()}
+                    <View style={styles.pickerWrapper}>
+                        <RNPickerSelect
+                            onValueChange={(value) => setSelectedProperty(value)}
+                            items={pickerItems}
+                            value={selectedProperty}
+                            style={pickerSelectStyles}
+                            useNativeAndroidPickerStyle={false}
+                            placeholder={{ label: 'Select a property', value: null }}
+                            Icon={() => (
+                                <FontAwesomeIcon 
+                                    icon={faChevronDown} 
+                                    size={16} 
+                                    color="#666"
+                                    style={{ marginRight: 12 }}
                                 />
-                            ))}
-                        </Picker>
+                            )}
+                        />
                     </View>
 
                     {loading && (
@@ -341,8 +348,47 @@ const EarningsScreen: React.FC = () => {
                     </View>
                 )}
             </ScrollView>
+
+            {isPickerOpen && (
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setIsPickerOpen(false)}
+                />
+            )}
         </View>
     );
+};
+
+const pickerSelectStyles = {
+    inputIOS: {
+        fontSize: 14,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30, // to ensure the text is never behind the icon
+        height: 55,
+    },
+    inputAndroid: {
+        fontSize: 14,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30, // to ensure the text is never behind the icon
+        height: 55,
+    },
+    iconContainer: {
+        top: 15,
+        right: 12,
+    },
 };
 
 const styles = StyleSheet.create({
@@ -371,7 +417,7 @@ const styles = StyleSheet.create({
         elevation: 0,
     },
     topContainer: {
-        height: 220,
+        height: 250,
         zIndex: 1,
     },
     topBackground: {
@@ -380,6 +426,7 @@ const styles = StyleSheet.create({
     contentArea: {
         flex: 1,
         marginTop: -20,
+        zIndex: 1,
     },
     scrollContent: {
         paddingBottom: 30,  // Increased padding for better scroll experience
@@ -470,7 +517,9 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 25,
         paddingHorizontal: 15,
         paddingTop: 0,
-        paddingBottom: 15,  // Added padding bottom
+        paddingBottom: 15,
+        position: 'relative',
+        zIndex: 3000,
     },
     sectionTitle: {
         fontSize: 18,
@@ -482,9 +531,7 @@ const styles = StyleSheet.create({
     singleCard: {
         width: '100%',
     },
-    pickerContainer: {
-        backgroundColor: '#fff',
-        borderRadius: 10,
+    pickerWrapper: {
         marginHorizontal: 5,
         marginBottom: 15,
         shadowColor: '#000',
@@ -495,12 +542,19 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 3,
+        backgroundColor: 'white',
+        borderRadius: 10,
     },
     picker: {
         height: 55,
         width: '100%',
-        color: '#000',
-
+        backgroundColor: '#fff',
+        borderRadius: 10,
+    },
+    pickerOpen: {
+        backgroundColor: '#fff',
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
     },
     chartContainer: {
         backgroundColor: '#fff',
@@ -508,12 +562,13 @@ const styles = StyleSheet.create({
         padding: 15,
         marginHorizontal: 20,
         marginTop: 5,
-        marginBottom: 15,  // Added margin bottom
+        marginBottom: 15,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 3,
+        zIndex: 1,
     },
     barChartScrollContent: {
         paddingHorizontal: 10,
@@ -633,6 +688,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: '#333',
+    },
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 2000,
     },
 });
 
