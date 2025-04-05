@@ -1,12 +1,12 @@
 import { faStar as faStarRegular } from '@fortawesome/free-regular-svg-icons';
 import {
     faChevronCircleLeft,
+    faChevronDown,
     faGlobe,
     faStarHalfAlt,
     faStar as faStarSolid,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Picker } from '@react-native-picker/picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import {
@@ -20,6 +20,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
 import { useProperty } from '../../context/PropertyContext';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import PropertyService from '../../services/propertyService';
@@ -260,29 +261,33 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                 <ActivityIndicator size="large" color="#008489" />
                             </View>
                         ) : (
-                            <Picker
-                                selectedValue={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : '')}
-                                mode="dropdown"
-                                dropdownIconColor="#000"
+                            <RNPickerSelect
+                                value={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : '')}
                                 onValueChange={(itemValue) => {
                                     console.log('Selected property id:', itemValue.toString());
-                                    return setSelectedProperty(itemValue.toString());
+                                    setSelectedProperty(itemValue.toString());
                                 }}
-                                style={styles.picker}
-                            >
-                                <Picker.Item label="Select a property" value={properties.length > 0 ? properties[0].id.toString() : ""} />
-                                {properties.map((property) => {
-                                    console.log("property", property);
-                                    console.log("property.id", property.id);
-
-                                    return (
-                                        <Picker.Item
-                                            key={property.id}
-                                            label={property.listing_name}
-                                            value={property.id.toString()} />
-                                    );
-                                })}
-                            </Picker>
+                                items={[
+                                    { label: 'Select a property', value: properties.length > 0 ? properties[0].id.toString() : '' },
+                                    ...properties.map((property) => ({
+                                        label: property.listing_name,
+                                        value: property.id.toString(),
+                                    }))
+                                ]}
+                                style={{
+                                    inputIOS: styles.picker,
+                                    inputAndroid: styles.picker,
+                                    iconContainer: {
+                                        top: 12,
+                                        right: 12,
+                                    },
+                                }}
+                                Icon={() => (
+                                    <View style={styles.pickerIcon}>
+                                        <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+                                    </View>
+                                )}
+                            />
                         )}
                     </View>
                 </View>
@@ -403,9 +408,15 @@ const styles = StyleSheet.create({
         color: '#000',
     },
     picker: {
-        height: 55,
-        width: '100%',
-        color: '#000', // Added text color black
+        backgroundColor: '#FFFFFF',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#EEEEEE',
+        padding: 12,
+        // marginBottom: 16,
+        fontSize: 16,
+        color: 'black',
+        paddingRight: 30, // Make room for the icon
     },
     header: {
         flexDirection: 'row',
