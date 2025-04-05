@@ -1,10 +1,10 @@
 import {
   faCheckCircle,
+  faChevronDown,
   faChevronLeft,
   faShare
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import {
   Image,
@@ -17,8 +17,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
 import PropertyService from '../../services/propertyService';
-
 const dummyBanners = [
   {
     id: '1',
@@ -218,18 +218,29 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         />
 
         <Text style={styles.label}>Property Type</Text>
-        <Picker
-          selectedValue={formData.propertyType}
-          mode="dropdown"
-          dropdownIconColor="#000"
-          onValueChange={(itemValue) => handleChange('propertyType', itemValue)}
-          style={[styles.input, { height: 50, backgroundColor: '#FFFFFF', color: 'black' }]}
-          itemStyle={{ color: 'black' }} // Set dropdown item color to black
-        >
-          <Picker.Item label="Villa" value="Villa" />
-          <Picker.Item label="Condo" value="Condo" />
-          <Picker.Item label="Apartment" value="Apartment" />
-        </Picker>
+        <RNPickerSelect
+          value={formData.propertyType}
+          onValueChange={(value) => handleChange('propertyType', value)}
+          items={[
+            { label: "Villa", value: "Villa" },
+            { label: "Condo", value: "Condo" },
+            { label: "Apartment", value: "Apartment" }
+          ]}
+          style={{
+            inputIOS: styles.pickerInput,
+            inputAndroid: styles.pickerInput,
+            iconContainer: {
+              top: 12,
+              right: 12,
+            },
+          }}
+          placeholder={{ label: "Select property type", value: null }}
+          Icon={() => (
+            <View style={styles.pickerIcon}>
+              <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+            </View>
+          )}
+        />
 
         <View style={styles.rowContainer}>
           <View style={styles.halfContainer}>
@@ -243,19 +254,30 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             />
           </View>
           <View style={styles.halfContainer}>
-            <Text style={[styles.label,]}>Swimming Pool</Text>
-            <Picker
-              selectedValue={formData.swimmingPool}
-              mode="dropdown"
-              dropdownIconColor="#000"
-              onValueChange={(itemValue) => handleChange('swimmingPool', itemValue)}
-              style={[styles.input, { height: 50, backgroundColor: '#FFFFFF', color: 'black' }]}
-              itemStyle={{ color: 'black' }} // Set dropdown item color to black
-            >
-              <Picker.Item label="None" value="None" />
-              <Picker.Item label="Private" value="Private" />
-              <Picker.Item label="Shared" value="Shared" />
-            </Picker>
+            <Text style={[styles.label]}>Swimming Pool</Text>
+            <RNPickerSelect
+              value={formData.swimmingPool}
+              onValueChange={(value) => handleChange('swimmingPool', value)}
+              items={[
+                { label: "None", value: "None" },
+                { label: "Private", value: "Private" },
+                { label: "Shared", value: "Shared" }
+              ]}
+              style={{
+                inputIOS: styles.pickerInput,
+                inputAndroid: styles.pickerInput,
+                iconContainer: {
+                  top: 12,
+                  right: 12,
+                },
+              }}
+              placeholder={{ label: "Select pool type", value: null }}
+              Icon={() => (
+                <View style={styles.pickerIcon}>
+                  <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+                </View>
+              )}
+            />
           </View>
         </View>
 
@@ -441,6 +463,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 2,
+  },
+  pickerInput: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+    color: 'black',
+    paddingRight: 30, // Make room for the icon
+  },
+  pickerIcon: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
 });
 
