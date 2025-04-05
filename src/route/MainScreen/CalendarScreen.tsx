@@ -392,6 +392,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                 });
                             }}
                         >
+                            <Text style={styles.addButtonText}>Reserve Property</Text>
                             <FontAwesomeIcon icon={faAdd} size={20} color="black" />
                         </TouchableOpacity>
                     </View>
@@ -618,9 +619,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
     },
     addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: 10,
         borderRadius: 50,
-        alignItems: 'flex-end',
     },
     topContainer: {
         height: 120,
@@ -881,6 +883,12 @@ const styles = StyleSheet.create({
     legendText: {
         fontSize: 12,
         color: '#333333',
+    },
+    addButtonText: {
+        marginRight: 8,
+        fontSize: 14,
+        color: 'black',
+        fontWeight: '500',
     },
 });
 
