@@ -2,7 +2,7 @@ import { faRemove } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import PropertyService from '../../services/propertyService';
 
@@ -20,7 +20,8 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [blockType, setBlockType] = useState('');
+  const [blockType, setBlockType] = useState('Owner block');
+  const [reason, setReason] = useState('');
   const propertyId = props.route.params.propertyId;
   console.log('propertyId', propertyId);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +64,43 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
       return;
     }
 
+    // Check if start date is within 15 days from current date
+    const today = new Date();
+    const fifteenDaysFromNow = new Date(today);
+    fifteenDaysFromNow.setDate(today.getDate() + 15);
+    
+    if (startDate <= fifteenDaysFromNow) {
+      // Show warning alert
+      Alert.alert(
+        'Warning',
+        'You are blocking the property which is closer and you lose revenue. Do you want to proceed?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => {
+              // User chose to cancel
+              return;
+            }
+          },
+          {
+            text: 'Proceed',
+            onPress: () => {
+              // User chose to proceed, continue with the block
+              proceedWithBlock();
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    // If not within 15 days, proceed directly
+    proceedWithBlock();
+  };
+
+  // Function to handle the actual blocking process
+  const proceedWithBlock = async () => {
     setIsLoading(true); // Start loading
 
     // try {
@@ -71,7 +109,7 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
       blockType: blockType,
       start: startDate.toISOString(),
       end: endDate.toISOString(),
-      reason: 'Testing the block functionality',
+      reason: reason,
     };
 
     const formattedStartDate = startDate.toISOString().split('T')[0];
@@ -90,7 +128,7 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
       if (response.status === 400) {
         Alert.alert(
           'Notice',
-          'This Room block reason is not available in PMS.',
+          'Booking is currently unavailable. Please contact the administrator for further assistance',
           [{ text: 'OK', style: 'destructive', onPress: () => props.navigation.goBack() }],
           { cancelable: false }
         );
@@ -116,6 +154,7 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
      } finally {
        setIsLoading(false); // Stop loading regardless of outcome
      } */
+    setIsLoading(false); // Stop loading
   };
 
   return (
@@ -172,8 +211,21 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
             />
           )}
 
-          {/* Block Type Selection */}
+          {/* Reason Block */}
           <View style={styles.blockTypeContainer}>
+            <Text style={styles.datePickerLabel}>Reason:</Text>
+            <TextInput
+              style={styles.reasonInput}
+              multiline
+              numberOfLines={4}
+              value={reason}
+              onChangeText={setReason}
+              placeholder="Enter reason for blocking"
+              textAlignVertical="top" // Align text at the top for multiline
+            />
+          </View>
+          {/* Block Type Selection */}
+          {/* <View style={styles.blockTypeContainer}>
             <Text style={styles.datePickerLabel}>Block Type:</Text>
             <View style={styles.blockTypeButtons}>
               <TouchableOpacity
@@ -202,7 +254,7 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
                 ]}>Owner Block</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </View> */}
 
           {/* Submit Button */}
           <TouchableOpacity
@@ -337,6 +389,17 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginLeft: 8,
+  },
+  reasonInput: {
+    backgroundColor: '#F9F9F9',
+    borderColor: '#E0E0E0',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    color: '#2E3A59',
+    marginTop: 8,
+    minHeight: 100,
   },
 });
 

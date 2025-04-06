@@ -1,6 +1,8 @@
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import HomeScreen from '../MainScreen/HomeScreen';
@@ -42,7 +44,8 @@ const WorkingScreen: React.FC<WorkingScreenProps> = ({ navigation }) => {
             case 'Calendar':
               return <CalendarIcon width={size} height={size} fill={color} />;
             case 'Profile':
-              return <ProfileIcon width={size} height={size} fill={color} />;
+              //return <ProfileIcon width={size} height={size} fill={color} />;
+              return <FontAwesomeIcon icon={faUser} size={22} color={color} />
             default:
               return <HomeIcon width={size} height={size} fill={color} />;
           }

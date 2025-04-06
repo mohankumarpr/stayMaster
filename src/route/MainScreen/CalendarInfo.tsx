@@ -1,4 +1,4 @@
-import { faChevronDown, faChevronUp, faLocation } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronUp, faLocation, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -116,7 +116,7 @@ interface BookingDetails {
             </View>
             <View style={styles.statusBadge}>
               <TouchableOpacity onPress={() => props.navigation.goBack()}>
-                <FontAwesomeIcon icon={faLocation} size={22} color="#000" />
+                <FontAwesomeIcon icon={faTimes} size={22} color="#000" />
               </TouchableOpacity>
             </View>
           </View>

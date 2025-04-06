@@ -1,7 +1,7 @@
 import { faRemove } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
 import PropertyService from '../../services/propertyService';
 
 
@@ -53,6 +53,54 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
     }
   };
   console.log("Booking Details:", bookingDetails);
+
+  // Function to handle unblocking a property
+  const handleUnblock = async () => {
+    // Check if start date is within 15 days from current date
+    const today = new Date();
+    const blockStartDate = new Date(alpineBlissBooking.checkInDateTime);
+    console.log("Block Start Date:", blockStartDate);
+    
+    // Calculate date 15 days from now
+    const fifteenDaysFromNow = new Date(today);
+    fifteenDaysFromNow.setDate(today.getDate() + 15);
+    
+    if (blockStartDate <= fifteenDaysFromNow) {
+      // Show warning alert
+      Alert.alert(
+        'Warning',
+        'You are trying to unblock the property which is within 15 days and may lose revenue. Do you want to proceed?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => {
+              // User chose to cancel
+              return;
+            }
+          },
+          {
+            text: 'Proceed',
+            onPress: async () => {
+              // User chose to proceed, continue with the unblock
+              var unblock = await PropertyService.unblockBooking(bookingId);
+              console.log("Unblock", unblock);
+              if(unblock.success === true){
+               props.navigation.goBack();
+              }
+            }
+          }
+        ]
+      );
+    } else {
+      // If not within 15 days, proceed directly
+      var unblock = await PropertyService.unblockBooking(bookingId);
+      console.log("Unblock", unblock);
+      if(unblock.success === true){
+       props.navigation.goBack();
+      }
+    }
+  };
 
   const alpineBlissBooking = {
     bookingDate: 'February 5',
@@ -159,15 +207,7 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
 
           {/* Source Information */}
           <View style={styles.sourceSection}> 
-          <TouchableOpacity style={styles.actionButton} onPress={async () => {
-
-             var unblock = await PropertyService.unblockBooking(bookingId);
-             console.log("Unblock", unblock);
-             if(unblock.success === true){
-              props.navigation.goBack();
-             }
-           
-          }}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleUnblock}>
             <Text style={styles.actionButtonText}>Unblock</Text>
           </TouchableOpacity>
           </View>

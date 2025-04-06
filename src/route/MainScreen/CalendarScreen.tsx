@@ -372,29 +372,9 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                         />
                     </View>
                     <View style={styles.legendContainer}>
-                        <LegendItem color="#50cebb" label="Checked-in Bookings" />
-                        <LegendItem color="#FFC107" label="Upcoming Bookings" />
-                        <LegendItem color="#FF5252" label="Current" />
-                    </View>
-                    <View style={[styles.legendContainer2, { alignItems: 'flex-end' }]}>
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={() => {
-                                const propertyId = selectedProperty?.toString() || '';
-                                console.log('selectedProperty', selectedProperty);
-                                if (!selectedProperty) {
-                                    showToast('Please select a property');
-                                    return;
-                                }
-                                navigation.navigate('UnblockBlockScreen', { propertyId } as any);
-                                navigation.addListener('focus', () => {
-                                    fetchCalendarData();
-                                });
-                            }}
-                        >
-                            <Text style={styles.addButtonText}>Reserve Property</Text>
-                            <FontAwesomeIcon icon={faAdd} size={20} color="black" />
-                        </TouchableOpacity>
+                        <LegendItem color="#50cebb" label="Guest" />
+                        <LegendItem color="#FFC107" label="Owner" />
+                        <LegendItem color="#FF5252" label="Maintenance" />
                     </View>
 
                     {loading && (
@@ -575,6 +555,25 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     />
                 </TouchableOpacity>
             </View>
+
+            {/* Floating Action Button for Reserve Property */}
+            <TouchableOpacity
+                style={styles.floatingButton}
+                onPress={() => {
+                    const propertyId = selectedProperty?.toString() || '';
+                    console.log('selectedProperty', selectedProperty);
+                    if (!selectedProperty) {
+                        showToast('Please select a property');
+                        return;
+                    }
+                    navigation.navigate('UnblockBlockScreen', { propertyId } as any);
+                    navigation.addListener('focus', () => {
+                        fetchCalendarData();
+                    });
+                }}
+            >
+                <FontAwesomeIcon icon={faAdd} size={20} color="#FFFFFF" />
+            </TouchableOpacity>
         </View>
     );
 };
@@ -889,6 +888,24 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
         fontWeight: '500',
+    },
+    // Add floating button styles
+    floatingButton: {
+        position: 'absolute',
+        right: 20,
+        bottom: 80, // Position above the tab bar
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#008489',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        zIndex: 1000,
     },
 });
 
