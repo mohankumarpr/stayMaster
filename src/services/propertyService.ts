@@ -1,7 +1,9 @@
 import { Alert } from 'react-native';
 import api from '../api/api';
-import { Property, PropertyResponse } from '../types/property';
+import { Property, PropertyResponse, BlockBookingResponse, CalendarResponse, UnblockBookingResponse } from '../types/property';
 import Storage, { STORAGE_KEYS } from '../utils/Storage';
+import Toast from 'react-native-toast-message';
+import { createAuthErrorResponse } from '../utils/authUtils';
 
 interface EarningsByMonth {
   earnings: Array<{
@@ -13,6 +15,7 @@ interface EarningsByMonth {
     count: number;
     date: string;
   }>;
+  authError?: boolean;
 }
 
 interface CalendarBooking {
@@ -34,38 +37,6 @@ interface RatingResponse {
   property: any;
   guest: any;
 }
-
-interface CalendarResponse {
-  data: any;
-  booking: any;
-  property: any;
-  rentalInfo: any;
-  tariff: any;
-  guest: any;
-  calendar: Array<{
-    id: number;
-    start: string;
-    end: string;
-    currentStatus: string;
-    status: string;
-    type: string;
-  }>;
-}
-
-interface BlockBookingResponse {
-  success: boolean;
-  status: number;
-  blocks: Array<{
-    block_id: number;
-    property: string;
-    start: string;
-    end: string;
-    room_id: string;
-    blockType: string;
-  }>;
-}
-
-
 
 interface MonthlyStatement {
   name: string; // e.g., "2024_11.pdf"
@@ -163,6 +134,30 @@ class PropertyService {
           headers: error.config?.headers
         }
       });
+      
+      // Handle 401 Unauthorized error
+      if (error.response?.status === 401) {
+        // Clear user data and token
+        await Storage.clear();
+        
+        // Show professional error message
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please log in again to continue.',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        
+        // Return a special response that indicates authentication failure
+        return {
+          totalGBV: 0,
+          totalNights: 0,
+          properties: [],
+          authError: true
+        };
+      }
+      
       throw error;
     }
   }
@@ -334,6 +329,53 @@ class PropertyService {
         status: error.response?.status,
         data: error.response?.data
       });
+      
+      // Handle 401 Unauthorized error
+      if (error.response?.status === 401) {
+        // Clear user data and token
+        await Storage.clear();
+        
+        // Show professional error message
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please log in again to continue.',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        
+        // Return a special response that indicates authentication failure
+        return {
+          id: '',
+          listing_name: '',
+          earnings: [],
+          location: '',
+          image: '',
+          amenities: [],
+          description: '',
+          internal_name: '',
+          number_of_bedrooms: 0,
+          number_of_bathrooms: 0,
+          number_of_beds: 0,
+          number_of_guests: 0,
+          number_of_extra_guests: 0,
+          google_latitude: '',
+          google_longitude: '',
+          address_line_1: '',
+          address_line_2: '',
+          city: '',
+          state: '',
+          country: 0,
+          media_filename: '',
+          url: '',
+          gbv: 0,
+          nights: 0,
+          average_rating: 0,
+          total_reviews: 0,
+          authError: true
+        };
+      }
+      
       throw error;
     }
   }
@@ -422,6 +464,29 @@ class PropertyService {
         status: error.response?.status,
         data: error.response?.data
       });
+      
+      // Handle 401 Unauthorized error
+      if (error.response?.status === 401) {
+        // Clear user data and token
+        await Storage.clear();
+        
+        // Show professional error message
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please log in again to continue.',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        
+        // Return a special response that indicates authentication failure
+        return {
+          earnings: [],
+          nights: [],
+          authError: true
+        };
+      }
+      
       throw error;
     }
   }
@@ -484,7 +549,6 @@ class PropertyService {
         start: startDate,
         end: endDate,
         reason: 'testing',
-
       });
 
       console.log('✅ API Response received');
@@ -495,34 +559,12 @@ class PropertyService {
       if (response.status === 200 || response.status === 301 || response.status === 400) {
         if (response.status === 200 || response.status === 301) {
            return response.data;
-         /*  Alert.alert(
-            'Success',
-            'Blocked Successfully',
-            [{ text: 'OK', style: 'default' }],
-
-            { cancelable: false }
-          );
-         
-          showToast({
-            text1: 'Blocked Successfully',
-            type: 'success',
-          }); */
         } else if (response.status === 400) {
           return response.data;
-          showToast({
-            text1: 'This Room block reason is not available in PMS.',
-            type: 'error',
-          });
         }
       }
       return response.data;
     } catch (error: any) {
-      console.log(error.response.status);
-      if (error.response?.status === 400) {
-        // console.error('❌ Block reason is not available in PMS.');
-        // Allow this condition to proceed without throwing an error
-        return { success: true, status: 400, blocks: [] }; // or handle it as needed
-      }
       console.error(`\n❌ Error in blockBooking:`, {
         blockType,
         startDate,
@@ -532,13 +574,36 @@ class PropertyService {
         data: error.response?.data
       });
 
+      // Handle 401 Unauthorized error
+      if (error.response?.status === 401) {
+        // Clear user data and token
+        await Storage.clear();
+        
+        // Show professional error message
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please log in again to continue.',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        
+        // Return a special response that indicates authentication failure
+        return {
+          success: false,
+          status: 401,
+          blocks: [],
+          authError: true
+        };
+      }
+
       throw error;
     }
   }
 
 
   //unblock booking
-  async unblockBooking(blockId: string): Promise<{ success: boolean }> {
+  async unblockBooking(blockId: string): Promise<UnblockBookingResponse> {
     try {
       console.log(`\n=== Starting unblockBooking Request (Booking ID: ${blockId}) ===`);
       const guestToken = await this.getGuestToken();
@@ -552,7 +617,7 @@ class PropertyService {
       const url = '/hosts/unblock';
       console.log(`📡 Making API request to: ${url}`);
 
-      const response = await api.post<{ success: boolean }>(url, {
+      const response = await api.post<UnblockBookingResponse>(url, {
         block_id: blockId,
         guestToken
       });
@@ -570,6 +635,28 @@ class PropertyService {
         status: error.response?.status,
         data: error.response?.data
       });
+      
+      // Handle 401 Unauthorized error
+      if (error.response?.status === 401) {
+        // Clear user data and token
+        await Storage.clear();
+        
+        // Show professional error message
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please log in again to continue.',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        
+        // Return a special response that indicates authentication failure
+        return {
+          success: false,
+          authError: true
+        };
+      }
+      
       throw error;
     }
   }
@@ -611,6 +698,34 @@ class PropertyService {
         status: error.response?.status,
         data: error.response?.data
       });
+      
+      // Handle 401 Unauthorized error
+      if (error.response?.status === 401) {
+        // Clear user data and token
+        await Storage.clear();
+        
+        // Show professional error message
+        Toast.show({
+          type: 'error',
+          text1: 'Session Expired',
+          text2: 'Your session has expired. Please log in again to continue.',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        
+        // Return a special response that indicates authentication failure
+        return {
+          data: {},
+          booking: {},
+          property: {},
+          rentalInfo: [],
+          tariff: {},
+          guest: {},
+          calendar: [],
+          authError: true
+        };
+      }
+      
       throw error;
     }
   }

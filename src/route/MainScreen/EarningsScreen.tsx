@@ -262,7 +262,7 @@ const EarningsScreen: React.FC = () => {
                 {/* Statistics Section */}
                 {propertyDetails && (
                     <View style={styles.chartContainer}>
-                        <Text style={styles.chartTitle}>Statistics</Text>
+                        {/* <Text style={styles.chartTitle}>Statistics</Text> */}
                         <View style={styles.bookingSummary}>
                             <View style={styles.summaryItem}>
                                 <Text style={styles.summaryValue}>
@@ -331,7 +331,7 @@ const EarningsScreen: React.FC = () => {
 
                 {/* Details Card */}
                 {selectedMonth !== null && (
-                    <View style={[styles.detailsCard, { marginHorizontal: 20, marginBottom: 80 }]}>
+                    <View style={[styles.detailsCard, { marginHorizontal: 20, marginBottom: 60 }]}>
                         <View style={styles.detailsRow}>
                             <Text style={styles.detailsMonth}>
                                 {bookingsData[selectedMonth].month}
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
         elevation: 0,
     },
     topContainer: {
-        height: 250,
+        height: 220,
         zIndex: 1,
     },
     topBackground: {
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 25,
         paddingHorizontal: 15,
         paddingTop: 0,
-        paddingBottom: 15,
+        paddingBottom: 5,
         position: 'relative',
         zIndex: 3000,
     },
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     },
     pickerWrapper: {
         marginHorizontal: 5,
-        marginBottom: 15,
+        marginBottom: 5,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -559,10 +559,10 @@ const styles = StyleSheet.create({
     chartContainer: {
         backgroundColor: '#fff',
         borderRadius: 10,
-        padding: 15,
+        padding: 5,
         marginHorizontal: 20,
         marginTop: 5,
-        marginBottom: 15,
+        marginBottom: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -571,12 +571,12 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     barChartScrollContent: {
-        paddingHorizontal: 10,
+        paddingHorizontal: 5,
     },
     barChart: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        height: 150,
+        height: 160,
         paddingTop: 10,
         paddingBottom: 5,
         position: 'relative',
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
         color: '#E3C063',
     },
     detailsCard: {
-        marginTop: 15,
+        marginTop: 5,
         marginBottom: 30,  // Increased margin bottom
         padding: 15,
         backgroundColor: '#3A3B3F',

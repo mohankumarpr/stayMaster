@@ -1,7 +1,7 @@
-import { faChevronDown, faChevronUp, faLocation, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronUp, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import PropertyService from '../../services/propertyService';
 
 
@@ -27,9 +27,8 @@ interface BookingDetails {
 }
 
   const CalendarInfoScreen: React.FC<CalendarInfoProps> = (props) => {
-  const { bookingId, startDate, endDate, numberOfBedrooms, type } = props.route.params;
+  const { bookingId, startDate, endDate, numberOfBedrooms } = props.route.params;
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
-  const [guestDetails, setGuestDetails] = useState<any>(null);
   const [visibleRentInfo, setVisibleRentInfo] = useState(false);
 
   console.log("Booking ID:", bookingId);
@@ -37,21 +36,21 @@ interface BookingDetails {
   console.log("End Date:", endDate);
   console.log("Number of Bedrooms:", numberOfBedrooms);
 
-  useEffect(() => {
-    fetchBookingDetails();
-  }, []);
-
-
-  const fetchBookingDetails = async () => {
+  const fetchBookingDetails = useCallback(async () => {
     try {
       const response = await PropertyService.getBookingDetails(bookingId, startDate, endDate);
       const bookings = response;
       setBookingDetails(bookings);
       console.log("Booking Details:", bookings);
     } catch (error) {
-      console.error('Error fetching calendar data:', error);
+      console.error('Error fetching booking details:', error);
     }
-  };
+  }, [bookingId, startDate, endDate]);
+
+  useEffect(() => {
+    fetchBookingDetails();
+  }, [fetchBookingDetails]);
+
   console.log("Booking Details:", bookingDetails);
 
   const alpineBlissBooking = {
@@ -194,40 +193,41 @@ interface BookingDetails {
               <Text style={styles.infoValue}>{alpineBlissBooking.source ?? '...'}</Text>
             </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Booking Information</Text>
-              <TouchableWithoutFeedback onPress={() => {
+            <TouchableOpacity 
+              style={[styles.infoRow, styles.clickableRow]} 
+              onPress={() => {
                 setVisibleRentInfo(prev => !prev);
-              }}>
-                <FontAwesomeIcon icon={visibleRentInfo ? faChevronUp : faChevronDown} size={22} color="#000" /> 
-              </TouchableWithoutFeedback>
-            </View>
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.infoLabel}>Booking Information</Text>
+              <FontAwesomeIcon icon={visibleRentInfo ? faChevronUp : faChevronDown} size={22} color="#000" />
+            </TouchableOpacity>
           </View>
-        </View> 
 
-        {/* Rental Info Section */}
-        {visibleRentInfo && alpineBlissBooking.rentalInfo != null && (
-          <View style={styles.rentalInfoSection}>
-            <Text style={styles.sectionTitle}>Booking Information</Text>
-            <View style={styles.rentalInfoHeader}>
-              <Text style={styles.columnHeader}>Sl.No</Text>
-              <Text style={styles.columnHeader}>Date</Text>
-              <Text style={styles.columnHeader}>Adults</Text>
-              <Text style={styles.columnHeader}>Children</Text>
-              <Text style={[styles.columnHeader, { textAlign: 'right' }]}>Rent</Text>
-            </View>
-            {alpineBlissBooking.rentalInfo.map((info: { effectiveDate: string; adults: number; children: number; rent: number }, index: number) => (
-              <View key={index} style={styles.rentalInfoRow}>
-                <Text style={styles.columnData}>{index + 1}</Text>
-                <Text style={styles.columnData}>{new Date(info.effectiveDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}</Text>
-                <Text style={styles.columnData}>{info.adults}</Text>
-                <Text style={styles.columnData}>{info.children}</Text>
-                <Text style={[{ textAlign: 'right', fontWeight: 'bold', fontSize: 13 }]}>₹ {formatNumber(info.rent)}</Text>
+          {/* Rental Info Section - Now inside the main card */}
+          {visibleRentInfo && alpineBlissBooking.rentalInfo != null && (
+            <View style={styles.rentalInfoSection}>
+              {/* <Text style={styles.sectionTitle}>Booking Information</Text> */}
+              <View style={styles.rentalInfoHeader}>
+                <Text style={[styles.columnHeader, { flex: 0.3 }]}>Sl.No</Text>
+                <Text style={[styles.columnHeader, { flex: 0.7 }]}>Date</Text>
+                <Text style={[styles.columnHeader, { flex: 0.4 }]}>Adults</Text>
+                <Text style={[styles.columnHeader, { flex: 0.4 }]}>Kids</Text>
+                <Text style={[styles.columnHeader, { flex: 0.6, textAlign: 'right' }]}>Rent</Text>
               </View>
-            ))}
-          </View>
-        )}
-
+              {alpineBlissBooking.rentalInfo.map((info: { effectiveDate: string; adults: number; children: number; rent: number }, index: number) => (
+                <View key={index} style={styles.rentalInfoRow}>
+                  <Text style={[styles.columnData, { flex: 0.3 }]}>{index + 1}</Text>
+                  <Text style={[styles.columnData, { flex: 0.7 }]}>{new Date(info.effectiveDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}</Text>
+                  <Text style={[styles.columnData, { flex: 0.4 }]}>{info.adults}</Text>
+                  <Text style={[styles.columnData, { flex: 0.4 }]}>{info.children}</Text>
+                  <Text style={[{ flex: 0.6, textAlign: 'right', fontWeight: 'bold', fontSize: 13 }]}>₹ {formatNumber(info.rent)}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View> 
 
         {/* Quick Action Buttons */}
         {/* <View style={styles.actionButtonsContainer}>
@@ -257,13 +257,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   rentalInfoSection: {
+    marginTop: 16,
     paddingTop: 16,
-    paddingRight: 4, 
+    borderTopWidth: 1,
+    borderTopColor: '#E5E9F0',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 12,
+    color: '#2E3A59',
   },
   header: {
     flexDirection: 'row',
@@ -487,9 +490,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F0F0F0',
   },
   columnData: {
-    flex: 0.5,
     textAlign: 'center',
     fontSize: 13,
+  },
+  clickableRow: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
 });
 

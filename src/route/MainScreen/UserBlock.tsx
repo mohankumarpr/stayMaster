@@ -1,13 +1,46 @@
 import { faRemove } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Toast from 'react-native-toast-message';
+import React, { useState } from 'react';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast, { ToastConfigParams } from 'react-native-toast-message';
 import PropertyService from '../../services/propertyService';
+import { handleAuthError } from '../../utils/authUtils';
 
+interface CustomToastProps {
+  text1?: string;
+  text2?: string;
+  props?: {
+    onProceed: () => void;
+    onCancel: () => void;
+  };
+  onCancel?: () => void;
+  onProceed?: () => void;
+}
 
-
+// Add toast config at the top of the file
+const toastConfig = {
+  custom: ({ text1, text2, props }: ToastConfigParams<CustomToastProps>) => (
+    <View style={styles.toastContainer}>
+      <Text style={styles.toastTitle}>{text1}</Text>
+      <Text style={styles.toastMessage}>{text2}</Text>
+      <View style={styles.toastButtons}>
+        <TouchableOpacity 
+          style={[styles.toastButton, styles.cancelButton]} 
+          onPress={props?.onCancel}
+        >
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.toastButton, styles.proceedButton]} 
+          onPress={props?.onProceed}
+        >
+          <Text style={styles.proceedButtonText}>Proceed</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  ),
+};
 
 interface UnblockBlockScreenProps {
   route: any;
@@ -20,7 +53,7 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [blockType, setBlockType] = useState('Owner block');
+  const [blockType, _setBlockType] = useState('Owner block');
   const [reason, setReason] = useState('');
   const propertyId = props.route.params.propertyId;
   console.log('propertyId', propertyId);
@@ -48,19 +81,37 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
 
   const handleBlockSubmit = async () => {
     if (!blockType) {
-      Alert.alert('Error', 'Please select a block type');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please select a block type',
+        position: 'top',
+        visibilityTime: 3000,
+      });
       return;
     }
     console.log(startDate, endDate);
     const maxEndDate = new Date(startDate);
     maxEndDate.setDate(maxEndDate.getDate() + 15);
     if (endDate > maxEndDate) {
-      Alert.alert('Error', 'End date cannot be more than 15 days after start date');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'End date cannot be more than 15 days after start date',
+        position: 'top',
+        visibilityTime: 3000,
+      });
       return;
     }
 
     if (startDate < new Date()) {
-      Alert.alert('Error', 'Start date cannot be in the past');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Start date cannot be in the past',
+        position: 'top',
+        visibilityTime: 3000,
+      });
       return;
     }
 
@@ -70,28 +121,25 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
     fifteenDaysFromNow.setDate(today.getDate() + 15);
     
     if (startDate <= fifteenDaysFromNow) {
-      // Show warning alert
-      Alert.alert(
-        'Warning',
-        'You are blocking the property which is closer and you lose revenue. Do you want to proceed?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              // User chose to cancel
-              return;
-            }
+      // Show warning toast with custom component
+      Toast.show({
+        type: 'custom',
+        text1: 'Warning',
+        text2: 'You are blocking the property which is closer and you lose revenue.',
+        position: 'bottom',
+        visibilityTime: -1, // This makes it stay until manually dismissed
+        autoHide: false, // Prevent auto-hiding
+        bottomOffset: 40, // Add some space from the bottom
+        props: {
+          onProceed: () => {
+            Toast.hide(); // Hide the toast before proceeding
+            proceedWithBlock();
           },
-          {
-            text: 'Proceed',
-            onPress: () => {
-              // User chose to proceed, continue with the block
-              proceedWithBlock();
-            }
+          onCancel: () => {
+            Toast.hide(); // Hide the toast when cancelled
           }
-        ]
-      );
+        }
+      });
       return;
     }
 
@@ -103,58 +151,72 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
   const proceedWithBlock = async () => {
     setIsLoading(true); // Start loading
 
-    // try {
-    const blockData = {
-      propertyId: propertyId,
-      blockType: blockType,
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-      reason: reason,
-    };
+    try {
+      const blockData = {
+        propertyId: propertyId,
+        blockType: blockType,
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+        reason: reason,
+      };
 
-    const formattedStartDate = startDate.toISOString().split('T')[0];
-    const formattedEndDate = endDate.toISOString().split('T')[0];
+      const formattedStartDate = startDate.toISOString().split('T')[0];
+      const formattedEndDate = endDate.toISOString().split('T')[0];
 
-    const response = await PropertyService.blockBooking(
-      blockData.propertyId,
-      blockData.blockType,
-      formattedStartDate,
-      formattedEndDate
-    );
-    console.log('response handleBlockSubmit', response);
+      const response = await PropertyService.blockBooking(
+        blockData.propertyId,
+        blockData.blockType,
+        formattedStartDate,
+        formattedEndDate
+      );
+      console.log('response handleBlockSubmit', response);
 
-    if (response && (response.success === true)) {
-
-      if (response.status === 400) {
-        Alert.alert(
-          'Notice',
-          'Booking is currently unavailable. Please contact the administrator for further assistance',
-          [{ text: 'OK', style: 'destructive', onPress: () => props.navigation.goBack() }],
-          { cancelable: false }
-        );
-       
-      } else {
-        showToast('success', 'Success', 'Blocked Successfully');
-        props.navigation.goBack(); // Navigate back after success
+      // Check for authentication error
+      if (response.authError) {
+        // Navigate to login screen
+        props.navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+        return;
       }
 
-    } else if (response && response.success === false) {
-      Alert.alert(
-        'Notice',
-        'This Room block reason is not available in PMS.',
-        [{ text: 'OK', style: 'destructive' }],
-        { cancelable: false }
-      );
-    } else {
-      showToast('error', 'Error', 'Failed to create block');
+      if (response && (response.success === true)) {
+        if (response.status === 400) {
+          Toast.show({
+            type: 'error',
+            text1: 'Notice',
+            text2: 'Booking is currently unavailable. Please contact the administrator for further assistance',
+            position: 'top',
+            visibilityTime: 4000,
+          });
+          props.navigation.goBack();
+        } else {
+          showToast('success', 'Success', 'Blocked Successfully');
+          props.navigation.goBack(); // Navigate back after success
+        }
+      } else if (response && response.success === false) {
+        Toast.show({
+          type: 'error',
+          text1: 'Notice',
+          text2: 'This Room block reason is not available in PMS.',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      } else {
+        showToast('error', 'Error', 'Failed to create block');
+      }
+    } catch (error: any) {
+      console.error('Error creating block:', error);
+      
+      // Handle 401 error if not caught by the service
+      const isAuthError = await handleAuthError(error, props.navigation);
+      if (!isAuthError) {
+        showToast('error', 'Error', 'Failed to process request');
+      }
+    } finally {
+      setIsLoading(false); // Stop loading
     }
-    /*  } catch (error: any) {
-       console.error('Error creating block:', error);
-       showToast('error', 'Error', 'Failed to process request');
-     } finally {
-       setIsLoading(false); // Stop loading regardless of outcome
-     } */
-    setIsLoading(false); // Stop loading
   };
 
   return (
@@ -280,6 +342,8 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
 
         {/* ... existing content ... */}
       </ScrollView>
+      
+      <Toast config={toastConfig} />
     </View>
   );
 };
@@ -400,6 +464,57 @@ const styles = StyleSheet.create({
     color: '#2E3A59',
     marginTop: 8,
     minHeight: 100,
+  },
+  toastContainer: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  toastTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#2E3A59',
+  },
+  toastMessage: {
+    fontSize: 14,
+    marginBottom: 16,
+    color: '#2E3A59',
+  },
+  toastButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  toastButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  cancelButton: {
+    backgroundColor: '#F5F5F5',
+  },
+  proceedButton: {
+    backgroundColor: '#008489',
+  },
+  cancelButtonText: {
+    color: '#2E3A59',
+    fontWeight: '600',
+  },
+  proceedButtonText: {
+    color: 'white',
+    fontWeight: '600',
   },
 });
 

@@ -1,9 +1,45 @@
 import { faRemove } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import PropertyService from '../../services/propertyService';
+import Toast, { ToastConfigParams } from 'react-native-toast-message';
+import { handleAuthError } from '../../utils/authUtils';
 
+interface CustomToastProps {
+  text1?: string;
+  text2?: string;
+  props?: {
+    onProceed: () => void;
+    onCancel: () => void;
+  };
+  onCancel?: () => void;
+  onProceed?: () => void;
+}
+
+// Add toast config at the top of the file
+const toastConfig = {
+  custom: ({ text1, text2, props }: ToastConfigParams<CustomToastProps>) => (
+    <View style={styles.toastContainer}>
+      <Text style={styles.toastTitle}>{text1}</Text>
+      <Text style={styles.toastMessage}>{text2}</Text>
+      <View style={styles.toastButtons}>
+        <TouchableOpacity 
+          style={[styles.toastButton, styles.cancelButton]} 
+          onPress={props?.onCancel}
+        >
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.toastButton, styles.proceedButton]} 
+          onPress={props?.onProceed}
+        >
+          <Text style={styles.proceedButtonText}>Proceed</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  ),
+};
 
 interface BlockInfoProps {
   [x: string]: any; 
@@ -29,75 +65,149 @@ interface BookingDetails {
 const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
   const { bookingId, startDate, endDate, numberOfBedrooms, type } = props.route.params;
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
-  const [guestDetails, setGuestDetails] = useState<any>(null);
-  const [visibleRentInfo, setVisibleRentInfo] = useState(false);
+  const [visibleRentInfo] = useState(false);
 
-  console.log("Booking ID:", bookingId);
-  console.log("Start Date:", startDate);
-  console.log("End Date:", endDate);
-  console.log("Number of Bedrooms:", numberOfBedrooms);
+  // console.log("Booking ID:", bookingId);
+  // console.log("Start Date:", startDate);
+  // console.log("End Date:", endDate);
+  // console.log("Number of Bedrooms:", numberOfBedrooms);
+
+  const fetchBookingDetails = useCallback(async () => {
+    try {
+      const response = await PropertyService.getBookingDetails(bookingId, startDate, endDate);
+      
+      // Check for authentication error
+      if (response.authError) {
+        // Navigate to login screen
+        props.navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+        return;
+      }
+      
+      const bookings = response;
+      setBookingDetails(bookings);
+      console.log('Booking Details:', bookings);
+    } catch (error) {
+      // Handle 401 error if not caught by the service
+      const isAuthError = await handleAuthError(error, props.navigation);
+      if (!isAuthError) {
+        console.error('Error fetching calendar data:', error);
+      }
+    }
+  }, [bookingId, startDate, endDate, props.navigation]);
 
   useEffect(() => {
     fetchBookingDetails();
-  }, []);
-
-
-  const fetchBookingDetails = async () => {
-    try {
-      const response = await PropertyService.getBookingDetails(bookingId, startDate, endDate);
-      const bookings = response;
-      setBookingDetails(bookings);
-      console.log("Booking Details:", bookings);
-    } catch (error) {
-      console.error('Error fetching calendar data:', error);
-    }
-  };
-  console.log("Booking Details:", bookingDetails);
+  }, [fetchBookingDetails]);
 
   // Function to handle unblocking a property
   const handleUnblock = async () => {
     // Check if start date is within 15 days from current date
     const today = new Date();
     const blockStartDate = new Date(alpineBlissBooking.checkInDateTime);
-    console.log("Block Start Date:", blockStartDate);
-    
+
     // Calculate date 15 days from now
     const fifteenDaysFromNow = new Date(today);
     fifteenDaysFromNow.setDate(today.getDate() + 15);
-    
+
     if (blockStartDate <= fifteenDaysFromNow) {
-      // Show warning alert
-      Alert.alert(
-        'Warning',
-        'You are trying to unblock the property which is within 15 days and may lose revenue. Do you want to proceed?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              // User chose to cancel
-              return;
-            }
-          },
-          {
-            text: 'Proceed',
-            onPress: async () => {
-              // User chose to proceed, continue with the unblock
+      // Show warning toast with custom component
+      Toast.show({
+        type: 'custom',
+        text1: 'Warning',
+        text2: 'You are trying to unblock the property which is within 15 days and may lose revenue.',
+        position: 'bottom',
+        visibilityTime: -1, // This makes it stay until manually dismissed
+        autoHide: false, // Prevent auto-hiding
+        bottomOffset: 40, // Add some space from the bottom
+        props: {
+          onProceed: async () => {
+            Toast.hide(); // Hide the toast before proceeding
+            // User chose to proceed, continue with the unblock
+            try {
               var unblock = await PropertyService.unblockBooking(bookingId);
               console.log("Unblock", unblock);
+              
+              // Check for authentication error
+              if (unblock.authError) {
+                // Navigate to login screen
+                props.navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Login' }],
+                });
+                return;
+              }
+              
               if(unblock.success === true){
                props.navigation.goBack();
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Error',
+                  text2: 'Failed to unblock the property',
+                  position: 'top',
+                  visibilityTime: 3000,
+                });
+              }
+            } catch (error) {
+              // Handle 401 error if not caught by the service
+              const isAuthError = await handleAuthError(error, props.navigation);
+              if (!isAuthError) {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Error',
+                  text2: 'Failed to unblock the property',
+                  position: 'top',
+                  visibilityTime: 3000,
+                });
               }
             }
+          },
+          onCancel: () => {
+            Toast.hide(); // Hide the toast when cancelled
           }
-        ]
-      );
+        }
+      });
     } else {
       // If not within 15 days, proceed directly
-      var unblock = await PropertyService.unblockBooking(bookingId);
-      console.log("Unblock", unblock);
-      if(unblock.success === true){
-       props.navigation.goBack();
+      try {
+        var unblock = await PropertyService.unblockBooking(bookingId);
+        
+        // Check for authentication error
+        if (unblock.authError) {
+          // Navigate to login screen
+          props.navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
+          return;
+        }
+
+        if(unblock.success === true){
+         props.navigation.goBack();
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: 'Error',
+            text2: 'Failed to unblock the property',
+            position: 'top',
+            visibilityTime: 3000,
+          });
+        }
+      } catch (error) {
+        // Handle 401 error if not caught by the service
+        const isAuthError = await handleAuthError(error, props.navigation);
+        if (!isAuthError) {
+          Toast.show({
+            type: 'error',
+            text1: 'Error',
+            text2: 'Failed to unblock the property',
+            position: 'top',
+            visibilityTime: 3000,
+          });
+        }
       }
     }
   };
@@ -131,11 +241,11 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
     source: bookingDetails?.booking?.source ?? '',
     secondarySource: 'OYO Platform',
     status: 'Confirmed'
-}; 
+};
 
-  
+
   function formatNumber(securityDeposit: any): React.ReactNode {
-    if (securityDeposit == null) return '0.00'; // Check for both null and undefined
+    if (securityDeposit == null) {return '0.00';} // Check for both null and undefined
     return securityDeposit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
   }
 
@@ -159,7 +269,7 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
         {/* Main Booking Card */}
         <View style={styles.mainCard}>
           <View style={styles.propertyHeader}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={styles.headerRow}>
               <View style={{ width: 12, height: 12, borderRadius: 10, backgroundColor: type === 'Owner block' ? '#FFC107' : '#FF5252' }} />
               <Text style={styles.propertyName}>{type === 'Owner block' ? 'Owner Block' : 'Maintenance Block'}</Text>
             </View>
@@ -257,6 +367,7 @@ const BlockInfoScreen: React.FC<BlockInfoProps> = (props) => {
 
           
       </ScrollView>
+      <Toast config={toastConfig} />
     </View>
   );
 };
@@ -507,6 +618,60 @@ const styles = StyleSheet.create({
     flex: 0.5,
     textAlign: 'center',
     fontSize: 13,
+  },
+  toastContainer: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  toastTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#2E3A59',
+  },
+  toastMessage: {
+    fontSize: 14,
+    marginBottom: 16,
+    color: '#2E3A59',
+  },
+  toastButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  toastButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  cancelButton: {
+    backgroundColor: '#F5F5F5',
+  },
+  proceedButton: {
+    backgroundColor: '#008489',
+  },
+  cancelButtonText: {
+    color: '#2E3A59',
+    fontWeight: '600',
+  },
+  proceedButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 

@@ -93,9 +93,14 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
       var data = response.data;
 
       if (data != null) {
+        console.log('Login successful, storing user data and token...');
         await Storage.setObject(STORAGE_KEYS.USER_DATA, data.user);
         if (data.webUserToken) {
+          console.log('Storing web user token...');
           await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.webUserToken);
+          console.log('Token stored successfully');
+        } else {
+          console.log('No web user token received from server');
         }
         showToast('success', 'Success', 'OTP verified successfully.'); 
         navigation.reset({

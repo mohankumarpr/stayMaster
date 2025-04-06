@@ -28,6 +28,7 @@ export interface Property {
   url: string;
   gbv: number;
   nights: number;
+  authError?: boolean;
 }
 
 export interface PropertyRating {
@@ -61,17 +62,39 @@ export interface PropertyReview {
   date: string;
 }
 
+export interface CalendarResponse {
+  data: any;
+  booking: any;
+  property: any;
+  rentalInfo: any;
+  tariff: any;
+  guest: any;
+  calendar: Array<{
+    id: number;
+    start: string;
+    end: string; 
+    currentStatus: string;
+    status: string;
+    type: string;
+  }>;
+  authError?: boolean;
+}
 
+export interface BlockBookingResponse {
+  success: boolean;
+  status: number;
+  blocks: any[];
+  authError?: boolean;
+}
 
- 
-
-
-
-
-
+export interface UnblockBookingResponse {
+  success: boolean;
+  authError?: boolean;
+}
 
 export interface PropertyResponse {
   totalGBV: number;
   totalNights: number;
   properties: Property[];
-} 
+  authError?: boolean;
+}
