@@ -86,7 +86,13 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                 name: monthNames[parseInt(statement.month) - 1]
             }));
 
-        return monthsInYear.sort((a, b) => parseInt(b.number) - parseInt(a.number));
+        // Remove duplicates by using a Set with a unique key
+        const uniqueMonths = Array.from(
+            new Map(monthsInYear.map(item => [item.number, item]))
+            .values()
+        );
+
+        return uniqueMonths.sort((a, b) => parseInt(b.number) - parseInt(a.number));
     };
 
     // Update useEffect to set initial year and month
@@ -243,7 +249,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                 const fileUrl = downloadUrl; // Extract the URL from the response
                                 console.log('File URL:', fileUrl);
                                 // Use the download URL directly instead of creating an object URL
-                                Linking.openURL(downloadUrl.url).catch(err => console.error('Error opening URL:', err));
+                                await Linking.openURL(downloadUrl.url).catch(err => console.error('Error opening URL:', err));
 
                                 console.log(`Statement downloaded: ${downloadUrl}`);
                                 // Optionally, you can handle the download URL here (e.g., open it)

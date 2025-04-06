@@ -117,27 +117,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <View style={styles.topSpace} />
           <View style={styles.formContainer}>
             {isEmailLogin ? (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email Address"
-                  placeholderTextColor="#FFFFFF"
-                  keyboardType="email-address"
-                  onChangeText={setEmail}
-                  value={email}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  placeholderTextColor="#FFFFFF"
-                  secureTextEntry
-                  onChangeText={setPassword}
-                  value={password}
-                />
-                <TouchableOpacity style={styles.forgotPassword} onPress={() => { /* Handle forgot password */ }}>
-                  <Text style={[styles.forgotPasswordText, { textDecorationLine: 'underline' }]}>Forgot Password?</Text>
-                </TouchableOpacity>
-              </>
+              <TextInput
+                style={styles.registerinput}
+                placeholder="Email Address"
+                placeholderTextColor="#FFFFFF"
+                keyboardType="email-address"
+                onChangeText={setEmail}
+                value={email}
+              />
             ) : (
               <TextInput
                 style={styles.registerinput}
@@ -151,12 +138,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   }
                 }}
                 value={mobileNumber}
-                onBlur={() => {
-
-                }}
               />
             )}
-            {isEmailLogin && <View style={styles.bottomSpace} />}
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>
                 {isEmailLogin ? 'Login' : 'Generate OTP'}
@@ -165,7 +148,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             {loading && <ActivityIndicator size="large" color="#007BFF" style={styles.loading} />}
             <View style={styles.bottomSpace} />
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-              <TouchableOpacity style={styles.loginTextButton} onPress={() => setIsEmailLogin(!isEmailLogin)}>
+              <TouchableOpacity style={styles.loginTextButton} onPress={() => {
+                setIsEmailLogin(!isEmailLogin);
+                // Clear fields when switching login methods
+                setEmail('');
+                setPassword('');
+                setMobileNumber('');
+              }}>
                 <Text style={styles.loginTextButtonText}>
                   {isEmailLogin ? 'Login via Mobile Number' : 'Login via Email'}
                 </Text>

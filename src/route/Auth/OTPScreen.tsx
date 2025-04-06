@@ -1,12 +1,14 @@
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import NetInfo from '@react-native-community/netinfo';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import api from '../../api/api'; // Import the axios instance
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
-import Toast from 'react-native-toast-message';
 
 interface UserData {
   id?: string;
@@ -20,7 +22,7 @@ type OTPScreenProps = {
 };
 
 const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
-  const { mobileNumber } = route.params;
+  const { mobileNumber, email } = route.params;
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<TextInput[]>([]);
@@ -60,41 +62,40 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
   };
 
   const handleVerifyOTP = async (enteredOtp: string) => {
-    // Check network status
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       Alert.alert('No Internet Connection', 'Please check your internet connection and try again.');
       return;
     }
 
-    // Validate OTP
     if (enteredOtp.length === 0) {
-      Alert.alert('Invalid OTP', 'Please enter the OTP sent to your mobile number.');
+      Alert.alert('Invalid OTP', 'Please enter the OTP.');
       return;
     }
 
-    // Show loading indicator
     setLoading(true);
 
-    console.log('Mobile Number:', mobileNumber);
-    console.log('Entered OTP:', enteredOtp);
-    // Verify OTP
     try {
-      const response = await api.post('/hosts/loginWithOTP', {
-        phone: `91${mobileNumber}`,
-        otp: enteredOtp
-      });
+      let response;
+      if (email) {
+        response = await api.post('/hosts/loginWithEmail', {
+          email: email,
+          otp: enteredOtp
+        });
+      } else {
+        response = await api.post('/hosts/loginWithOTP', {
+          phone: `91${mobileNumber}`,
+          otp: enteredOtp
+        });
+      }
 
-      // Debugging: Log the response data
       console.log('Response Data:', response.data);
       var data = response.data;
 
       if (data != null) {
-        // Store user data and token separately
         await Storage.setObject(STORAGE_KEYS.USER_DATA, data.user);
         if (data.webUserToken) {
           await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.webUserToken);
-          console.log('Token stored:', data.token);
         }
         showToast('success', 'Success', 'OTP verified successfully.'); 
         navigation.reset({
@@ -105,11 +106,9 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
         showToast('error', 'Error', `Failed to verify OTP. Please try again. ${data.message}`);
       }
     } catch (error) {
-      // Debugging: Log the error
       console.error('Error:', error);
       showToast('error', 'Error', 'An error occurred while verifying OTP. Please try again.');
     } finally {
-      // Hide loading indicator
       setLoading(false);
     }
   };
@@ -120,9 +119,17 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     try {
       setCanResend(false);
       setTimer(60);
-      const response = await api.post('/hosts/generateOTP', {
-        phone: `91${mobileNumber}`
-      }); 
+      
+      let response;
+      if (email) {
+        response = await api.post('/hosts/generateEmailOTP', {
+          email: email
+        });
+      } else {
+        response = await api.post('/hosts/generateOTP', {
+          phone: `91${mobileNumber}`
+        });
+      }
 
       if (response.data != null && response.data.otp) {
         showToast('success', 'Success', 'OTP sent successfully');
@@ -136,16 +143,22 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     }
   };
 
-
-
-
   return (
     <ImageBackground source={require('../../assets/images/Login.png')} style={styles.background}>
+      <TouchableOpacity 
+        style={styles.backButton} 
+        onPress={() => navigation.goBack()}
+      >
+        <FontAwesomeIcon icon={faArrowLeft} size={16} color="white" />
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
       <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode='contain' />
       <View style={styles.container}>
         <View style={styles.Space} />
-        <Text style={[styles.subtitle, { textAlign: 'center' }]}>OTP has been sent to your registered</Text>
-        <Text style={[styles.subtitle1, { textAlign: 'center' }]}>mobile number</Text>
+        <Text style={[styles.subtitle, { textAlign: 'center' }]}>OTP has been sent to your</Text>
+        <Text style={[styles.subtitle1, { textAlign: 'center' }]}>
+          {email ? 'email address' : 'registered mobile number'}
+        </Text>
         <View style={styles.bottomSpace} />
         <Text style={[styles.title, { textAlign: 'center' }]}>Enter the OTP</Text>
 
@@ -234,6 +247,25 @@ const styles = StyleSheet.create({
   },
   loading: {
     marginTop: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    zIndex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    // backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    padding: 12,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 4,
+    lineHeight: 24,
   },
 });
 
