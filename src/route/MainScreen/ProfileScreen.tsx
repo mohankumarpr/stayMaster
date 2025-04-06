@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import {
+    ActivityIndicator,
     Image,
     SafeAreaView,
     ScrollView,
@@ -11,7 +12,6 @@ import {
     Text,
     TouchableOpacity,
     View,
-    ActivityIndicator,
 } from 'react-native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { default as PropertyService, default as propertyService } from '../../services/propertyService';
@@ -258,7 +258,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
                 </View>
             </ScrollView>
-            <View style={{ height: 100 }} />
+            <View style={{ height: 20 }} />
         </SafeAreaView>
     );
 };

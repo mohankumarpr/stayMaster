@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
-import api from '../../api/api'; 
-import Storage, { STORAGE_KEYS } from '../../utils/Storage';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
+import api from '../../api/api';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+import Storage, { STORAGE_KEYS } from '../../utils/Storage';
 
 type LoginScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Login'>;
@@ -39,8 +39,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   };
 
   const handleLogin = async () => {
-
-    console.log('Mobile Number:', mobileNumber);
     // Check network status
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
@@ -48,32 +46,56 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       return;
     }
 
-    // Validate mobile number
-    if (mobileNumber.length < 10) {
-      showToast('error', 'Invalid Number', 'Please enter a valid 10-digit mobile number.');
-      return;
-    }
-
-    // Show loading indicator
-    setLoading(true);
-
-    // Generate OTP
-    try {
-      const response = await api.post('/hosts/generateOTP', {
-        phone: `91${mobileNumber}`
-      });
-       // Debugging: Log the response data
-       console.log('Response Data:', response.data);
-      if (response.data != null && response.data.otp) {
-        navigation.navigate('OTP', { mobileNumber });
-      } else {
-        showToast('error', 'Failed to generate OTP. Please try again.', '');
+    if (isEmailLogin) {
+      // Validate email
+      if (!email) {
+        showToast('error', 'Invalid Email', 'Please enter a valid email address.');
+        return;
       }
-    } catch (error) {
-      showToast('error', 'Mobile number is not valid. Please try again.', '');
-    } finally {
-      // Hide loading indicator
-      setLoading(false);
+
+      // Show loading indicator
+      setLoading(true);
+
+      try {
+        const response = await api.post('/hosts/generateEmailOTP', {
+          email: email
+        });
+        console.log('Response Data:', response.data);
+        if (response.data != null && response.data.otp) {
+          navigation.navigate('OTP', { email });
+        } else {
+          showToast('error', 'Failed to generate OTP. Please try again.', '');
+        }
+      } catch (error) {
+        showToast('error', 'Email is not valid. Please try again.', '');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Validate mobile number
+      if (mobileNumber.length < 10) {
+        showToast('error', 'Invalid Number', 'Please enter a valid 10-digit mobile number.');
+        return;
+      }
+
+      // Show loading indicator
+      setLoading(true);
+
+      try {
+        const response = await api.post('/hosts/generateOTP', {
+          phone: `91${mobileNumber}`
+        });
+        console.log('Response Data:', response.data);
+        if (response.data != null && response.data.otp) {
+          navigation.navigate('OTP', { mobileNumber });
+        } else {
+          showToast('error', 'Failed to generate OTP. Please try again.', '');
+        }
+      } catch (error) {
+        showToast('error', 'Mobile number is not valid. Please try again.', '');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -95,27 +117,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <View style={styles.topSpace} />
           <View style={styles.formContainer}>
             {isEmailLogin ? (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email Address"
-                  placeholderTextColor="#FFFFFF"
-                  keyboardType="email-address"
-                  onChangeText={setEmail}
-                  value={email}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  placeholderTextColor="#FFFFFF"
-                  secureTextEntry
-                  onChangeText={setPassword}
-                  value={password}
-                />
-                <TouchableOpacity style={styles.forgotPassword} onPress={() => { /* Handle forgot password */ }}>
-                  <Text style={[styles.forgotPasswordText, { textDecorationLine: 'underline' }]}>Forgot Password?</Text>
-                </TouchableOpacity>
-              </>
+              <TextInput
+                style={styles.registerinput}
+                placeholder="Email Address"
+                placeholderTextColor="#FFFFFF"
+                keyboardType="email-address"
+                onChangeText={setEmail}
+                value={email}
+              />
             ) : (
               <TextInput
                 style={styles.registerinput}
@@ -129,12 +138,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   }
                 }}
                 value={mobileNumber}
-                onBlur={() => {
-
-                }}
               />
             )}
-            {isEmailLogin && <View style={styles.bottomSpace} />}
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>
                 {isEmailLogin ? 'Login' : 'Generate OTP'}
@@ -143,7 +148,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             {loading && <ActivityIndicator size="large" color="#007BFF" style={styles.loading} />}
             <View style={styles.bottomSpace} />
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-              <TouchableOpacity style={styles.loginTextButton} onPress={() => setIsEmailLogin(!isEmailLogin)}>
+              <TouchableOpacity style={styles.loginTextButton} onPress={() => {
+                setIsEmailLogin(!isEmailLogin);
+                // Clear fields when switching login methods
+                setEmail('');
+                setPassword('');
+                setMobileNumber('');
+              }}>
                 <Text style={styles.loginTextButtonText}>
                   {isEmailLogin ? 'Login via Mobile Number' : 'Login via Email'}
                 </Text>

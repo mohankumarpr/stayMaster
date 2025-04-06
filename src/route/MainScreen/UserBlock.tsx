@@ -1,9 +1,10 @@
+import { faRemove } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Alert, ScrollView, TouchableOpacity, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import PropertyService from '../../services/propertyService';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
+import PropertyService from '../../services/propertyService';
 
 
 
@@ -125,7 +126,7 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
           <View style={styles.headerContainer}>
             <Text style={styles.sectionTitle}>Block</Text>
             <TouchableOpacity onPress={() => props.navigation.goBack()}>
-              <FontAwesome name={"remove"} size={22} color="#000" />
+              <FontAwesomeIcon icon={faRemove} size={22} color="#000" />
             </TouchableOpacity>
           </View>
 
@@ -144,9 +145,9 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
             <DateTimePicker
               value={startDate}
               mode="date"
-              minimumDate={new Date()} // This ensures no past dates can be selected
+              minimumDate={new Date()}
               onChange={handleStartDateChange}
-              display="calendar" // Change the display format to spinner
+              display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
             />
           )}
 
@@ -165,8 +166,9 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
             <DateTimePicker
               value={endDate}
               mode="date"
-              minimumDate={startDate} // This ensures end date can't be before start date
+              minimumDate={startDate}
               onChange={handleEndDateChange}
+              display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
             />
           )}
 
@@ -234,6 +236,7 @@ const styles = StyleSheet.create({
   // ... existing styles ...
   container: {
     flex: 1,
+    paddingTop: 100,
     backgroundColor: 'transparent',
   },
   scrollView: {

@@ -1,8 +1,8 @@
-import { faChevronCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faChevronCircleLeft, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { Picker } from '@react-native-picker/picker';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
@@ -86,7 +86,13 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                 name: monthNames[parseInt(statement.month) - 1]
             }));
 
-        return monthsInYear.sort((a, b) => parseInt(b.number) - parseInt(a.number));
+        // Remove duplicates by using a Set with a unique key
+        const uniqueMonths = Array.from(
+            new Map(monthsInYear.map(item => [item.number, item]))
+            .values()
+        );
+
+        return uniqueMonths.sort((a, b) => parseInt(b.number) - parseInt(a.number));
     };
 
     // Update useEffect to set initial year and month
@@ -131,22 +137,30 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                 <ActivityIndicator size="large" color="#008489" />
                             </View>
                         ) : (
-                            <Picker
-                                selectedValue={selectedProperty}
-                                onValueChange={(itemValue) => setSelectedProperty(itemValue)}
-                                style={styles.picker}
-                                mode="dropdown"
-                                dropdownIconColor="#000"
-                            >
-                                <Picker.Item label="Select a property" value="" />
-                                {properties && properties.length > 0 && properties.map((property) => (
-                                    <Picker.Item
-                                        key={property.id}
-                                        label={property.listing_name}
-                                        value={property.id.toString()}
-                                    />
-                                ))}
-                            </Picker>
+                            <RNPickerSelect
+                                onValueChange={(value) => setSelectedProperty(value)}
+                                value={selectedProperty}
+                                items={[
+                                    { label: 'Select a property', value: '' },
+                                    ...(properties || []).map((property) => ({
+                                        label: property.listing_name,
+                                        value: property.id.toString(),
+                                    }))
+                                ]}
+                                style={{
+                                    inputIOS: styles.pickerInput,
+                                    inputAndroid: styles.pickerInput,
+                                    iconContainer: {
+                                        top: 12,
+                                        right: 12,
+                                    },
+                                }}
+                                    Icon={() => (
+                                        <View style={styles.pickerIcon}>
+                                            <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+                                        </View>
+                                    )}
+                            />
                         )}
                     </View>
 
@@ -159,10 +173,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                         <View style={styles.pickerContainer}>
                             <Text style={styles.cardTitle1}>Select Year</Text>
                             <View style={styles.pickerContainer1}>
-                                <Picker
-                                    selectedValue={selectedYear}
-                                    mode="dropdown"
-                                    dropdownIconColor="#000"
+                                <RNPickerSelect
                                     onValueChange={(itemValue) => {
                                         setSelectedYear(itemValue);
                                         // Reset month when year changes
@@ -172,34 +183,52 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                             setSelectedMonth(monthsForYear[0].month);
                                         }
                                     }}
-                                    style={styles.picker}>
-                                    {getUniqueYears().map((year) => (
-                                        <Picker.Item
-                                            key={year}
-                                            label={year}
-                                            value={year}
-                                        />
-                                    ))}
-                                </Picker>
+                                    value={selectedYear}
+                                    items={getUniqueYears().map((year) => ({
+                                        label: year,
+                                        value: year,
+                                    }))}
+                                    style={{
+                                        inputIOS: styles.pickerInput,
+                                        inputAndroid: styles.pickerInput,
+                                        iconContainer: {
+                                            top: 12,
+                                            right: 12,
+                                        },
+                                    }}
+                                    Icon={() => (
+                                        <View style={styles.pickerIcon}>
+                                            <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+                                        </View>
+                                    )}
+                                />
                             </View>
                         </View>
 
                         <View style={styles.pickerContainer}>
                             <Text style={styles.cardTitle1}>Select Month</Text>
                             <View style={styles.pickerContainer1}>
-                                <Picker
-                                    selectedValue={selectedMonth}
-                                    mode="dropdown"
+                                <RNPickerSelect
                                     onValueChange={(itemValue) => setSelectedMonth(itemValue)}
-                                    style={styles.picker}>
-                                    {getMonthsForSelectedYear().map((month) => (
-                                        <Picker.Item
-                                            key={month.number}
-                                            label={month.name}
-                                            value={month.number}
-                                        />
-                                    ))}
-                                </Picker>
+                                    value={selectedMonth}
+                                    items={getMonthsForSelectedYear().map((month) => ({
+                                        label: month.name,
+                                        value: month.number,
+                                    }))}
+                                    style={{
+                                        inputIOS: styles.pickerInput,
+                                        inputAndroid: styles.pickerInput,
+                                        iconContainer: {
+                                            top: 12,
+                                            right: 12,
+                                        },
+                                    }}
+                                    Icon={() => (
+                                        <View style={styles.pickerIcon}>
+                                            <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+                                        </View>
+                                    )}
+                                />
                             </View>
                         </View>
                     </View>
@@ -220,7 +249,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                 const fileUrl = downloadUrl; // Extract the URL from the response
                                 console.log('File URL:', fileUrl);
                                 // Use the download URL directly instead of creating an object URL
-                                Linking.openURL(downloadUrl.url).catch(err => console.error('Error opening URL:', err));
+                                await Linking.openURL(downloadUrl.url).catch(err => console.error('Error opening URL:', err));
 
                                 console.log(`Statement downloaded: ${downloadUrl}`);
                                 // Optionally, you can handle the download URL here (e.g., open it)
@@ -253,6 +282,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: '#FFFFFF',
+    },
+    pickerInput: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#EEEEEE',
+        padding: 12,
+        // marginBottom: 16,
+        fontSize: 16,
+        color: 'black',
+        paddingRight: 30, // Make room for the icon
     },
     backButton: {
         padding: 4,
@@ -292,6 +332,12 @@ const styles = StyleSheet.create({
     pickerContainer1: { flex: 1, backgroundColor: '#FFF', borderRadius: 8, marginRight: 10 },
     downloadButton: { backgroundColor: '#008281', padding: 15, borderRadius: 8, alignItems: 'center', margin: 20 },
     downloadButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+    iconContainer: {
+        position: 'absolute',
+        right: 10,
+        top: '50%',
+        transform: [{ translateY: -8 }], // Half of icon size to center it
+    },
 });
 
 export default MonthlyStatements;

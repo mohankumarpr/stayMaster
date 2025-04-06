@@ -13,13 +13,12 @@ import {
 import { CalendarList, DateData } from 'react-native-calendars';
 import 'react-native-gesture-handler';
 // import 'react-native-reanimated';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faAdd, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ActivityIndicator } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import Toast from 'react-native-toast-message';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useProperty } from '../../context/PropertyContext';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import PropertyService from '../../services/propertyService';
@@ -389,14 +388,12 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                 }
                                 navigation.navigate('UnblockBlockScreen', { propertyId } as any);
                                 navigation.addListener('focus', () => {
-                                    // Reload the calendar view or refresh data here
-                                    // For example, you might want to call a function to fetch the updated calendar data
                                     fetchCalendarData();
                                 });
                             }}
-
                         >
-                            <Icon name="add" size={20} color="black" />
+                            <Text style={styles.addButtonText}>Reserve Property</Text>
+                            <FontAwesomeIcon icon={faAdd} size={20} color="black" />
                         </TouchableOpacity>
                     </View>
 
@@ -622,9 +619,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
     },
     addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: 10,
         borderRadius: 50,
-        alignItems: 'flex-end',
     },
     topContainer: {
         height: 120,
@@ -885,6 +883,12 @@ const styles = StyleSheet.create({
     legendText: {
         fontSize: 12,
         color: '#333333',
+    },
+    addButtonText: {
+        marginRight: 8,
+        fontSize: 14,
+        color: 'black',
+        fontWeight: '500',
     },
 });
 
