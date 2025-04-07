@@ -157,14 +157,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             <StatusBar barStyle="dark-content" backgroundColor="#f8f8f8" />
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 {/* User Profile Section */}
-                <TouchableOpacity
-                    style={styles.userProfileSection}
-                    onPress={() => {
-                        //   return navigation.navigate('EditProfile');s
-                    }}
-                >
+                <View style={styles.userProfileSection}>
                     <Image
-                        source={require('../../assets/images/logo.png')}
+                        source={require('../../assets/images/StayMaster-Logo.png')}
                         style={styles.profileImage}
                     />
                     <View style={styles.userInfo}>
@@ -177,8 +172,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         )}
                         <Text style={styles.userEmail}></Text>
                     </View>
-                    <FontAwesomeIcon icon={faChevronCircleRight} size={20} color="#999" />
-                </TouchableOpacity>
+                </View>
 
                 {/* Properties Section */}
                 <View style={styles.section}>
@@ -302,6 +296,7 @@ const styles = StyleSheet.create({
     userProfileSection: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         padding: 0,
         paddingLeft: 20,
         paddingRight: 20,
@@ -312,12 +307,19 @@ const styles = StyleSheet.create({
     profileImage: {
         width: 60,
         height: 60,
-        borderRadius: 30,
+        borderRadius: '60%',
         marginRight: 15,
-        resizeMode: 'contain',
+        marginTop: 10,
+        marginBottom: 10,
+        // borderRadius: 60,
+        // padding: 10,
+        // marginRight: 35,
+        //resizeMode: 'cover',
     },
     userInfo: {
         flex: 1,
+        paddingTop: 20,
+        // paddingBottom: 20,
     },
     userName: {
         fontSize: 16,
