@@ -251,8 +251,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     </View>
 
                 </View>
+                
             </ScrollView>
-            <View style={{ height: 20 }} />
+            <View style={{ height: 50 }} />
         </SafeAreaView>
     );
 };
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
     profileImage: {
         width: 60,
         height: 60,
-        borderRadius: '60%',
+        borderRadius: 30,
         marginRight: 15,
         marginTop: 10,
         marginBottom: 10,

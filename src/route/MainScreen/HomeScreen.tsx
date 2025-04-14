@@ -75,7 +75,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       <Text style={styles.metricsTitle}>Performance metrics</Text>
       <View style={styles.metricsContainer}>
         <View>
-          <Text style={styles.metricsLabel}>GBV</Text>
+          <Text style={styles.metricsLabel}>NBV</Text>
           <Text style={styles.metricsValue}>₹ {formatAmount(bookingValue)}</Text>
         </View>
         <View>
@@ -90,7 +90,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { setSelectedProperty } = useProperty();
   const [properties, setProperties] = React.useState<Property[]>([]);
-  const [totalGBV, setTotalGBV] = React.useState(0);
+  const [totalNBV, settotalNBV] = React.useState(0);
   const [totalNights, setTotalNights] = React.useState(0);
   const [userName, setUserName] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
@@ -117,7 +117,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         setIsLoading(true);
         const response = await PropertyService.getAllProperties();
         setProperties(response.properties || []);
-        setTotalGBV(response.totalGBV);
+        settotalNBV(response.totalNBV);
         setTotalNights(response.totalNights);
       } catch (error) {
         console.error('Error fetching properties:', error);
@@ -135,9 +135,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     fetchProperties();
   }, []);
 
-  function formatAmount(totalGBV: number): string {
-    if (totalGBV === undefined) return '0.00';
-    return totalGBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
+  function formatAmount(totalNBV: number): string {
+    if (totalNBV === undefined) return '0.00';
+    return totalNBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
   }
 
   return (
@@ -175,9 +175,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     // return navigation.navigate('BookingDetails');
                   }}
                 >
-                  {/* Top Row - Gross Booking Value & Chevron */}
+                  {/* Top Row - Net Booking Value & Chevron */}
                   <View style={styles.topRow}>
-                    <Text style={styles.summaryLabel}>Gross Booking Value</Text>
+                    <Text style={styles.summaryLabel}>Net Booking Value</Text>
                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
 
@@ -191,7 +191,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                         />
                       </View>
                     </View>
-                    <Text style={styles.bookingValue}> {formatAmount(totalGBV)}</Text>
+                    <Text style={styles.bookingValue}> {formatAmount(totalNBV)}</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -203,7 +203,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     // return navigation.navigate('BookingDetails');
                   }}
                 >
-                  {/* Top Row - Gross Booking Value & Chevron */}
+                  {/* Top Row - Net Booking Value & Chevron */}
                   <View style={styles.topRow}>
                     <Text style={styles.summaryLabel}>No. of Nights Book</Text>
                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
@@ -248,10 +248,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       image={property.url}
                       guests={property.number_of_guests}
                       bedrooms={property.number_of_bedrooms}
-                      beds={property.number_of_bedrooms}
-                      bathrooms={property.number_of_bathrooms}
-                      bookingValue={property.gbv || 0}
-                      nightsBooked={property.nights || 0}
+                      beds={typeof property.number_of_beds === 'number' ? property.number_of_beds : 0}
+                      bathrooms={typeof property.number_of_bathrooms === 'number' ? property.number_of_bathrooms : 0}
+                      bookingValue={typeof property.nbv === 'number' ? property.nbv : 0}
+                      nightsBooked={typeof property.nights === 'number' ? property.nights : 0}
                       onPress={() => {
                         // Navigate to Earnings screen and set the selected property
                         navigation.navigate('Earnings');

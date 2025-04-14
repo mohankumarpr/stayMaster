@@ -151,7 +151,7 @@ class PropertyService {
         
         // Return a special response that indicates authentication failure
         return {
-          totalGBV: 0,
+          totalNBV: 0,
           totalNights: 0,
           properties: [],
           authError: true
@@ -368,7 +368,7 @@ class PropertyService {
           country: 0,
           media_filename: '',
           url: '',
-          gbv: 0,
+          nbv: 0,
           nights: 0,
           average_rating: 0,
           total_reviews: 0,

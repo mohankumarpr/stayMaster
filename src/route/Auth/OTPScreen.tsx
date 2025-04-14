@@ -22,7 +22,8 @@ type OTPScreenProps = {
 };
 
 const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
-  const { mobileNumber, email } = route.params;
+  const { mobileNumber } = route.params;
+  const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<TextInput[]>([]);

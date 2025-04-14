@@ -235,11 +235,11 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             },
           }}
           placeholder={{ label: "Select property type", value: null }}
-          Icon={() => (
+         /*  Icon={() => (
             <View style={styles.pickerIcon}>
               <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
             </View>
-          )}
+          )} */
         />
 
         <View style={styles.rowContainer}>
@@ -272,11 +272,11 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 },
               }}
               placeholder={{ label: "Select pool type", value: null }}
-              Icon={() => (
+             /*  Icon={() => (
                 <View style={styles.pickerIcon}>
                   <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
                 </View>
-              )}
+              )} */
             />
           </View>
         </View>
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   pickerIcon: {
     position: 'absolute',
     right: 0,
-    top: 0,
+    top: 20,
   },
 });
 

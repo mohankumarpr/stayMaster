@@ -62,7 +62,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         });
         console.log('Response Data:', response.data);
         if (response.data != null && response.data.otp) {
-          navigation.navigate('OTP', { email });
+          navigation.navigate('OTP', { mobileNumber });
         } else {
           showToast('error', 'Failed to generate OTP. Please try again.', '');
         }

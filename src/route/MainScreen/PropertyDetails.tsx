@@ -141,8 +141,8 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ navigation, route }) 
         <Text style={styles.sectionTitle}>Performance Metrics</Text>
         <View style={styles.metricsContainer}>
           <View style={styles.metricItem}>
-            <Text style={styles.metricLabel}>Gross Booking Value</Text>
-            <Text style={styles.metricValue}>₹ {formatCurrency(property.gbv)}</Text>
+            <Text style={styles.metricLabel}>Net Booking Value</Text>
+            <Text style={styles.metricValue}>₹ {formatCurrency(Number(property.nbv))}</Text>
           </View>
           <View style={styles.metricItem}>
             <Text style={styles.metricLabel}>Nights Booked</Text>

@@ -26,7 +26,7 @@ export interface Property {
   country: number;
   media_filename: string;
   url: string;
-  gbv: number;
+  nbv: number;
   nights: number;
   authError?: boolean;
 }
@@ -93,7 +93,7 @@ export interface UnblockBookingResponse {
 }
 
 export interface PropertyResponse {
-  totalGBV: number;
+  totalNBV: number;
   totalNights: number;
   properties: Property[];
   authError?: boolean;

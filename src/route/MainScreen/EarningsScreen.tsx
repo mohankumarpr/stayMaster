@@ -199,7 +199,7 @@ const EarningsScreen: React.FC = () => {
                         <View style={styles.summaryContainer}>
                             <TouchableOpacity style={[styles.summaryCard, styles.singleCard]}>
                                 <View style={styles.topRow}>
-                                    <Text style={styles.summaryLabel}>Gross Booking Value (current month)</Text>
+                                    <Text style={styles.summaryLabel}>Net Booking Value (current month)</Text>
                                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                                 </View>
 

@@ -282,11 +282,11 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                         right: 12,
                                     },
                                 }}
-                                Icon={() => (
+                                /* Icon={() => (
                                     <View style={styles.pickerIcon}>
                                         <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
                                     </View>
-                                )}
+                                )} */
                             />
                         )}
                     </View>
@@ -587,6 +587,12 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#666',
         marginTop: 4,
+    },
+    pickerIcon: {
+        position: 'absolute',
+        right: 10,
+        top: '50%',
+        transform: [{ translateY: -8 }], // Half of icon size to center it
     },
 });
 

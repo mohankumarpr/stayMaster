@@ -22,7 +22,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
     const [loading, setLoading] = useState(false);
     const [properties, setProperties] = useState<Property[]>([]);
     const [monthlyStatements, setMonthlyStatements] = useState<MonthlyStatement[]>([]);
-    const [totalGBV, setTotalGBV] = useState(0);
+    const [totalNBV, settotalNBV] = useState(0);
 
 
     useEffect(() => {
@@ -41,7 +41,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
         try {
             const response = await PropertyService.getAllProperties();
             const propertyList = response.properties || [];
-            setTotalGBV(response.totalGBV || 0); // Capture totalGBV from the response and set it in state
+            settotalNBV(response.totalNBV || 0); // Capture totalNBV from the response and set it in state
             setProperties(propertyList);
 
             // Set the first property as default if no property is selected
@@ -113,9 +113,9 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
         throw new Error('Function not implemented.');
     }
 
-    function formatAmount(totalGBV: number): string {
-        if (totalGBV === undefined) return '0.00';
-        return totalGBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
+    function formatAmount(totalNBV: number): string {
+        if (totalNBV === undefined) return '0.00';
+        return totalNBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
       }
 
     return (
@@ -155,18 +155,18 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                         right: 12,
                                     },
                                 }}
-                                    Icon={() => (
+                                   /*  Icon={() => (
                                         <View style={styles.pickerIcon}>
                                             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
                                         </View>
-                                    )}
+                                    )} */
                             />
                         )}
                     </View>
 
                     <View style={styles.grossValueCard}>
                         <Text style={styles.cardTitle}>Total Gross Value</Text>
-                        <Text style={styles.grossValue}>₹ {formatAmount(totalGBV)}</Text>
+                        <Text style={styles.grossValue}>₹ {formatAmount(totalNBV)}</Text>
                     </View>
 
                     <View style={styles.dropdownContainer}>
@@ -196,11 +196,11 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                             right: 12,
                                         },
                                     }}
-                                    Icon={() => (
+                                    /* Icon={() => (
                                         <View style={styles.pickerIcon}>
                                             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
                                         </View>
-                                    )}
+                                    )} */
                                 />
                             </View>
                         </View>
@@ -223,11 +223,11 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                             right: 12,
                                         },
                                     }}
-                                    Icon={() => (
+                                    /* Icon={() => (
                                         <View style={styles.pickerIcon}>
                                             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
                                         </View>
-                                    )}
+                                    )} */
                                 />
                             </View>
                         </View>
@@ -336,6 +336,13 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 10,
         top: '50%',
+        transform: [{ translateY: -8 }], // Half of icon size to center it
+    },
+    pickerIcon: {
+        position: 'absolute',
+        right: 10,
+        top: '50%',
+        color: 'white',
         transform: [{ translateY: -8 }], // Half of icon size to center it
     },
 });
