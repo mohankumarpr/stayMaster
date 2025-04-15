@@ -241,7 +241,7 @@ class PropertyService {
 
 
   // refer a property
-  async referProperty(owner_name: string, property_name: string, property_type: string, rooms: number, pool: string, owner_phone: string, url_address: string): Promise<{ url: string }> {
+  async referProperty(owner_name: string, property_name: string, property_type: string, rooms: number, pool: string, owner_phone: string, url_address: string): Promise<number> {
     try {
       console.log(`\n=== Starting referProperty Request ===`);
       const guestToken = await this.getGuestToken();
@@ -271,26 +271,14 @@ class PropertyService {
       console.log('✅ API Response received');
       console.log('Status:', response.status);
       console.log('Data:**', JSON.stringify(response.data, null, 2));
-      console.log(`=== End referProperty Request ===\n`);
-      if (response.status === 200 || response.status === 301) {
-        showToast({
-          text1: 'Property Referred Successfully',
-          type: 'success',
-        });
-      } else {
-        showToast({
-          text1: 'Property Referral Failed',
-          type: 'error',
-        });
-      }
-
-      return response.data.status; // Return the URL directly
+      console.log(`=== End referProperty Request ===\n`); 
+      return response.status; // Return the status directly as a number
     } catch (error: any) {
-      console.error(`\n❌ Error in referProperty:`, {
+      /* console.error(`\n❌ Error in referProperty:`, {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data
-      });
+      }); */
       throw error;
     }
   }

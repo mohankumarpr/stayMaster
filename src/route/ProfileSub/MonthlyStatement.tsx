@@ -6,6 +6,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
+import Toast from 'react-native-toast-message';
 
 
 interface MonthlyStatement {
@@ -109,10 +110,16 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
         }
     }, [monthlyStatements]);
 
-    function showToast(arg0: { text1: string; type: string; }) {
-        throw new Error('Function not implemented.');
-    }
-
+    const showToast = (type: string, title: string, message: string) => {
+        Toast.show({
+            type: type,
+            text1: title,
+            text2: message,
+            visibilityTime: 4000, // Duration for which the toast is visible
+            autoHide: true, // Automatically hide the toast after the visibility time
+            topOffset: 30, // Offset from the top of the screen
+        });
+    };
     function formatAmount(totalNBV: number): string {
         if (totalNBV === undefined) return '0.00';
         return totalNBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
@@ -148,13 +155,20 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                     }))
                                 ]}
                                 style={{
-                                    inputIOS: styles.pickerInput,
-                                    inputAndroid: styles.pickerInput,
+                                    viewContainer: {
+                                        borderRadius: 10,
+                                        backgroundColor: '#fff',
+                                        padding: 3,
+                                    },
+                                    
+                                    inputIOS: { ...styles.picker, height: 60, },
+                                    inputAndroid: { ...styles.picker, height: 60, },
                                     iconContainer: {
                                         top: 12,
                                         right: 12,
                                     },
                                 }}
+                            /*  Icon={
                                    /*  Icon={() => (
                                         <View style={styles.pickerIcon}>
                                             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
@@ -189,13 +203,20 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                         value: year,
                                     }))}
                                     style={{
-                                        inputIOS: styles.pickerInput,
-                                        inputAndroid: styles.pickerInput,
+                                        viewContainer: {
+                                            borderRadius: 10,
+                                            backgroundColor: '#fff',
+                                            padding: 3,
+                                        },
+                                        
+                                        inputIOS: { ...styles.picker, height: 60, },
+                                        inputAndroid: { ...styles.picker, height: 60, },
                                         iconContainer: {
                                             top: 12,
                                             right: 12,
                                         },
                                     }}
+                                /*  Icon={
                                     /* Icon={() => (
                                         <View style={styles.pickerIcon}>
                                             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
@@ -216,13 +237,20 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                         value: month.number,
                                     }))}
                                     style={{
-                                        inputIOS: styles.pickerInput,
-                                        inputAndroid: styles.pickerInput,
+                                        viewContainer: {
+                                            borderRadius: 10,
+                                            backgroundColor: '#fff',
+                                            padding: 3,
+                                        },
+                                        
+                                        inputIOS: { ...styles.picker, height: 60, },
+                                        inputAndroid: { ...styles.picker, height: 60, },
                                         iconContainer: {
                                             top: 12,
                                             right: 12,
                                         },
                                     }}
+                                /*  Icon={
                                     /* Icon={() => (
                                         <View style={styles.pickerIcon}>
                                             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
@@ -249,19 +277,16 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                 const fileUrl = downloadUrl; // Extract the URL from the response
                                 console.log('File URL:', fileUrl);
                                 // Use the download URL directly instead of creating an object URL
-                                await Linking.openURL(downloadUrl.url).catch(err => console.error('Error opening URL:', err));
+                                await Linking.openURL(fileUrl.url).catch(err => console.error('Error opening URL:', err));
 
-                                console.log(`Statement downloaded: ${downloadUrl}`);
+                                console.log(`Statement downloaded: ${fileUrl}`);
                                 // Optionally, you can handle the download URL here (e.g., open it)
                             } finally {
                                 setLoading(false); // End loading state
                             }
                         } else {
                             console.log('No statement found');
-                            showToast({
-                                text1: 'No statement found',
-                                type: 'error',
-                            });
+                            showToast('error', 'No statement found', '');
                         }
                     }}>
                     <Text style={styles.downloadButtonText}>Download Statement</Text>

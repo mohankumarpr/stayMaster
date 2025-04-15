@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import PropertyService from '../../services/propertyService';
+import Toast from 'react-native-toast-message';
 const dummyBanners = [
   {
     id: '1',
@@ -108,27 +109,35 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     try {
       // Set loading state to true
       // setLoading(true);
-      
+
       console.log('Form submitted with data:', formData);
 
       // For demonstration, we'll implement a share feature
-   /*    await Share.share({
-        message: `New Property Referral: ${formData.propertyName} (${formData.propertyType}) with ${formData.numberOfRooms} rooms.`,
-        title: 'Property Referral',
-      }); */
+      /*    await Share.share({
+           message: `New Property Referral: ${formData.propertyName} (${formData.propertyType}) with ${formData.numberOfRooms} rooms.`,
+           title: 'Property Referral',
+         }); */
       const response = await PropertyService.referProperty(formData.ownerName, formData.propertyName, formData.propertyType, parseInt(formData.numberOfRooms), formData.swimmingPool ?? 'None', formData.contact, formData.urlAddress);
       console.log('Response:', response);
+      if (response === 200 || response === 301) {
+        showToast('success', 'Property Referred Successfully', '');
+        // Reset form after submission
+        setFormData({
+          ownerName: '',
+          propertyName: '',
+          propertyType: '',
+          numberOfRooms: '',
+          swimmingPool: '',
+          contact: '',
+          urlAddress: '',
+        });
 
-      // Reset form after submission
-      setFormData({
-        ownerName: '',
-        propertyName: '',
-        propertyType: '',
-        numberOfRooms: '',
-        swimmingPool: '',
-        contact: '',
-        urlAddress: '',
-      });
+      } else {
+        showToast('error', 'Property Referral Failed', '');
+      }
+
+
+
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
@@ -149,8 +158,8 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       </View>
 
       <View style={styles.bannerListContainer}>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.bannerList}
         >
@@ -235,11 +244,11 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             },
           }}
           placeholder={{ label: "Select property type", value: null }}
-         /*  Icon={() => (
-            <View style={styles.pickerIcon}>
-              <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-            </View>
-          )} */
+        /*  Icon={() => (
+           <View style={styles.pickerIcon}>
+             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+           </View>
+         )} */
         />
 
         <View style={styles.rowContainer}>
@@ -272,11 +281,11 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 },
               }}
               placeholder={{ label: "Select pool type", value: null }}
-             /*  Icon={() => (
-                <View style={styles.pickerIcon}>
-                  <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-                </View>
-              )} */
+            /*  Icon={() => (
+               <View style={styles.pickerIcon}>
+                 <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+               </View>
+             )} */
             />
           </View>
         </View>
@@ -413,7 +422,7 @@ const styles = StyleSheet.create({
     height: 160,
     marginRight: 12,
     borderRadius: 8,
-    alignContent: 'center',  
+    alignContent: 'center',
     overflow: 'hidden',
     position: 'relative',
     borderWidth: 1,
@@ -466,7 +475,7 @@ const styles = StyleSheet.create({
   },
   pickerInput: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 4,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#EEEEEE',
     padding: 12,
@@ -474,6 +483,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
     paddingRight: 30, // Make room for the icon
+    height: 55,
   },
   pickerIcon: {
     position: 'absolute',
@@ -487,3 +497,15 @@ export default PropertyReferralScreen;
 function setLoading(arg0: boolean) {
   throw new Error('Function not implemented.');
 }
+
+const showToast = (type: string, title: string, message: string) => {
+  Toast.show({
+    type: type,
+    text1: title,
+    text2: message,
+    visibilityTime: 4000, // Duration for which the toast is visible
+    autoHide: true, // Automatically hide the toast after the visibility time
+    topOffset: 30, // Offset from the top of the screen
+  });
+};
+

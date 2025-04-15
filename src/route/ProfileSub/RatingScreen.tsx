@@ -64,7 +64,7 @@ interface Propertys {
 
 const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
     // Sample properties data
-    
+
 
     const [selectedPropertyId, setSelectedPropertyId] = useState('1');
     const [properties, setPropertiesvalue] = useState<Property[]>([]);
@@ -75,10 +75,10 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
     // Add this function to calculate average rating
     const calculateAverageRating = (ratings: RatingDetailsResponse | null): number => {
         if (!ratings || Object.keys(ratings).length === 0) return 0;
-        
+
         const totalRating = Object.values(ratings).reduce((sum, rating) => sum + rating, 0);
         const averageRating = totalRating / Object.keys(ratings).length;
-        
+
         return Number(averageRating.toFixed(1));
     };
 
@@ -162,32 +162,32 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
         for (let i = 0; i < 5; i++) {
             if (i < fullStars) {
                 stars.push(
-                    <FontAwesomeIcon 
-                        key={`star-${i}`} 
-                        icon={faStarSolid} 
-                        size={14} 
-                        color="#FFD700" 
-                        style={styles.star} 
+                    <FontAwesomeIcon
+                        key={`star-${i}`}
+                        icon={faStarSolid}
+                        size={14}
+                        color="#FFD700"
+                        style={styles.star}
                     />
                 );
             } else if (i === fullStars && halfStar) {
                 stars.push(
-                    <FontAwesomeIcon 
-                        key={`star-${i}`} 
-                        icon={faStarHalfAlt} 
-                        size={14} 
-                        color="#FFD700" 
-                        style={styles.star} 
+                    <FontAwesomeIcon
+                        key={`star-${i}`}
+                        icon={faStarHalfAlt}
+                        size={14}
+                        color="#FFD700"
+                        style={styles.star}
                     />
                 );
             } else {
                 stars.push(
-                    <FontAwesomeIcon 
-                        key={`star-${i}`} 
-                        icon={faStarRegular} 
-                        size={14} 
-                        color="#FFD700" 
-                        style={styles.star} 
+                    <FontAwesomeIcon
+                        key={`star-${i}`}
+                        icon={faStarRegular}
+                        size={14}
+                        color="#FFD700"
+                        style={styles.star}
                     />
                 );
             }
@@ -262,10 +262,11 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                             </View>
                         ) : (
                             <RNPickerSelect
-                                value={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : '')}
+                                value={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : '')} 
                                 onValueChange={(itemValue) => {
                                     console.log('Selected property id:', itemValue.toString());
                                     setSelectedProperty(itemValue.toString());
+
                                 }}
                                 items={[
                                     { label: 'Select a property', value: properties.length > 0 ? properties[0].id.toString() : '' },
@@ -275,19 +276,26 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                     }))
                                 ]}
                                 style={{
-                                    inputIOS: styles.picker,
-                                    inputAndroid: styles.picker,
+                                    viewContainer: {
+                                        borderRadius: 10,
+                                        backgroundColor: '#fff',
+                                        padding: 2,
+                                    },
+                                    
+                                    inputIOS: { ...styles.picker, height: 60, },
+                                    inputAndroid: { ...styles.picker, height: 60, },
                                     iconContainer: {
                                         top: 12,
                                         right: 12,
                                     },
                                 }}
-                                /* Icon={() => (
-                                    <View style={styles.pickerIcon}>
-                                        <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-                                    </View>
-                                )} */
+                            /*  Icon={() => (
+                                 <View style={styles.pickerIcon}>
+                                     <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
+                                 </View>
+                             )} */
                             />
+
                         )}
                     </View>
                 </View>
@@ -320,7 +328,7 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                     </Text> */}
 
                                     {/* Add Average Rating Card */}
-                                   {/*  <View style={styles.averageRatingCard}>
+                                    {/*  <View style={styles.averageRatingCard}>
                                         <Text style={styles.averageRatingTitle}>Average Rating</Text>
                                         <View style={styles.averageRatingContent}>
                                             <View style={styles.ratingStars}>
@@ -357,7 +365,7 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                     </View>
                                 </View>
                             </View>
-                        </View> 
+                        </View>
                     </>
                 )}
             </ScrollView>
