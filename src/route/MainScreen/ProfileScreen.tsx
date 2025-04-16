@@ -264,6 +264,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 navigation.navigate('PropertyReferralScreen');
                             }}
                         />
+
                         {/* <SettingsItem
                             title="View your listings"
                             onPress={() => {
@@ -277,6 +278,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 navigation.navigate('SupportScreen');
                             }}
                         />
+                      {/*   <SettingsItem
+                            title="Reset Password"
+                            onPress={() => {
+                                // navigation.navigate('ReferProperty'); 
+                            }}
+                        /> */}
                         <SettingsItem
                             title="Logout"
                             onPress={() => {

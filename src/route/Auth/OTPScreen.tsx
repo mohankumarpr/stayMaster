@@ -22,8 +22,7 @@ type OTPScreenProps = {
 };
 
 const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
-  const { mobileNumber } = route.params;
-  const [email, setEmail] = useState('');
+  const { mobileNumber, email, isEmailLogin } = route.params;
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<TextInput[]>([]);
@@ -78,11 +77,13 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
 
     try {
       let response;
-      if (email) {
-        response = await api.post('/hosts/loginWithEmail', {
-          email: email,
-          otp: enteredOtp
-        });
+      if (isEmailLogin) {
+        if (email) {
+          response = await api.post('/hosts/loginWithEmail', {
+            email: email,
+            password: enteredOtp
+          });
+        }
       } else {
         response = await api.post('/hosts/loginWithOTP', {
           phone: `91${mobileNumber}`,
@@ -90,30 +91,44 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
         });
       }
 
-      console.log('Response Data:', response.data);
-      var data = response.data;
+      if (response != null) {
+        console.log('Response Data:', response.data);
+        var data = response.data;
 
-      if (data != null) {
-        console.log('Login successful, storing user data and token...');
-        await Storage.setObject(STORAGE_KEYS.USER_DATA, data.user);
-        if (data.webUserToken) {
-          console.log('Storing web user token...');
-          await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.webUserToken);
-          console.log('Token stored successfully');
+        if (data != null) {
+          console.log('Login successful, storing user data and token...');
+          await Storage.setObject(STORAGE_KEYS.USER_DATA, data.user);
+          if (data.webUserToken) {
+            console.log('Storing web user token...');
+            await Storage.setItem(STORAGE_KEYS.USER_TOKEN, data.webUserToken);
+            console.log('Token stored successfully');
+          } else {
+            console.log('No web user token received from server');
+          }
+          if (isEmailLogin) {
+            showToast('success', 'Success', 'Password verified successfully.');
+          } else {
+            showToast('success', 'Success', 'OTP verified successfully.');
+          }
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Welcome' }],
+          });
         } else {
-          console.log('No web user token received from server');
+          if (isEmailLogin) {
+            showToast('error', 'Error', `Failed to verify password. Please try again. ${data.message}`);
+          } else {
+            showToast('error', 'Error', `Failed to verify OTP. Please try again. ${data.message}`);
+          }
         }
-        showToast('success', 'Success', 'OTP verified successfully.'); 
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Welcome' }],
-        });
-      } else {
-        showToast('error', 'Error', `Failed to verify OTP. Please try again. ${data.message}`);
       }
     } catch (error) {
       console.error('Error:', error);
-      showToast('error', 'Error', 'An error occurred while verifying OTP. Please try again.');
+      if (isEmailLogin) {
+        showToast('error', 'Error', 'An error occurred while verifying password. Please try again.');
+      } else {
+        showToast('error', 'Error', 'An error occurred while verifying OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -125,7 +140,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     try {
       setCanResend(false);
       setTimer(60);
-      
+
       let response;
       if (email) {
         response = await api.post('/hosts/generateEmailOTP', {
@@ -151,8 +166,8 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
 
   return (
     <ImageBackground source={require('../../assets/images/Login.png')} style={styles.background}>
-      <TouchableOpacity 
-        style={styles.backButton} 
+      <TouchableOpacity
+        style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
         <FontAwesomeIcon icon={faArrowLeft} size={16} color="white" />
@@ -161,12 +176,21 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
       <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode='contain' />
       <View style={styles.container}>
         <View style={styles.Space} />
-        <Text style={[styles.subtitle, { textAlign: 'center' }]}>OTP has been sent to your</Text>
-        <Text style={[styles.subtitle1, { textAlign: 'center' }]}>
-          {email ? 'email address' : 'registered mobile number'}
-        </Text>
+        {!isEmailLogin ? (
+          <>
+            <Text style={[styles.subtitle, { textAlign: 'center' }]}>OTP has been sent to your</Text>
+            <Text style={[styles.subtitle1, { textAlign: 'center' }]}>
+              {'registered mobile number'}
+            </Text>
+          </>
+        ) : (
+          <Text style={[styles.subtitle, { textAlign: 'center' }]}></Text>
+        )}
+
         <View style={styles.bottomSpace} />
-        <Text style={[styles.title, { textAlign: 'center' }]}>Enter the OTP</Text>
+        <Text style={[styles.title, { textAlign: 'center' }]}>
+          {isEmailLogin ? 'Enter your password' : 'Enter the OTP'}
+        </Text>
 
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => (
@@ -188,20 +212,37 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
         </View>
         {loading && <ActivityIndicator size="large" color="#007BFF" style={styles.loading} />}
         <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Text style={[styles.subtitle1, { textAlign: 'center' }]}>Didn't receive the OTP?</Text>
-          <TouchableOpacity 
-            onPress={handleResendOTP}
-            disabled={!canResend}
-            style={styles.resendContainer}
-          >
-            <Text style={[
-              styles.resendotp, 
-              { textDecorationLine: 'underline' },
-              !canResend && styles.resendDisabled
-            ]}>
-              {canResend ? 'Resend OTP' : `Resend OTP in ${timer}s`}
-            </Text>
-          </TouchableOpacity>
+          {isEmailLogin ? (
+            <TouchableOpacity
+              onPress={() => {
+                // Add your forgot password navigation logic here
+                // navigation.navigate('ForgotPassword');
+                navigation.navigate('ResetPassword', { email: email });
+              }}
+              style={styles.resendContainer}
+            >
+              <Text style={[styles.resendotp, { textDecorationLine: 'underline' }]}>
+                Forgot Password?
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <>
+              <Text style={[styles.subtitle1, { textAlign: 'center' }]}>Didn't receive the OTP?</Text>
+              <TouchableOpacity
+                onPress={handleResendOTP}
+                disabled={!canResend}
+                style={styles.resendContainer}
+              >
+                <Text style={[
+                  styles.resendotp,
+                  { textDecorationLine: 'underline' },
+                  !canResend && styles.resendDisabled
+                ]}>
+                  {canResend ? 'Resend OTP' : `Resend OTP in ${timer}s`}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
     </ImageBackground>

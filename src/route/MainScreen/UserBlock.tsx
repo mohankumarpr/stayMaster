@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
 
 export default UnblockBlockScreen;
 
-function showToast(type: string, title: string, message: string) {
+const showToast = (type: string, title: string, message: string) => {
   Toast.show({
     type: type,
     text1: title,

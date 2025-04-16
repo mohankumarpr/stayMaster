@@ -55,14 +55,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       // Show loading indicator
       setLoading(true);
-
-      try {
+      navigation.navigate('OTP', { mobileNumber, email, isEmailLogin });
+      setLoading(false);
+      /* try {
         const response = await api.post('/hosts/generateEmailOTP', {
           email: email
         });
         console.log('Response Data:', response.data);
         if (response.data != null && response.data.otp) {
-          navigation.navigate('OTP', { mobileNumber });
+          navigation.navigate('PasswordScreen', { email });
         } else {
           showToast('error', 'Failed to generate OTP. Please try again.', '');
         }
@@ -70,7 +71,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         showToast('error', 'Email is not valid. Please try again.', '');
       } finally {
         setLoading(false);
-      }
+      } */
     } else {
       // Validate mobile number
       if (mobileNumber.length < 10) {
@@ -87,7 +88,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         });
         console.log('Response Data:', response.data);
         if (response.data != null && response.data.otp) {
-          navigation.navigate('OTP', { mobileNumber });
+          navigation.navigate('OTP', { mobileNumber, email, isEmailLogin });
         } else {
           showToast('error', 'Failed to generate OTP. Please try again.', '');
         }

@@ -19,11 +19,12 @@ import PropertyReferralScreen from '../route/ProfileSub/ReferPropertyDetails';
 import SupportScreen from '../route/ProfileSub/SupportScreen';
 import CalendarInfo from '../route/MainScreen/CalendarInfo';
 import UnblockBlockScreen from '../route/MainScreen/UserBlock';
-import BlockInfoScreen from '../route/MainScreen/BlockInfoScreen';
+import BlockInfoScreen from '../route/MainScreen/BlockInfoScreen'; 
+import ResetPasswordScreen from '../route/Auth/ResetPasswordScreen';
 
 export type RootStackParamList = {
   Login: undefined;
-  OTP: { mobileNumber: string };
+  OTP: { mobileNumber: string, email: string, isEmailLogin: boolean };
   Welcome: undefined;
   Home: undefined;
   Earnings: undefined;
@@ -43,7 +44,9 @@ export type RootStackParamList = {
   SupportScreen: undefined;
   CalendarInfo: undefined;
   UnblockBlockScreen: undefined;
-  BlockInfoScreen: undefined;
+  BlockInfoScreen: undefined; 
+  ResetPassword: { email: string };
+
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -113,7 +116,8 @@ const AppNavigator = () => {
         <Stack.Screen name="SupportScreen" component={SupportScreen} />
         <Stack.Screen name="CalendarInfo" component={CalendarInfo} />
         <Stack.Screen name="UnblockBlockScreen" component={UnblockBlockScreen} />
-        <Stack.Screen name="BlockInfoScreen" component={BlockInfoScreen} />
+        <Stack.Screen name="BlockInfoScreen" component={BlockInfoScreen} /> 
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         <Stack.Screen
           name="PropertyDetails"
           component={PropertyDetails}

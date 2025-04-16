@@ -301,9 +301,9 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
         return property ? property.listing_name : "Select Property";
     };
 
-    function showToast(arg0: string) {
+    const showToast = (message: string) => {
         Toast.show({
-            text1: arg0,
+            text1: message,
             type: 'error',
             position: 'bottom',
             visibilityTime: 3000,
