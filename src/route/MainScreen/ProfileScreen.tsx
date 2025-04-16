@@ -12,15 +12,15 @@ import {
     Text,
     TouchableOpacity,
     View,
-    Share,
-    Platform,
+
 } from 'react-native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { default as PropertyService, default as propertyService } from '../../services/propertyService';
 import { Property } from '../../types/property';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
-import { Linking } from 'react-native'; 
-
+import { Linking } from 'react-native';
+import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
 
 type ProfileScreenProps = {
     navigation: StackNavigationProp<RootStackParamList, 'Profile'>;
@@ -49,27 +49,38 @@ const PropertyCard: React.FC<Propertys> = ({
     console.log('Image URL:', url);
     const handleShare = async () => {
         try {
-            /*   📸 View Property Image: ${url}
-            🔗 View more details: ${url} */
-            const message = `
-            🏠 ${listing_name}
+            const fileName = `property_${Date.now()}.jpg`;
+            const localPath = `${RNFS.CachesDirectoryPath}/${fileName}`;
 
-            📊 Property Details:
-            • Guests: ${number_of_guests}
-            • Bedrooms: ${number_of_bedrooms}
-            • Beds: ${number_of_beds}
-            • Bathrooms: ${number_of_bathrooms}
- 
-            by Staymaster
-            `.trim(); 
+            // Download the image
+            const downloadResult = await RNFS.downloadFile({
+                fromUrl: url,
+                toFile: localPath,
+            }).promise;
 
-            const shareOptions = {
-                title: listing_name,
-                message: message,
-            };
+            if (downloadResult.statusCode === 200) {
+                const shareOptions = {
+                    title: listing_name,
+                    message: `
+        🏠 ${listing_name}
+        
+        📊 Property Details:
+        • Guests: ${number_of_guests}
+        • Bedrooms: ${number_of_bedrooms}
+        • Beds: ${number_of_beds}
+        • Bathrooms: ${number_of_bathrooms}
+        
+        by Staymaster
+              `.trim(),
+                    url: `file://${localPath}`,
+                    type: 'image/jpeg',
+                    failOnCancel: false,
+                };
 
-            await Share.share(shareOptions);
-
+                await Share.open(shareOptions);
+            } else {
+                console.warn('Failed to download image');
+            }
         } catch (error) {
             console.error('Error sharing:', error);
         }
