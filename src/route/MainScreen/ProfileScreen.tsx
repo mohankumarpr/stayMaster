@@ -12,11 +12,14 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Share,
+    Platform,
 } from 'react-native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { default as PropertyService, default as propertyService } from '../../services/propertyService';
 import { Property } from '../../types/property';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
+import { Linking } from 'react-native'; 
 
 
 type ProfileScreenProps = {
@@ -45,13 +48,31 @@ const PropertyCard: React.FC<Propertys> = ({
 }) => {
     console.log('Image URL:', url);
     const handleShare = async () => {
-        /*  try {
-             const result = await Share.share({
-                 title: listing_name,
-                 message: url ? `${listing_name}\n${url}` : listing_name,
-                 url: url
-             });
-         } */
+        try {
+            /*   📸 View Property Image: ${url}
+            🔗 View more details: ${url} */
+            const message = `
+            🏠 ${listing_name}
+
+            📊 Property Details:
+            • Guests: ${number_of_guests}
+            • Bedrooms: ${number_of_bedrooms}
+            • Beds: ${number_of_beds}
+            • Bathrooms: ${number_of_bathrooms}
+ 
+            by Staymaster
+            `.trim(); 
+
+            const shareOptions = {
+                title: listing_name,
+                message: message,
+            };
+
+            await Share.share(shareOptions);
+
+        } catch (error) {
+            console.error('Error sharing:', error);
+        }
     };
     return (
         <View style={styles.propertyCard}>
@@ -70,7 +91,10 @@ const PropertyCard: React.FC<Propertys> = ({
             </View>
             <View style={{ height: 40 }} />
             <View style={{ alignItems: 'center' }}>
-                {<TouchableOpacity style={[styles.button, { alignItems: 'center' }]}>
+                {<TouchableOpacity
+                    style={[styles.button, { alignItems: 'center' }]}
+                    onPress={handleShare}
+                >
                     <FontAwesomeIcon icon={faShareNodes} size={18} color="#666" />
                     <Text style={styles.shareText}>Share</Text>
                 </TouchableOpacity>}
@@ -251,7 +275,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     </View>
 
                 </View>
-                
+
             </ScrollView>
             <View style={{ height: 50 }} />
         </SafeAreaView>
