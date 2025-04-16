@@ -90,7 +90,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
         // Remove duplicates by using a Set with a unique key
         const uniqueMonths = Array.from(
             new Map(monthsInYear.map(item => [item.number, item]))
-            .values()
+                .values()
         );
 
         return uniqueMonths.sort((a, b) => parseInt(b.number) - parseInt(a.number));
@@ -123,7 +123,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
     function formatAmount(totalNBV: number): string {
         if (totalNBV === undefined) return '0.00';
         return totalNBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
-      }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -143,37 +143,27 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="large" color="#008489" />
                             </View>
-                        ) : (
+                        ) : ( 
                             <RNPickerSelect
                                 onValueChange={(value) => setSelectedProperty(value)}
-                                value={selectedProperty}
-                                items={[
-                                    { label: 'Select a property', value: '' },
+                                items={[ 
                                     ...(properties || []).map((property) => ({
                                         label: property.listing_name,
                                         value: property.id.toString(),
                                     }))
                                 ]}
-                                style={{
-                                    viewContainer: {
-                                        borderRadius: 10,
-                                        backgroundColor: '#fff',
-                                        padding: 3,
-                                    },
-                                    
-                                    inputIOS: { ...styles.picker, height: 60, },
-                                    inputAndroid: { ...styles.picker, height: 60, },
-                                    iconContainer: {
-                                        top: 12,
-                                        right: 12,
-                                    },
-                                }}
-                            /*  Icon={
-                                   /*  Icon={() => (
-                                        <View style={styles.pickerIcon}>
-                                            <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-                                        </View>
-                                    )} */
+                                value={selectedProperty}
+                                style={pickerSelectStyles}
+                                useNativeAndroidPickerStyle={false}
+                                placeholder={{ label: 'Select a property', value: null }}
+                                Icon={() => (
+                                    <FontAwesomeIcon
+                                        icon={faChevronDown}
+                                        size={16}
+                                        color="#666"
+                                        style={{ marginRight: 12 }}
+                                    />
+                                )}
                             />
                         )}
                     </View>
@@ -187,6 +177,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                         <View style={styles.pickerContainer}>
                             <Text style={styles.cardTitle1}>Select Year</Text>
                             <View style={styles.pickerContainer1}>
+
                                 <RNPickerSelect
                                     onValueChange={(itemValue) => {
                                         setSelectedYear(itemValue);
@@ -197,31 +188,22 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                             setSelectedMonth(monthsForYear[0].month);
                                         }
                                     }}
-                                    value={selectedYear}
                                     items={getUniqueYears().map((year) => ({
                                         label: year,
                                         value: year,
                                     }))}
-                                    style={{
-                                        viewContainer: {
-                                            borderRadius: 10,
-                                            backgroundColor: '#fff',
-                                            padding: 3,
-                                        },
-                                        
-                                        inputIOS: { ...styles.picker, height: 60, },
-                                        inputAndroid: { ...styles.picker, height: 60, },
-                                        iconContainer: {
-                                            top: 12,
-                                            right: 12,
-                                        },
-                                    }}
-                                /*  Icon={
-                                    /* Icon={() => (
-                                        <View style={styles.pickerIcon}>
-                                            <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-                                        </View>
-                                    )} */
+                                    value={selectedYear}
+                                    style={pickerSelectStyles}
+                                    useNativeAndroidPickerStyle={false}
+                                    placeholder={{ label: 'Select a year', value: null }}
+                                    Icon={() => (
+                                        <FontAwesomeIcon
+                                            icon={faChevronDown}
+                                            size={16}
+                                            color="#666"
+                                            style={{ marginRight: 12 }}
+                                        />
+                                    )}
                                 />
                             </View>
                         </View>
@@ -229,42 +211,48 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                         <View style={styles.pickerContainer}>
                             <Text style={styles.cardTitle1}>Select Month</Text>
                             <View style={styles.pickerContainer1}>
+
                                 <RNPickerSelect
-                                    onValueChange={(itemValue) => setSelectedMonth(itemValue)}
-                                    value={selectedMonth}
+                                    onValueChange={(itemValue) => {
+                                        setSelectedMonth(itemValue);
+                                        // Reset month when year changes
+                                        const monthsForYear = monthlyStatements
+                                            .filter(statement => statement.year === selectedYear);
+                                        if (monthsForYear.length > 0) {
+                                            setSelectedMonth(monthsForYear[0].month);
+                                        }
+                                    }}
                                     items={getMonthsForSelectedYear().map((month) => ({
                                         label: month.name,
                                         value: month.number,
                                     }))}
-                                    style={{
-                                        viewContainer: {
-                                            borderRadius: 10,
-                                            backgroundColor: '#fff',
-                                            padding: 3,
-                                        },
-                                        
-                                        inputIOS: { ...styles.picker, height: 60, },
-                                        inputAndroid: { ...styles.picker, height: 60, },
-                                        iconContainer: {
-                                            top: 12,
-                                            right: 12,
-                                        },
-                                    }}
-                                /*  Icon={
-                                    /* Icon={() => (
-                                        <View style={styles.pickerIcon}>
-                                            <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-                                        </View>
-                                    )} */
+                                    value={selectedMonth}
+                                    style={pickerSelectStyles}
+                                    useNativeAndroidPickerStyle={false}
+                                    placeholder={{ label: 'Select a month', value: null }}
+                                    Icon={() => (
+                                        <FontAwesomeIcon
+                                            icon={faChevronDown}
+                                            size={16}
+                                            color="#666"
+                                            style={{ marginRight: 12 }}
+                                        />
+                                    )}
                                 />
                             </View>
                         </View>
                     </View>
                 </ScrollView>
 
+
                 <TouchableOpacity
                     style={styles.downloadButton}
                     onPress={async () => {
+                        if (!selectedYear || !selectedMonth) {
+                            showToast('error', 'Error', 'Please select both year and month');
+                            return;
+                        }
+
                         const statement = monthlyStatements.find(
                             s => s.year === selectedYear && s.month === selectedMonth
                         );
@@ -276,8 +264,14 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                 const downloadUrl = await PropertyService.downloadMonthlyStatement(selectedProperty, statement.name);
                                 const fileUrl = downloadUrl; // Extract the URL from the response
                                 console.log('File URL:', fileUrl);
-                                // Use the download URL directly instead of creating an object URL
-                                await Linking.openURL(fileUrl.url).catch(err => console.error('Error opening URL:', err));
+
+                                // Convert the URL to a proper format if needed
+                                const formattedUrl = fileUrl;
+
+                                await Linking.openURL(formattedUrl.url).catch(err => {
+                                    console.error('Error opening URL:', err);
+                                    return showToast('error', 'Error opening URL', err.message);
+                                });
 
                                 console.log(`Statement downloaded: ${fileUrl}`);
                                 // Optionally, you can handle the download URL here (e.g., open it)
@@ -288,7 +282,9 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                             console.log('No statement found');
                             showToast('error', 'No statement found', '');
                         }
-                    }}>
+                    }} 
+                    disabled={!selectedYear || !selectedMonth} // Disable button if year or month is not selected
+                >
                     <Text style={styles.downloadButtonText}>Download Statement</Text>
                 </TouchableOpacity>
             </View>
@@ -297,9 +293,52 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
     );
 };
 
+
+const pickerSelectStyles = {
+    viewContainer: {
+        borderRadius: 10,
+        backgroundColor: '#fff',
+        padding: 2,
+    }, 
+    inputIOS: {
+        fontSize: 14,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30,
+        height: 55,
+    },
+    inputAndroid: {
+        fontSize: 14,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30,
+        height: 55,
+    },
+    iconContainer: {
+        top: 15,
+        right: 12,
+    },
+    itemStyle: {
+        color: '#008281',
+        fontWeight: 'bold',
+    },
+   
+};
+
+
 const styles = StyleSheet.create({
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    picker: { color: '#000', fontSize: 14 }, 
+    picker: { color: '#000', fontSize: 14 },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -338,7 +377,7 @@ const styles = StyleSheet.create({
     cardTitle: { color: '#FFF', fontSize: 14 },
     cardTitle1: { color: '#000', fontSize: 14, marginBottom: 10 },
     grossValue: { color: '#FFF', fontSize: 24, fontWeight: 'bold' },
-    dropdownContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
+    dropdownContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
     pickerContainerlist: {
         backgroundColor: '#fff',
         borderRadius: 10,
@@ -354,7 +393,7 @@ const styles = StyleSheet.create({
         color: '#000',
     },
     pickerContainer: { flex: 1, borderRadius: 8, marginRight: 10 },
-    pickerContainer1: { flex: 1, backgroundColor: '#FFF', borderRadius: 8, marginRight: 10 },
+    pickerContainer1: { flex: 1, borderRadius: 8, marginRight: 10 },
     downloadButton: { backgroundColor: '#008281', padding: 15, borderRadius: 8, alignItems: 'center', margin: 20 },
     downloadButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
     iconContainer: {
@@ -370,6 +409,7 @@ const styles = StyleSheet.create({
         color: 'white',
         transform: [{ translateY: -8 }], // Half of icon size to center it
     },
+    errorText: { color: 'red', fontSize: 16, marginBottom: 10 },
 });
 
 export default MonthlyStatements;

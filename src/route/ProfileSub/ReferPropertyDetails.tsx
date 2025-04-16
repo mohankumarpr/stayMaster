@@ -228,29 +228,25 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
         <Text style={styles.label}>Property Type</Text>
         <RNPickerSelect
-          value={formData.propertyType}
           onValueChange={(value) => handleChange('propertyType', value)}
           items={[
             { label: "Villa", value: "Villa" },
             { label: "Condo", value: "Condo" },
             { label: "Apartment", value: "Apartment" }
           ]}
-          style={{
-            inputIOS: styles.pickerInput,
-            inputAndroid: styles.pickerInput,
-            iconContainer: {
-              top: 12,
-              right: 12,
-            },
-          }}
-          placeholder={{ label: "Select property type", value: null }}
-        /*  Icon={() => (
-           <View style={styles.pickerIcon}>
-             <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-           </View>
-         )} */
+          value={formData.propertyType}
+          style={pickerSelectStyles}
+          useNativeAndroidPickerStyle={false}
+          placeholder={{ label: 'Select a property type', value: null }}
+          Icon={() => (
+            <FontAwesomeIcon
+              icon={faChevronDown}
+              size={16}
+              color="#666"
+              style={{ marginRight: 12 }}
+            />
+          )}
         />
-
         <View style={styles.rowContainer}>
           <View style={styles.halfContainer}>
             <Text style={styles.label}>No. of Rooms</Text>
@@ -262,30 +258,28 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               keyboardType="numeric"
             />
           </View>
+            
           <View style={styles.halfContainer}>
             <Text style={[styles.label]}>Swimming Pool</Text>
             <RNPickerSelect
-              value={formData.swimmingPool}
               onValueChange={(value) => handleChange('swimmingPool', value)}
               items={[
                 { label: "None", value: "None" },
                 { label: "Private", value: "Private" },
                 { label: "Shared", value: "Shared" }
               ]}
-              style={{
-                inputIOS: styles.pickerInput,
-                inputAndroid: styles.pickerInput,
-                iconContainer: {
-                  top: 12,
-                  right: 12,
-                },
-              }}
-              placeholder={{ label: "Select pool type", value: null }}
-            /*  Icon={() => (
-               <View style={styles.pickerIcon}>
-                 <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-               </View>
-             )} */
+              value={formData.swimmingPool}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+              placeholder={{ label: 'Select pool type', value: null }}
+              Icon={() => (
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  size={16}
+                  color="#666"
+                  style={{ marginRight: 12 }}
+                />
+              )}
             />
           </View>
         </View>
@@ -325,6 +319,51 @@ const PropertyReferralScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       </ScrollView>
     </SafeAreaView>
   );
+};
+
+
+
+const pickerSelectStyles = {
+  viewContainer: {
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    padding: 2,
+  },
+  inputIOS: {
+    fontSize: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
+    borderRadius: 5,
+    color: 'black',
+    backgroundColor: 'white',
+    paddingRight: 30,
+    marginBottom: 10,
+    height: 50,
+  },
+  inputAndroid: {
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
+    borderRadius: 5,
+    color: 'black',
+    backgroundColor: 'white',
+    paddingRight: 30,
+    marginBottom: 10,
+    height: 50,
+  },
+  iconContainer: {
+    top: 15,
+    right: 12,
+  },
+  itemStyle: {
+    color: '#008281',
+    fontWeight: 'bold',
+  },
+
 };
 
 const styles = StyleSheet.create({
@@ -378,6 +417,9 @@ const styles = StyleSheet.create({
   halfContainer: {
     width: '48%',
   },
+  halfContainer1: {
+    width: '48%',
+  },
   submitButton: {
     backgroundColor: '#7ECEC4',
     borderRadius: 8,
@@ -409,7 +451,7 @@ const styles = StyleSheet.create({
   },
   bannerListContainer: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
+    paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
     paddingBottom: 12
@@ -419,7 +461,7 @@ const styles = StyleSheet.create({
   },
   bannerItem: {
     width: 350,
-    height: 160,
+    height: 140,
     marginRight: 12,
     borderRadius: 8,
     alignContent: 'center',

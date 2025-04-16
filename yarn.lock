@@ -6387,6 +6387,11 @@ react-native-otp-textinput@^1.1.6:
   resolved "https://registry.npmjs.org/react-native-otp-textinput/-/react-native-otp-textinput-1.1.6.tgz"
   integrity sha512-auj4etyrp8N2GWyWTDO2If3uMdSoMR9oSJweQYfNEYP8cJEoEHLtDJhNOBJMwTrkRG8YbYroHg3b30TOhLv9kw==
 
+react-native-phone-call@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/react-native-phone-call/-/react-native-phone-call-1.2.0.tgz"
+  integrity sha512-M1CiocX8w7YNsh3Cwcnwc3eUkIJOPaBIQji3P9Uv/ZWAwb6XGI2NtV2UBSAa4Prvn6ooXeFPZs/YXmeTHmVHKg==
+
 react-native-picker-select@^9.3.1:
   version "9.3.1"
   resolved "https://registry.npmjs.org/react-native-picker-select/-/react-native-picker-select-9.3.1.tgz"

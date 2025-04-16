@@ -261,41 +261,31 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
                                 <ActivityIndicator size="large" color="#008489" />
                             </View>
                         ) : (
+
                             <RNPickerSelect
-                                value={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : '')} 
                                 onValueChange={(itemValue) => {
                                     console.log('Selected property id:', itemValue.toString());
                                     setSelectedProperty(itemValue.toString());
-
                                 }}
                                 items={[
-                                    { label: 'Select a property', value: properties.length > 0 ? properties[0].id.toString() : '' },
-                                    ...properties.map((property) => ({
+                                    ...(properties || []).map((property) => ({
                                         label: property.listing_name,
                                         value: property.id.toString(),
                                     }))
                                 ]}
-                                style={{
-                                    viewContainer: {
-                                        borderRadius: 10,
-                                        backgroundColor: '#fff',
-                                        padding: 2,
-                                    },
-                                    
-                                    inputIOS: { ...styles.picker, height: 60, },
-                                    inputAndroid: { ...styles.picker, height: 60, },
-                                    iconContainer: {
-                                        top: 12,
-                                        right: 12,
-                                    },
-                                }}
-                            /*  Icon={() => (
-                                 <View style={styles.pickerIcon}>
-                                     <FontAwesomeIcon icon={faChevronDown} size={16} color="#666" />
-                                 </View>
-                             )} */
+                                value={selectedProperty || (properties.length > 0 ? properties[0].id.toString() : '')}
+                                style={pickerSelectStyles}
+                                useNativeAndroidPickerStyle={false}
+                                placeholder={{ label: 'Select a property', value: null }}
+                                Icon={() => (
+                                    <FontAwesomeIcon
+                                        icon={faChevronDown}
+                                        size={16}
+                                        color="#666"
+                                        style={{ marginRight: 12 }}
+                                    />
+                                )}
                             />
-
                         )}
                     </View>
                 </View>
@@ -371,6 +361,49 @@ const RatingsScreen: React.FC<RatingsScreenProps> = ({ navigation }) => {
             </ScrollView>
         </SafeAreaView>
     );
+};
+
+
+
+const pickerSelectStyles = {
+    viewContainer: {
+        borderRadius: 10,
+        backgroundColor: '#fff',
+        padding: 2,
+    },
+    inputIOS: {
+        fontSize: 14,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30,
+        height: 55,
+    },
+    inputAndroid: {
+        fontSize: 14,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
+        borderRadius: 10,
+        color: 'black',
+        backgroundColor: 'white',
+        paddingRight: 30,
+        height: 55,
+    },
+    iconContainer: {
+        top: 15,
+        right: 12,
+    },
+    itemStyle: {
+        color: '#008281',
+        fontWeight: 'bold',
+    },
+
 };
 
 const styles = StyleSheet.create({

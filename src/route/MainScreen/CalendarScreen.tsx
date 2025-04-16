@@ -377,55 +377,70 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                         <LegendItem color="#FF5252" label="Maintenance" />
                     </View>
 
-                    {loading && (
+                    {loading ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#008489" />
+                            <Text style={styles.loadingText}>Loading calendar data...</Text>
                         </View>
-                    )}
-
-
-                    {selectedProperty && !loading && (
-                        <View style={styles.calendarContainer}>
-                            <View style={styles.monthHeader}>
-                                {/* <Text style={styles.monthText}>{getCurrentMonthText()}</Text> */}
+                    ) : (
+                        selectedProperty && (
+                            <View style={styles.calendarContainer}>
+                                <CalendarList
+                                    style={styles.calendar}
+                                    onDayPress={onDayPress}
+                                    onMonthChange={onMonthChange}
+                                    markingType={'period'}
+                                    markedDates={markedDates}
+                                    pastScrollRange={6}
+                                    futureScrollRange={6}
+                                    scrollEnabled={true}
+                                    showScrollIndicator={true}
+                                    calendarHeight={360}
+                                    firstDay={0}
+                                    hideExtraDays={false}
+                                    showSixWeeks={true}
+                                    disableMonthChange={false}
+                                    enableSwipeMonths={true}
+                                    horizontal={true}
+                                    pagingEnabled={true}
+                                    theme={{
+                                        backgroundColor: '#ffffff',
+                                        calendarBackground: '#ffffff',
+                                        textSectionTitleColor: '#b6c1cd',
+                                        selectedDayBackgroundColor: '#50cebb',
+                                        selectedDayTextColor: '#ffffff',
+                                        todayTextColor: '#50cebb',
+                                        dayTextColor: '#2d4150',
+                                        textDisabledColor: '#d9e1e8',
+                                        dotColor: '#50cebb',
+                                        selectedDotColor: '#ffffff',
+                                        arrowColor: '#50cebb',
+                                        monthTextColor: '#2d4150',
+                                        textMonthFontSize: 16,
+                                        textDayFontSize: 12,
+                                        textDayHeaderFontSize: 12, 
+                                        'stylesheet.calendar.main': {
+                                            week: {
+                                                marginTop: 0,
+                                                marginBottom: 0,
+                                                flexDirection: 'row',
+                                                justifyContent: 'space-around',
+                                                paddingVertical: 2,
+                                            },
+                                            dayContainer: {
+                                                flex: 1,
+                                                alignItems: 'center',
+                                                borderRightWidth: 0.3,
+                                                borderRightColor: '#e0e0e0',
+                                            },
+                                            'stylesheet.calendar.main.dayContainer:last-child': {
+                                                borderRightWidth: 0,
+                                            },
+                                        },
+                                    }}
+                                />
                             </View>
-                            <CalendarList
-                                style={styles.calendar}
-                                onDayPress={onDayPress}
-                                onMonthChange={onMonthChange}
-                                markingType={'period'}
-                                markedDates={markedDates}
-                                pastScrollRange={12}
-                                futureScrollRange={12}
-                                scrollEnabled={true}
-                                showScrollIndicator={true}
-                                calendarHeight={360}
-                                firstDay={0}
-                                hideExtraDays={false}
-                                showSixWeeks={true}
-                                disableMonthChange={false}
-                                enableSwipeMonths={true}
-                                theme={{
-                                    backgroundColor: '#ffffff',
-                                    calendarBackground: '#ffffff',
-                                    textSectionTitleColor: '#b6c1cd',
-                                    selectedDayBackgroundColor: '#50cebb',
-                                    selectedDayTextColor: '#ffffff',
-                                    todayTextColor: '#50cebb',
-                                    dayTextColor: '#2d4150',
-                                    textDisabledColor: '#d9e1e8',
-                                    dotColor: '#50cebb',
-                                    selectedDotColor: '#ffffff',
-                                    arrowColor: '#50cebb',
-                                    monthTextColor: '#2d4150',
-                                    textMonthFontSize: 16,
-                                    textDayFontSize: 12,
-                                    textDayHeaderFontSize: 12,
-                                    // Removed dayNames as it does not exist on the CalendarListProps
-                                    // dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] // Commented out as it does not exist
-                                }}
-                            />
-                        </View>
+                        )
                     )}
                 </View>
             </View>
@@ -682,8 +697,15 @@ const styles = StyleSheet.create({
         zIndex: 2000,
     },
     loadingContainer: {
-        padding: 20,
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
+        padding: 20,
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#666',
     },
     calendarContainer: {
         backgroundColor: '#fff',
