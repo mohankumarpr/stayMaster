@@ -31,6 +31,7 @@
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-otp-textinput": "^1.1.6",
+    "react-native-otp-verify": "^1.1.8",
     "react-native-phone-call": "^1.2.0",
     "react-native-picker-select": "^9.3.1",
     "react-native-reanimated": "^3.17.1",

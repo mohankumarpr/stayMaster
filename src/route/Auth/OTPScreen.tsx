@@ -3,22 +3,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import NetInfo from '@react-native-community/netinfo';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { ActivityIndicator, Alert, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View, PermissionsAndroid, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import api from '../../api/api'; // Import the axios instance
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
-
-interface UserData {
-  id?: string;
-  phoneNumber?: string;
-  // Add other fields based on your API response
-}
+import OtpVerify from 'react-native-otp-verify';
 
 type OTPScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'OTP'>;
-  route: RouteProp<RootStackParamList, 'OTP'>;
+  route: RouteProp<RootStackParamList, 'OTP'> & {
+    params: {
+      mobileNumber: string;
+      email: string;
+      isEmailLogin: boolean;
+      otp?: string | number;
+    };
+  };
 };
 
 const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
@@ -28,40 +30,108 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
   const inputRefs = useRef<TextInput[]>([]);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [otpDetected, setOtpDetected] = useState(false);
 
-  useEffect(() => {
-    // Start initial timer
-    setTimer(60);
-    setCanResend(false);
-  }, []); // Empty dependency array means this runs once when component mounts
+  // Start OTP detection
+  const startOtpDetection = useCallback(() => {
+    if (otpDetected) return; // Prevent multiple detection attempts
+    
+    console.log('Starting OTP detection...');
+    OtpVerify.getHash()
+      .then((hash: string[]) => {
+        console.log('Hash received:', hash);
+        
+        // Start listening for OTP using hash-based detection
+        OtpVerify.addListener((message: string) => {
+          console.log('Raw message received:', message);
+          
+          // First try to extract OTP from the response data
+          try {
+            const responseData = JSON.parse(message);
+            if (responseData.otp) {
+              console.log('OTP found in response data:', responseData.otp);
+              const otpString = responseData.otp.toString();
+              const otpArray = otpString.split('');
+              console.log('Setting OTP array:', otpArray);
+              setOtp(otpArray);
+              setOtpDetected(true);
+              OtpVerify.removeListener();
+              return;
+            }
+          } catch (e) {
+            console.log('Not a JSON response, trying regex patterns');
+          }
 
-  useEffect(() => {
-    const enteredOtp = otp.join('');
-    if (enteredOtp.length === 6) {
-      handleVerifyOTP(enteredOtp);
+          // If not found in response data, try regex patterns
+          const patterns = [
+            /Your staymaster OTP is (\d{6})/, // StayMaster specific format
+            /(\d{6})/, // Standard 6-digit OTP
+            /OTP[:\s]*(\d{6})/, // OTP followed by 6 digits
+            /verification code[:\s]*(\d{6})/, // Verification code followed by 6 digits
+            /code[:\s]*(\d{6})/, // Code followed by 6 digits
+          ];
+
+          for (const pattern of patterns) {
+            const match = message.match(pattern);
+            if (match && match[1]) {
+              const detectedOtp = match[1];
+              console.log('OTP detected from regex:', detectedOtp);
+              
+              // Fill OTP fields
+              const otpArray = detectedOtp.split('');
+              console.log('Setting OTP array:', otpArray);
+              setOtp(otpArray);
+              setOtpDetected(true);
+              
+              // Remove listener after OTP is detected
+              OtpVerify.removeListener();
+              return;
+            }
+          }
+        });
+      })
+      .catch((error: Error) => {
+        console.log('Error in OTP detection:', error);
+        showToast('error', 'Error', 'Failed to start OTP detection');
+      });
+  }, [otpDetected]);
+
+  // Request SMS permissions and start OTP detection
+  const requestSMSPermission = useCallback(async () => {
+    if (Platform.OS === 'android') {
+      try {
+        console.log('Requesting SMS permission...');
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_SMS,
+          {
+            title: 'SMS Permission',
+            message: 'StayMaster needs access to your SMS to auto-fill OTP',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        console.log('Permission result:', granted);
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('SMS permission granted, starting OTP detection');
+          startOtpDetection();
+        } else {
+          console.log('SMS permission denied');
+          showToast('error', 'Permission Denied', 'Please grant SMS permission to auto-fill OTP');
+        }
+      } catch (err) {
+        console.warn('Error requesting SMS permission:', err);
+        showToast('error', 'Error', 'Failed to request SMS permission');
+      }
+    } else {
+      // For iOS, we can't request SMS permissions directly
+      // The library will handle this internally
+      console.log('iOS platform detected, starting OTP detection');
+      startOtpDetection();
     }
-  }, [otp]);
+  }, [startOtpDetection]);
 
-  const handleOtpChange = (text: string, index: number) => {
-    if (text.length === 1 && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-
-    let newOtp = [...otp];
-    newOtp[index] = text;
-    setOtp(newOtp);
-  };
-
-  const handleBackspace = (text: string, index: number) => {
-    if (text === '' && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-    let newOtp = [...otp];
-    newOtp[index] = text;
-    setOtp(newOtp);
-  };
-
-  const handleVerifyOTP = async (enteredOtp: string) => {
+  const handleVerifyOTP = useCallback(async (enteredOtp: string) => {
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       Alert.alert('No Internet Connection', 'Please check your internet connection and try again.');
@@ -132,6 +202,99 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     } finally {
       setLoading(false);
     }
+  }, [isEmailLogin, email, mobileNumber, navigation]);
+
+  useEffect(() => {
+    // Start initial timer
+    setTimer(60);
+    setCanResend(false);
+    
+    // Handle initial OTP if available in route params
+    if (route.params?.otp) {
+      console.log('Initial OTP received:', route.params.otp);
+      const otpString = route.params.otp.toString();
+      const otpArray = otpString.split('');
+      console.log('Setting initial OTP array:', otpArray);
+      setOtp(otpArray);
+      setOtpDetected(true);
+    }
+    
+    // Request SMS permissions and start OTP detection
+    if (!isEmailLogin) {
+      requestSMSPermission();
+    }
+  }, [isEmailLogin, requestSMSPermission, route.params?.otp]);
+
+  // Add effect to handle OTP from response data
+  useEffect(() => {
+    const handleInitialOTP = async () => {
+      try {
+        let response;
+        if (email) {
+          response = await api.post('/hosts/generateEmailOTP', {
+            email: email
+          });
+        } else {
+          response = await api.post('/hosts/generateOTP', {
+            phone: `91${mobileNumber}`
+          });
+        }
+
+        if (response.data != null && response.data.otp) {
+          console.log('Initial OTP received in response:', response.data.otp);
+          const otpString = response.data.otp.toString();
+          const otpArray = otpString.split('');
+          console.log('Setting initial OTP array from response:', otpArray);
+          setOtp(otpArray);
+          setOtpDetected(true);
+        }
+      } catch (error) {
+        console.log('Error getting initial OTP:', error);
+      }
+    };
+
+    handleInitialOTP();
+  }, [email, mobileNumber]);
+
+  useEffect(() => {
+    const enteredOtp = otp.join('');
+    if (enteredOtp.length === 6) {
+      handleVerifyOTP(enteredOtp);
+    }
+  }, [otp, handleVerifyOTP]);
+
+  // Clean up OTP listener when component unmounts
+  useEffect(() => {
+    return () => {
+      console.log('Cleaning up OTP listener');
+      if (otpDetected) {
+        OtpVerify.removeListener();
+      }
+    };
+  }, [otpDetected]);
+
+  // Add effect to log OTP changes
+  useEffect(() => {
+    console.log('OTP state updated:', otp);
+  }, [otp]);
+
+  const handleOtpChange = (text: string, index: number) => {
+    if (text.length === 1 && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+
+    let newOtp = [...otp];
+    newOtp[index] = text;
+    setOtp(newOtp);
+  };
+
+  const handleBackspace = (text: string, index: number) => {
+    if (text === '' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+    let newOtp = [...otp];
+    newOtp[index] = text;
+    setOtp(newOtp);
   };
 
   const handleResendOTP = async () => {
@@ -153,6 +316,13 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
       }
 
       if (response.data != null && response.data.otp) {
+        console.log('OTP received in response:', response.data.otp);
+        // Set OTP directly from response
+        const otpString = response.data.otp.toString();
+        const otpArray = otpString.split('');
+        console.log('Setting OTP array from response:', otpArray);
+        setOtp(otpArray);
+        setOtpDetected(true);
         showToast('success', 'Success', 'OTP sent successfully');
       } else {
         showToast('error', 'Error', 'Failed to generate OTP. Please try again.');
