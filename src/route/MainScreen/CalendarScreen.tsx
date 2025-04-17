@@ -113,34 +113,34 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             const response = await PropertyService.getAllProperties();
             const propertyList = response.properties || [];
             // Adding the dummy record to the property list
-          /*   propertyList.push({
-                id: "43", // Changed from number to string
-                listing_name: "Test ",
-                internal_name: "Cranberry Corner ",
-                number_of_bedrooms: 4,
-                number_of_bathrooms: 4,
-                number_of_guests: 8,
-                number_of_extra_guests: 2,
-                google_latitude: "15.4612813771341",
-                google_longitude: "73.81050413558205",
-                address_line_1: "Staymaster Cranberry Corner (centre villa) ",
-                address_line_2: "La Citadel Colony  Durgavado",
-                city: "Dona Paula",
-                state: "Goa",
-                country: 14,
-                media_filename: "126_display_image.jpg",
-                url: "https://staymaster.s3.ap-south-1.amazonaws.com/property/126/126_display_image.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2VBA7ZYA7ET7KSK3%2F20250401%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20250401T141447Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFUaCmFwLXNvdXRoLTEiRjBEAiBDjo3l%2Fbt8%2F%2BOX2V%2B9zd15yUh43oTc8QSsigI4dAs09gIgBto7EX5nDHMoco2iBLaRC8vO6Bbq8I2cTtYYzMhINE0qyQUIvv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3MzIzNjExMTcxODUiDAgHN7fKOWfOT0AcWCqdBcnD0T6hTZcQ2JGWFYofI5o%2BM%2F3WUsj6yI7u0YKigRHcA1TkSoa8TpuuzpFHUneM6xYUM%2F%2B1DMs7ocMpFm2LWwK93CSBsJ1u2JQWfXZiKo5s5Wy3EsO1JxAVoIf7rSM0weI2UxYMcpFM%2BftBGj89fDmw5FRtPu2GtKPn3%2BpF%2BLm83zN2cOW0cODsaEk5P6U%2BX6XLLgnGQtwHzG18qUO3XqMxSmwD6NV63x8chqrCqGV%2F%2FoX9TNzTrC05V%2BkOY%2FdL2PYLVg1S2bfPaXy9jX37IJ%2BxsNxhM1TY%2Fz4kRVSeI1MligLQ9t9XWc3LV%2B7Bxr3H9nhEZ2QrY%2BD9TNh3K2PTLTWjha1cnRNTR%2BsIemoQSmhXNWahjrJG0Ru0pzWweYZJFrQuX3b8IWNaR4dU%2Butd%2F%2Fyr2%2BCJ6Rlbek4sYU05SN%2B7IUQFlCx9W6WwDnVvkEqkE7FYEAtIQeYEAjh5e7Mr1NCbkdMKx0rMIYM2yCF41Fq4m%2B5wNJeyVxrdaiKHgk3Me8QJNoyDiaDEBgZM%2BgkU40DX4nKmi6gw6AWitizEy9GAAE2n2a01sAzcJuOgVkd%2FRpT3%2BRtxcicE82LMLXyC%2FvHEhfOKudnelqiLEf6OYYwCoocrlDJcIxrAPiXDMFwgnWQ27yyQkxz8%2Ff6%2B43s%2BqR4apQqlHc5Mzx9mZAasXCO1bz8tyYrnZp24Bfkn7k1pUlH4xHnsBFTCTtE9iqnsC99jXvKwtuqOsrFKzqehkygliQSlaO6O7flfH562rKxs%2F1BhHMOhVZ8Dd3tpxhpF%2FBcI%2FoL1r1JxVIRXbsraEaHVIw1gRl1BtEO8U9LT9rMCJKM468lle1rty6GVpc1T4Uj0e6SwPvMURt0HY0ds6%2BnLHCz09P6qjwOS%2Buw2ITDKy6%2B%2FBjqyAZ6syFLUxm0V%2FikgtNZ295un0D6JvOf1dart0dcpL8heCPHH2rPc5CpYi7XdCZl3tKNgkXfGUbPwU%2BaGKIRBUbiebmsDQJR5AKcqmqO2i01PdTi7QH%2FbzSV1FlBMONJEnZ6bo1TcXMwzudlX1puocWwmn1New0XvYolRw7bNZbe5TKcEuEVvWu1g1HAvojDBWYL0hKF4x7Sw1TByST0yFePDB0%2Fs2JWHkTu38%2FZBlhNVpoI%3D&X-Amz-Signature=d7655d87de54371848cfa5fef5109d5e1df9a95407791539870ee7fb60ed9dc0&X-Amz-SignedHeaders=host",
-                nbv: 1064223,
-                nights: 81,
-                average_rating: undefined,
-                total_reviews: undefined,
-                earnings: [],
-                location: '',
-                image: '',
-                amenities: [],
-                description: '',
-                number_of_beds: 0
-            }); */
+            /*   propertyList.push({
+                  id: "43", // Changed from number to string
+                  listing_name: "Test ",
+                  internal_name: "Cranberry Corner ",
+                  number_of_bedrooms: 4,
+                  number_of_bathrooms: 4,
+                  number_of_guests: 8,
+                  number_of_extra_guests: 2,
+                  google_latitude: "15.4612813771341",
+                  google_longitude: "73.81050413558205",
+                  address_line_1: "Staymaster Cranberry Corner (centre villa) ",
+                  address_line_2: "La Citadel Colony  Durgavado",
+                  city: "Dona Paula",
+                  state: "Goa",
+                  country: 14,
+                  media_filename: "126_display_image.jpg",
+                  url: "https://staymaster.s3.ap-south-1.amazonaws.com/property/126/126_display_image.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2VBA7ZYA7ET7KSK3%2F20250401%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20250401T141447Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFUaCmFwLXNvdXRoLTEiRjBEAiBDjo3l%2Fbt8%2F%2BOX2V%2B9zd15yUh43oTc8QSsigI4dAs09gIgBto7EX5nDHMoco2iBLaRC8vO6Bbq8I2cTtYYzMhINE0qyQUIvv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3MzIzNjExMTcxODUiDAgHN7fKOWfOT0AcWCqdBcnD0T6hTZcQ2JGWFYofI5o%2BM%2F3WUsj6yI7u0YKigRHcA1TkSoa8TpuuzpFHUneM6xYUM%2F%2B1DMs7ocMpFm2LWwK93CSBsJ1u2JQWfXZiKo5s5Wy3EsO1JxAVoIf7rSM0weI2UxYMcpFM%2BftBGj89fDmw5FRtPu2GtKPn3%2BpF%2BLm83zN2cOW0cODsaEk5P6U%2BX6XLLgnGQtwHzG18qUO3XqMxSmwD6NV63x8chqrCqGV%2F%2FoX9TNzTrC05V%2BkOY%2FdL2PYLVg1S2bfPaXy9jX37IJ%2BxsNxhM1TY%2Fz4kRVSeI1MligLQ9t9XWc3LV%2B7Bxr3H9nhEZ2QrY%2BD9TNh3K2PTLTWjha1cnRNTR%2BsIemoQSmhXNWahjrJG0Ru0pzWweYZJFrQuX3b8IWNaR4dU%2Butd%2F%2Fyr2%2BCJ6Rlbek4sYU05SN%2B7IUQFlCx9W6WwDnVvkEqkE7FYEAtIQeYEAjh5e7Mr1NCbkdMKx0rMIYM2yCF41Fq4m%2B5wNJeyVxrdaiKHgk3Me8QJNoyDiaDEBgZM%2BgkU40DX4nKmi6gw6AWitizEy9GAAE2n2a01sAzcJuOgVkd%2FRpT3%2BRtxcicE82LMLXyC%2FvHEhfOKudnelqiLEf6OYYwCoocrlDJcIxrAPiXDMFwgnWQ27yyQkxz8%2Ff6%2B43s%2BqR4apQqlHc5Mzx9mZAasXCO1bz8tyYrnZp24Bfkn7k1pUlH4xHnsBFTCTtE9iqnsC99jXvKwtuqOsrFKzqehkygliQSlaO6O7flfH562rKxs%2F1BhHMOhVZ8Dd3tpxhpF%2FBcI%2FoL1r1JxVIRXbsraEaHVIw1gRl1BtEO8U9LT9rMCJKM468lle1rty6GVpc1T4Uj0e6SwPvMURt0HY0ds6%2BnLHCz09P6qjwOS%2Buw2ITDKy6%2B%2FBjqyAZ6syFLUxm0V%2FikgtNZ295un0D6JvOf1dart0dcpL8heCPHH2rPc5CpYi7XdCZl3tKNgkXfGUbPwU%2BaGKIRBUbiebmsDQJR5AKcqmqO2i01PdTi7QH%2FbzSV1FlBMONJEnZ6bo1TcXMwzudlX1puocWwmn1New0XvYolRw7bNZbe5TKcEuEVvWu1g1HAvojDBWYL0hKF4x7Sw1TByST0yFePDB0%2Fs2JWHkTu38%2FZBlhNVpoI%3D&X-Amz-Signature=d7655d87de54371848cfa5fef5109d5e1df9a95407791539870ee7fb60ed9dc0&X-Amz-SignedHeaders=host",
+                  nbv: 1064223,
+                  nights: 81,
+                  average_rating: undefined,
+                  total_reviews: undefined,
+                  earnings: [],
+                  location: '',
+                  image: '',
+                  amenities: [],
+                  description: '',
+                  number_of_beds: 0
+              }); */
 
             setProperties(propertyList);
 
@@ -265,7 +265,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 if (type?.toLowerCase() === 'booking') {
                     navigation.navigate('CalendarInfo', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
                 } else if (type?.toLowerCase() === 'owner block' || type?.toLowerCase() === 'maintenance block') {
-                    navigation.navigate('BlockInfoScreen', { bookingId, startDate, endDate, numberOfBedrooms, type } as any); 
+                    navigation.navigate('BlockInfoScreen', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
                     navigation.addListener('focus', () => {
                         // Reload the calendar view or refresh data here
                         // For example, you might want to call a function to fetch the updated calendar data
@@ -362,9 +362,9 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                 color: '#9EA0A4',
                             }}
                             Icon={() => (
-                                <FontAwesomeIcon 
-                                    icon={faChevronDown} 
-                                    size={16} 
+                                <FontAwesomeIcon
+                                    icon={faChevronDown}
+                                    size={16}
                                     color="#666"
                                     style={{ marginRight: 12 }}
                                 />
@@ -384,15 +384,15 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                         </View>
                     ) : (
                         selectedProperty && (
-                            <View style={styles.calendarContainer}>
+                            <View style={styles.calendarContainer}> 
                                 <CalendarList
                                     style={styles.calendar}
                                     onDayPress={onDayPress}
                                     onMonthChange={onMonthChange}
                                     markingType={'period'}
                                     markedDates={markedDates}
-                                    pastScrollRange={6}
-                                    futureScrollRange={6}
+                                    pastScrollRange={12}
+                                    futureScrollRange={12}
                                     scrollEnabled={true}
                                     showScrollIndicator={true}
                                     calendarHeight={360}
@@ -401,8 +401,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                     showSixWeeks={true}
                                     disableMonthChange={false}
                                     enableSwipeMonths={true}
-                                    horizontal={true}
-                                    pagingEnabled={true}
                                     theme={{
                                         backgroundColor: '#ffffff',
                                         calendarBackground: '#ffffff',
@@ -418,7 +416,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                         monthTextColor: '#2d4150',
                                         textMonthFontSize: 16,
                                         textDayFontSize: 12,
-                                        textDayHeaderFontSize: 12, 
+                                        textDayHeaderFontSize: 12,
                                         'stylesheet.calendar.main': {
                                             week: {
                                                 marginTop: 0,
@@ -430,13 +428,14 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                             dayContainer: {
                                                 flex: 1,
                                                 alignItems: 'center',
-                                                borderRightWidth: 0.3,
+                                                borderRightWidth: 0.4,
                                                 borderRightColor: '#e0e0e0',
                                             },
                                             'stylesheet.calendar.main.dayContainer:last-child': {
                                                 borderRightWidth: 0,
                                             },
                                         },
+
                                     }}
                                 />
                             </View>
