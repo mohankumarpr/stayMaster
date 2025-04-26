@@ -467,6 +467,7 @@ const styles = StyleSheet.create({
     },
     topBackground: {
         width: '100%',
+        height: 140,
     },
     contentArea: {
         flex: 1,

@@ -752,8 +752,8 @@ const styles = StyleSheet.create({
     },
     calendarSection: {
         backgroundColor: '#f8f8f8',
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
+        borderTopLeftRadius: 5,
+        borderTopRightRadius: 2,
         paddingHorizontal: 15,
         paddingTop: 20,
         flex: 1,
