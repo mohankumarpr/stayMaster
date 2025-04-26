@@ -681,7 +681,7 @@ const styles = StyleSheet.create({
         padding: 15,
         backgroundColor: '#F9F4F1',
         borderRadius: 50,
-        borderColor: '#008489',
+        borderColor: '#D5BDA3',
         borderWidth: 1,
     },
     detailsRow: {
