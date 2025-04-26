@@ -174,7 +174,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   }}>
                   {/* Top Row - Net Booking Value & Chevron */}
                   <View style={styles.topRow}>
-                    <Text style={styles.summaryLabel}>Revenue Current FY</Text>
+                    <View style={styles.columnContainer}>
+                      <Text style={styles.summaryLabel}>Revenue Current FY</Text>
+                      <Text style={styles.summaryLabel2}></Text>
+                    </View>
                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
 
@@ -191,8 +194,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     <Text style={styles.bookingValue}> {formatAmount(totalNBV)}</Text>
                   </View>
                 </TouchableOpacity>
-
-
+                  <View style={styles.divider2} />  
 
                 <TouchableOpacity
                   style={styles.summaryCard}
@@ -202,7 +204,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 >
                   {/* Top Row - Net Booking Value & Chevron */}
                   <View style={styles.topRow}>
-                    <Text style={styles.summaryLabel}>Nights Booked Current FY</Text>
+                    <View style={styles.columnContainer}>
+                      <Text style={styles.summaryLabel}>Nights Booked</Text>
+                      <Text style={styles.summaryLabel2}>Current FY</Text>
+                    </View>
                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
 
@@ -360,6 +365,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 16,
+    width: '50%',
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -373,6 +379,10 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 5,
     paddingRight: 6,
+  },
+  summaryLabel2: {
+    fontSize: 10,
+    color: '#666', 
   },
   topRow: {
     flexDirection: 'row',
@@ -492,6 +502,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     marginVertical: 10,
   },
+  divider2: { 
+    marginHorizontal: 2, 
+  },
   metricsTitle: {
     fontSize: 14,
     color: '#666',
@@ -523,6 +536,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#666',
     fontSize: 14,
+  },
+  columnContainer: {
+    flexDirection: 'column',
   },
 });
 
