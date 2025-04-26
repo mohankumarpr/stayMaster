@@ -1,7 +1,7 @@
 import NetInfo from '@react-native-community/netinfo';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import api from '../../api/api';
 import { RootStackParamList } from '../../navigation/AppNavigator';
@@ -104,66 +104,65 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require('../../assets/images/Login.png')} // Adjust the path to your background image
+      source={require('../../assets/images/Login.png')}
       style={styles.background}
-      resizeMode="cover" // Ensure the image covers the screen without blurring
+      resizeMode="cover"
     >
-      <View style={styles.container}>
-        <Image
-          source={require('../../assets/images/logo.png')} // Adjust the path to your email icon image
-          style={styles.logo}
-          resizeMode='contain'
-        />
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.topSpace} />
-          <View style={styles.formContainer}>
-            {isEmailLogin ? (
-              <TextInput
-                style={styles.registerinput}
-                placeholder="Email Address"
-                placeholderTextColor="#FFFFFF"
-                keyboardType="email-address"
-                onChangeText={setEmail}
-                value={email}
-              />
-            ) : (
-              <TextInput
-                style={styles.registerinput}
-                placeholder="Register Mobile Number"
-                placeholderTextColor="#FFFFFF"
-                keyboardType="phone-pad"
-                maxLength={10}
-                onChangeText={(text) => {
-                  if (/^\d{0,10}$/.test(text)) {
-                    setMobileNumber(text);
-                  }
-                }}
-                value={mobileNumber}
-              />
-            )}
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>
-                {isEmailLogin ? 'Login' : 'Generate OTP'}
-              </Text>
-            </TouchableOpacity>
-            {loading && <ActivityIndicator size="large" color="#007BFF" style={styles.loading} />}
-            <View style={styles.bottomSpace} />
-            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-              <TouchableOpacity style={styles.loginTextButton} onPress={() => {
-                setIsEmailLogin(!isEmailLogin);
-                // Clear fields when switching login methods
-                setEmail('');
-                setPassword('');
-                setMobileNumber('');
-              }}>
-                <Text style={styles.loginTextButtonText}>
-                  {isEmailLogin ? 'Login via Mobile Number' : 'Login via Email'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </View>
+      <Image
+        source={require('../../assets/images/logo.png')}
+        style={styles.logo}
+        resizeMode='contain'
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+        style={{ width: '100%', alignItems: 'center' }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        <View style={styles.topSpace} />
+        <View style={[styles.formContainer, { alignSelf: 'center', width: '95%' }]}>
+          {isEmailLogin ? (
+            <TextInput
+              style={styles.registerinput}
+              placeholder="Email Address"
+              placeholderTextColor="#FFFFFF"
+              keyboardType="email-address"
+              onChangeText={setEmail}
+              value={email}
+            />
+          ) : (
+            <TextInput
+              style={styles.registerinput}
+              placeholder="Registered Mobile Number"
+              placeholderTextColor="#FFFFFF"
+              keyboardType="phone-pad"
+              maxLength={10}
+              onChangeText={(text) => {
+                if (/^\d{0,10}$/.test(text)) {
+                  setMobileNumber(text);
+                }
+              }}
+              value={mobileNumber}
+            />
+          )}
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>
+              {isEmailLogin ? 'Login' : 'Generate OTP'}
+            </Text>
+          </TouchableOpacity>
+          {loading && <ActivityIndicator size="large" color="#007BFF" style={styles.loading} />}
+          <View style={styles.bottomSpace} />
+          <TouchableOpacity style={[styles.loginTextButton, { marginTop: 24 }]} onPress={() => {
+            setIsEmailLogin(!isEmailLogin);
+            setEmail('');
+            setPassword('');
+            setMobileNumber('');
+          }}>
+            <Text style={styles.loginTextButtonText}>
+              {isEmailLogin ? 'Login using Mobile Number' : 'Login using Email'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 };
@@ -173,25 +172,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
   container: {
     flex: 1,
     justifyContent: 'flex-start', // Align content to the top
   },
   topSpace: {
-    height: 150, // Adjust the height to create space at the top
+    height: 100, // Adjust the height to create space at the top
   },
   bottomSpace: {
-    height: 60, // Adjust the height to create space at the top
+    height: 5, // Adjust the height to create space at the top
   },
   formContainer: {
     padding: 20,
     borderRadius: 10,
     marginHorizontal: 20,
-    marginVertical: 50,
+    marginVertical: 70,
   },
   input: {
     height: 40,
@@ -199,7 +194,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#FFFFFF', // Color of the underline
     color: '#FFFFFF', // Text color
     paddingHorizontal: 10, // Padding inside the input field
-    marginBottom: 20, // Space between input fields
+    marginBottom: 10, // Space between input fields
     fontSize: 16,
   },
   icon: {
@@ -213,7 +208,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#FFFFFF', // Color of the underline
     color: '#FFFFFF', // Text color
     paddingHorizontal: 10, // Padding inside the input field
-    marginBottom: 65, // Space between input fields
+    marginBottom: 35, // Space between input fields
     fontSize: 16,
   },
   forgotPassword: {
@@ -232,13 +227,13 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     backgroundColor: '#008281', // Button background color
-    padding: 15,
+    padding: 10,
     borderRadius: 25,
     alignItems: 'center',
   },
   loginTextButton: {
     // backgroundColor: '#008281', // Button background color
-    padding: 15,
+    padding: 10,
     borderRadius: 25,
     alignItems: 'center',
   },
@@ -257,7 +252,7 @@ const styles = StyleSheet.create({
     height: 150,
     alignSelf: 'center',
     marginBottom: 0,
-    marginTop: 50,
+    marginTop: 30,
   },
   loading: {
     marginTop: 20,
