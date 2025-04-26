@@ -1,4 +1,4 @@
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faBed, faCalendarDays, faChevronDown, faPersonWalkingLuggage, faSun } from '@fortawesome/free-solid-svg-icons';
 import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons/faChevronCircleRight';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { useProperty } from '../../context/PropertyContext';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
+import { faUser, faCalendar, faMoon, faChartLine } from '@fortawesome/free-solid-svg-icons';
 
 // const { width } = Dimensions.get('window');
 // const cardWidth = width * 0.8;
@@ -175,6 +176,20 @@ const EarningsScreen: React.FC = () => {
         value: property.id.toString(),
     }));
 
+    interface LegendItemProps {
+        color: string;
+        label: string;
+    }
+    const LegendItem: React.FC<LegendItemProps> = ({ color, label }) => {
+        return (
+            <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: color }]} />
+                <Text style={styles.legendText}>{label}</Text>
+            </View>
+        );
+    };
+
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#008489" />
@@ -189,6 +204,7 @@ const EarningsScreen: React.FC = () => {
                     <SafeAreaView>
                         <View style={styles.header}>
                             <View style={styles.userInfo}>
+                                <Image source={require('../../assets/images/StayMaster-Logo.png')} style={styles.avatar} />
                                 <View>
                                     <Text style={styles.welcomeText}>Earnings</Text>
                                 </View>
@@ -199,7 +215,7 @@ const EarningsScreen: React.FC = () => {
                         <View style={styles.summaryContainer}>
                             <TouchableOpacity style={[styles.summaryCard, styles.singleCard]}>
                                 <View style={styles.topRow}>
-                                    <Text style={styles.summaryLabel}>Net Booking Value (current month)</Text>
+                                    <Text style={styles.summaryLabel}>Revenue Current FY</Text>
                                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                                 </View>
 
@@ -223,7 +239,7 @@ const EarningsScreen: React.FC = () => {
             </View>
 
             {/* Content Area with enhanced ScrollView */}
-            <ScrollView 
+            <ScrollView
                 style={styles.contentArea}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
@@ -242,9 +258,9 @@ const EarningsScreen: React.FC = () => {
                             useNativeAndroidPickerStyle={false}
                             placeholder={{ label: 'Select a property', value: null }}
                             Icon={() => (
-                                <FontAwesomeIcon 
-                                    icon={faChevronDown} 
-                                    size={16} 
+                                <FontAwesomeIcon
+                                    icon={faChevronDown}
+                                    size={16}
                                     color="#666"
                                     style={{ marginRight: 12 }}
                                 />
@@ -264,29 +280,10 @@ const EarningsScreen: React.FC = () => {
                     <View style={styles.chartContainer}>
                         {/* <Text style={styles.chartTitle}>Statistics</Text> */}
                         <View style={styles.bookingSummary}>
-                            <View style={styles.summaryItem}>
-                                <Text style={styles.summaryValue}>
-                                    {totals.checkedOut || 0}
-                                </Text>
-                                <Text style={[styles.summaryLabel, styles.checkedOutText]}>
-                                    Checked Out
-                                </Text>
-                            </View>
-                            <View style={styles.summaryItem}>
-                                <Text style={styles.summaryValue}>
-                                    {totals.current || 0}
-                                </Text>
-                                <Text style={[styles.summaryLabel, styles.currentText]}>
-                                    Current
-                                </Text>
-                            </View>
-                            <View style={styles.summaryItem}>
-                                <Text style={styles.summaryValue}>
-                                    {totals.upcoming || 0}
-                                </Text>
-                                <Text style={[styles.summaryLabel, styles.upcomingText]}>
-                                    Upcoming
-                                </Text>
+                            <View style={styles.legendContainer}>
+                                <LegendItem color="#50cebb" label="Checked Out" />
+                                <LegendItem color="#FF7F7B" label="Current" />
+                                <LegendItem color="#E3C063" label="Upcoming" />
                             </View>
                         </View>
 
@@ -310,8 +307,7 @@ const EarningsScreen: React.FC = () => {
                                     <TouchableOpacity
                                         key={index}
                                         style={styles.barWrapper}
-                                        onPress={() => setSelectedMonth(index)}
-                                    >
+                                        onPress={() => setSelectedMonth(index)}>
                                         <View
                                             style={[
                                                 styles.bar,
@@ -331,26 +327,75 @@ const EarningsScreen: React.FC = () => {
 
                 {/* Details Card */}
                 {selectedMonth !== null && (
-                    <View style={[styles.detailsCard, { marginHorizontal: 20, marginBottom: 60 }]}>
-                        <View style={styles.detailsRow}>
-                            <Text style={styles.detailsMonth}>
-                                {bookingsData[selectedMonth].month}
-                            </Text>
+                    <View style={[styles.detailsCard, { marginHorizontal: 20, marginBottom: 60, padding: 20, borderRadius: 40, backgroundColor: '#F7F0ED', elevation: 1 }]}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                            <Text style={{ color: '#B66E63', fontSize: 18, fontWeight: 'bold' }}>You've made </Text>
+                            <Text style={{ color: '#008489', fontSize: 18, fontWeight: 'bold' }}>₹{formatAmount(bookingsData[selectedMonth].totalEarnings)}</Text>
+                            <Text style={{ color: '#B66E63', fontSize: 18, fontWeight: 'bold' }}> in </Text>
+                            <Text style={{ color: '#008489', fontSize: 18, fontWeight: 'bold' }}>{bookingsData[selectedMonth].month}</Text>
+                            <Text style={{ color: '#B66E63', fontSize: 18, fontWeight: 'bold' }}>!</Text>
                         </View>
-                        <View style={styles.detailsRow}>
-                            <Text style={styles.detailsNights}>
-                                {bookingsData[selectedMonth].totalNights} nights booked
-                            </Text>
-                            <Text style={styles.detailsEarnings}>
-                                {(bookingsData[selectedMonth].totalEarnings.toLocaleString())}
-                            </Text>
+
+                        <View style={[styles.statsGrid, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }]}>
+                            {/* Guests Hosted */}
+                            <View style={styles.statsItem}>
+                                <View style={styles.statsItemContent}>
+                                    <View style={styles.iconContainer}>
+                                        <FontAwesomeIcon icon={faPersonWalkingLuggage} size={28} color="#000" />
+                                    </View>
+                                    <View style={styles.statsTextContainer}>
+                                        <Text style={[styles.statsValue, { color: '#008080' }]}>{bookingsData[selectedMonth].bookings}</Text>
+                                        <Text style={styles.statsLabel}>Guests Hosted</Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Occupancy */}
+                            <View style={styles.statsItem}>
+                                <View style={styles.statsItemContent}>
+                                    <View style={styles.iconContainer}>
+                                        <FontAwesomeIcon icon={faCalendarDays} size={28} color="#000" />
+                                    </View>
+                                    <View style={styles.statsTextContainer}>
+                                        <Text style={[styles.statsValue, { color: '#008080' }]}>{69}%</Text>
+                                        <Text style={styles.statsLabel}>Occupancy</Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Nights */}
+                            <View style={styles.statsItem}>
+                                <View style={styles.statsItemContent}>
+                                    <View style={styles.iconContainer}>
+                                        <FontAwesomeIcon icon={faBed} size={28} color="#000" />
+                                    </View>
+                                    <View style={styles.statsTextContainer}>
+                                        <Text style={[styles.statsValue, { color: '#008080' }]}>{(bookingsData[selectedMonth].totalNights)}</Text>
+                                        <Text style={styles.statsLabel}>Nights</Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Revenue Growth */}
+                            <View style={styles.statsItem}>
+                                <View style={styles.statsItemContent}>
+                                    <View style={styles.iconContainer}>
+                                        <FontAwesomeIcon icon={faChartLine} size={28} color="#000" />
+                                    </View>
+                                    <View style={styles.statsTextContainer}>
+                                        <Text style={[styles.statsValue, { color: '#008080' }]}>12%</Text>
+                                        <Text style={styles.statsLabel}>MoM Revenue Growth</Text>
+                                    </View>
+                                </View>
+                            </View>
                         </View>
                     </View>
                 )}
+
             </ScrollView>
 
             {isPickerOpen && (
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalOverlay}
                     activeOpacity={1}
                     onPress={() => setIsPickerOpen(false)}
@@ -417,7 +462,7 @@ const styles = StyleSheet.create({
         elevation: 0,
     },
     topContainer: {
-        height: 220,
+        height: 200,
         zIndex: 1,
     },
     topBackground: {
@@ -433,8 +478,8 @@ const styles = StyleSheet.create({
         flexGrow: 1,       // Ensures content can grow
     },
     header: {
-        paddingHorizontal: 20,
-        paddingTop: 20,
+        paddingHorizontal: 16,
+        paddingTop: 10,
         paddingBottom: 15,
     },
     userInfo: {
@@ -632,10 +677,12 @@ const styles = StyleSheet.create({
     },
     detailsCard: {
         marginTop: 5,
-        marginBottom: 30,  // Increased margin bottom
+        marginBottom: 10,  // Increased margin bottom
         padding: 15,
-        backgroundColor: '#3A3B3F',
-        borderRadius: 10,
+        backgroundColor: '#F9F4F1',
+        borderRadius: 50,
+        borderColor: '#008489',
+        borderWidth: 1,
     },
     detailsRow: {
         flexDirection: 'row',
@@ -697,6 +744,74 @@ const styles = StyleSheet.create({
         bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         zIndex: 2000,
+    },
+    legendContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        paddingVertical: 5,
+        paddingHorizontal: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: 'transparent',
+        // marginBottom: 10,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+    },
+    legendDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginRight: 5,
+    },
+    legendText: {
+        fontSize: 12,
+        color: '#666',
+    },
+    statsTitle: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
+    },
+    statsItem: {
+        width: '45%',
+        marginBottom: 10,
+    },
+    statsItemContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    statsTextContainer: {
+        flex: 1,
+    },
+    statsValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    statsLabel: {
+        fontSize: 8,
+        color: '#666',
     },
 });
 

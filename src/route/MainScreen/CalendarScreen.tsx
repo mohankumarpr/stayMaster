@@ -129,7 +129,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                   state: "Goa",
                   country: 14,
                   media_filename: "126_display_image.jpg",
-                  url: "https://staymaster.s3.ap-south-1.amazonaws.com/property/126/126_display_image.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2VBA7ZYA7ET7KSK3%2F20250401%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20250401T141447Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFUaCmFwLXNvdXRoLTEiRjBEAiBDjo3l%2Fbt8%2F%2BOX2V%2B9zd15yUh43oTc8QSsigI4dAs09gIgBto7EX5nDHMoco2iBLaRC8vO6Bbq8I2cTtYYzMhINE0qyQUIvv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3MzIzNjExMTcxODUiDAgHN7fKOWfOT0AcWCqdBcnD0T6hTZcQ2JGWFYofI5o%2BM%2F3WUsj6yI7u0YKigRHcA1TkSoa8TpuuzpFHUneM6xYUM%2F%2B1DMs7ocMpFm2LWwK93CSBsJ1u2JQWfXZiKo5s5Wy3EsO1JxAVoIf7rSM0weI2UxYMcpFM%2BftBGj89fDmw5FRtPu2GtKPn3%2BpF%2BLm83zN2cOW0cODsaEk5P6U%2BX6XLLgnGQtwHzG18qUO3XqMxSmwD6NV63x8chqrCqGV%2F%2FoX9TNzTrC05V%2BkOY%2FdL2PYLVg1S2bfPaXy9jX37IJ%2BxsNxhM1TY%2Fz4kRVSeI1MligLQ9t9XWc3LV%2B7Bxr3H9nhEZ2QrY%2BD9TNh3K2PTLTWjha1cnRNTR%2BsIemoQSmhXNWahjrJG0Ru0pzWweYZJFrQuX3b8IWNaR4dU%2Butd%2F%2Fyr2%2BCJ6Rlbek4sYU05SN%2B7IUQFlCx9W6WwDnVvkEqkE7FYEAtIQeYEAjh5e7Mr1NCbkdMKx0rMIYM2yCF41Fq4m%2B5wNJeyVxrdaiKHgk3Me8QJNoyDiaDEBgZM%2BgkU40DX4nKmi6gw6AWitizEy9GAAE2n2a01sAzcJuOgVkd%2FRpT3%2BRtxcicE82LMLXyC%2FvHEhfOKudnelqiLEf6OYYwCoocrlDJcIxrAPiXDMFwgnWQ27yyQkxz8%2Ff6%2B43s%2BqR4apQqlHc5Mzx9mZAasXCO1bz8tyYrnZp24Bfkn7k1pUlH4xHnsBFTCTtE9iqnsC99jXvKwtuqOsrFKzqehkygliQSlaO6O7flfH562rKxs%2F1BhHMOhVZ8Dd3tpxhpF%2FBcI%2FoL1r1JxVIRXbsraEaHVIw1gRl1BtEO8U9LT9rMCJKM468lle1rty6GVpc1T4Uj0e6SwPvMURt0HY0ds6%2BnLHCz09P6qjwOS%2Buw2ITDKy6%2B%2FBjqyAZ6syFLUxm0V%2FikgtNZ295un0D6JvOf1dart0dcpL8heCPHH2rPc5CpYi7XdCZl3tKNgkXfGUbPwU%2BaGKIRBUbiebmsDQJR5AKcqmqO2i01PdTi7QH%2FbzSV1FlBMONJEnZ6bo1TcXMwzudlX1puocWwmn1New0XvYolRw7bNZbe5TKcEuEVvWu1g1HAvojDBWYL0hKF4x7Sw1TByST0yFePDB0%2Fs2JWHkTu38%2FZBlhNVpoI%3D&X-Amz-Signature=d7655d87de54371848cfa5fef5109d5e1df9a95407791539870ee7fb60ed9dc0&X-Amz-SignedHeaders=host",
+                  url: "https://staymaster.s3.ap-south-1.amazonaws.com/property/126/126_display_image.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2VBA7ZYA7ET7KSK3%2F20250401%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20250401T141447Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFUaCmFwLXNvdXRoLTEiRjBEAiBDjo3l%2Fbt8%2F%2BOX2V%2B9zd15yUh43oTc8QSsigI4dAs09gIgBto7EX5nDHMoco2iBLaRC8vO6Bbq8I2cTtYYzMhINE0qyQUIvv%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3MzIzNjExMTcxODUiDAgHN7fKOWfOT0AcWCqdBcnD0T6hTZcQ2JGWFYofI5o%2BM%2F3WUsj6yI7u0YKigRHcA1TkSoa8TpuuzpFHUneM6xYUM%2F%2B1DMs7ocMpFm2LWwK93CSBsJ1u2JQWfXZiKo5s5Wy3EsO1JxAVoIf7rSM0weI2UxYMcpFM%2BftBGj89fDmw5FRtPu2GtKPn3%2BpF%2BLm83zN2cOW0cODsaEk5P6U%2BX6XLLgnGQtwHzG18qUO3XqMxSmwD6NV63x8chqrCqGV%2F%2FoX9TNzTrC05V%2BkOY%2FdL2PYLVg1S2bfPaXy9jX37IJ%2BxsNxhM1TY%2Fz4kRVSeI1MligLQ9t9XWc3LV%2B7Bxr3H9nhEZ2QrY%2BD9TNh3K2PTLTWjha1cnRNTR%2BsIemoQSmhXNWahjrJG0Ru0pzWweYZJFrQuX3b8IWNaR4dU%2Butd%2F%2Fyr2%2BCJ6Rlbek4sYU05SN%2B7IUQFlCx9W6WwDnVvkEqkE7FYEAtIQeYEAjh5e7Mr1NCbkdMKx0rMIYM2yCF41Fq4m%2B5wNJeyVxrdaiKHgk3Me8QJNoyDiaDEBgZM%2BgkU40DX4nKmi6gw6AWitizEy9GAAE2n2a01sAzcJuOgVkd%2FRpT3%2BRtxcicE82LMLXyC%2FvHEhfOKudnelqiLEf6OYYwCoocrlDJcIxrAPiXDMFwgnWQ27yyQkxz8%2Ff6%2B43s%2BqR4apQqlHc5Mzx9mZAasXCO1bz8tyYrnZp24Bfkn7k1pUlH4xHnsBFTCTtE9iqnsC99jXvKwtuqOsrFKzqehkygliQSlaO6O7flfH562rKxs%2F1BhHMOhVZ8Dd3tpxhpF%2FBcI%2FoL1r1JxVIRXbsraEaHVIw1gRl1BtEO8U9LT9rMCJKM468lle1rty6GVpc1T4Uj0e6SwPvMURt0HY0ds6%2BnLHCz09P6qjwOS%2Buw2ITDKy6%2B%2FBjqyAZ6syFLUxm0V%2FikgtNZ295un0D6JvOf1dart0dcpL8heCPHH2rPc5CpYi7XdCZl3tKNgkXfGUbPwU%2BaGKIRBUbiebmsDQJR5AKcqmqO2i01PdTi7QH%2FbzSV1FlBMONJEnZ6bo1TcXMwzudlX1puocWwmn1New0XvYolRw7bNZbe5TKcEuEVvWu1g1HAvojDBWYL0hKF4x7Sw1TByST0yFePDB0%2Fs2JWHkTu38%2FZBlhNVpoI%3D&X-Amz-Signature=d7655d87de54371848cfa5fef5109d5e1df9a95407791539870ee7fb60ed9dc0&X-Amz-SignedHeaders=host",
                   nbv: 1064223,
                   nights: 81,
                   average_rating: undefined,
@@ -180,8 +180,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             const marked: any = {};
 
             Object.values(groups).forEach(bookingGroup => {
-                // Determine if this is a maintenance booking
-
                 console.log("bookingGroup", bookingGroup);
                 const type = bookingGroup[0].type;
                 let color = '';
@@ -193,25 +191,57 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     color = '#FF5252';
                 }
                 console.log("color", color);
-                //'#FFC107' : '#50cebb';
 
-                // Get start and end dates from server data
-                const firstDate = bookingGroup[0].start; // Assuming startDate is provided by the server
-                const lastDate = bookingGroup[0].end; // Assuming endDate is provided by the server
+                const firstDate = bookingGroup[0].start;
+                const lastDate = bookingGroup[0].end;
 
-                // Mark first date
+                // Mark first date with left margin
                 marked[firstDate] = {
                     startingDay: true,
                     color: color,
-                    textColor: 'white'
+                    textColor: 'white',
+                    customStyles: {
+                        container: {
+                            borderLeftWidth: 0,
+                            borderRightWidth: 0,
+                            borderTopWidth: 0,
+                            borderBottomWidth: 0,
+                            backgroundColor: 'transparent',
+                        },
+                        text: {
+                            color: 'black',
+                        },
+                    },
+                    leftMargin: {
+                        color: color,
+                        width: '50%',
+                    },
                 };
-                // Mark last date
+
+                // Mark last date with right margin
                 marked[lastDate] = {
                     endingDay: true,
                     color: color,
-                    textColor: 'white'
+                    textColor: 'white',
+                    customStyles: {
+                        container: {
+                            borderLeftWidth: 0,
+                            borderRightWidth: 0,
+                            borderTopWidth: 0,
+                            borderBottomWidth: 0,
+                            backgroundColor: 'transparent',
+                        },
+                        text: {
+                            color: 'black',
+                        },
+                    },
+                    rightMargin: {
+                        color: color,
+                        width: '50%',
+                    },
                 };
-                // Mark middle dates
+
+                // Mark middle dates with both margins
                 const currentDate = new Date(firstDate);
                 const endDate = new Date(lastDate);
                 while (currentDate <= endDate) {
@@ -219,7 +249,27 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     if (dateString !== firstDate && dateString !== lastDate) {
                         marked[dateString] = {
                             color: color,
-                            textColor: 'white'
+                            textColor: 'white',
+                            customStyles: {
+                                container: {
+                                    borderLeftWidth: 0,
+                                    borderRightWidth: 0,
+                                    borderTopWidth: 0,
+                                    borderBottomWidth: 0,
+                                    backgroundColor: 'transparent',
+                                },
+                                text: {
+                                    color: 'black',
+                                },
+                            },
+                            leftMargin: {
+                                color: color,
+                                width: '50%',
+                            },
+                            rightMargin: {
+                                color: color,
+                                width: '50%',
+                            },
                         };
                     }
                     currentDate.setDate(currentDate.getDate() + 1);
@@ -273,12 +323,19 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     });
                 }
                 bookingFound = true; // Set flag to true if booking is found
+            } else {
+                console.warn("No booking found for the selected date:", selectedDate);
+
             }
         });
 
         // If no booking is found, you may want to handle that case
         if (!bookingFound) {
             console.warn("No booking found for the selected date.");
+            navigation.navigate('UnblockBlockScreen', { propertyId: selectedProperty, date: selectedDate } as any);
+            navigation.addListener('focus', () => {
+                fetchCalendarData();
+            });
         }
 
 
@@ -321,7 +378,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#008489" />
-
             {/* Top portion with curved image background */}
             <View style={styles.topContainer}>
                 <ImageBackground
@@ -330,9 +386,11 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                     resizeMode="cover"
                 >
                     <SafeAreaView>
-                        <View style={styles.header}>
-                            {/* <Text style={styles.headerText}>Good {timeSession}</Text> */}
-                            <Text style={styles.subHeaderText}>Calendar</Text>
+                        <View style={styles.userInfo}>
+                            <Image source={require('../../assets/images/StayMaster-Logo.png')} style={styles.avatar} />
+                            <View>
+                                <Text style={styles.welcomeText}>Calendar</Text>
+                            </View>
                         </View>
                     </SafeAreaView>
                 </ImageBackground>
@@ -384,7 +442,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                         </View>
                     ) : (
                         selectedProperty && (
-                            <View style={styles.calendarContainer}> 
+                            <View style={styles.calendarContainer}>
                                 <CalendarList
                                     style={styles.calendar}
                                     onDayPress={onDayPress}
@@ -424,18 +482,24 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                                 flexDirection: 'row',
                                                 justifyContent: 'space-around',
                                                 paddingVertical: 2,
+                                                borderBottomWidth: 0.4,
+                                                borderBottomColor: '#e0e0e0',
                                             },
                                             dayContainer: {
                                                 flex: 1,
                                                 alignItems: 'center',
                                                 borderRightWidth: 0.4,
                                                 borderRightColor: '#e0e0e0',
+                                                borderBottomWidth: 0.4,
+                                                borderBottomColor: '#e0e0e0',
                                             },
                                             'stylesheet.calendar.main.dayContainer:last-child': {
                                                 borderRightWidth: 0,
                                             },
+                                            'stylesheet.calendar.main.week:last-child': {
+                                                borderBottomWidth: 0,
+                                            },
                                         },
-
                                     }}
                                 />
                             </View>
@@ -571,7 +635,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             </View>
 
             {/* Floating Action Button for Reserve Property */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 style={styles.floatingButton}
                 onPress={() => {
                     const propertyId = selectedProperty?.toString() || '';
@@ -587,12 +651,13 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 }}
             >
                 <FontAwesomeIcon icon={faAdd} size={20} color="#FFFFFF" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     );
 };
 
 const pickerSelectStyles = {
+
     inputIOS: {
         fontSize: 14,
         paddingVertical: 12,
@@ -605,6 +670,7 @@ const pickerSelectStyles = {
         paddingRight: 30,
         height: 55,
     },
+
     inputAndroid: {
         fontSize: 14,
         paddingHorizontal: 12,
@@ -627,6 +693,26 @@ const pickerSelectStyles = {
 };
 
 const styles = StyleSheet.create({
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        // justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+    welcomeText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'white',
+        paddingLeft: 10,
+        textAlign: 'center',
+    },
+    avatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 50,
+        paddingRight: 20,
+    },
     container: {
         flex: 1,
         backgroundColor: '#f8f8f8',
@@ -662,7 +748,7 @@ const styles = StyleSheet.create({
     },
     contentArea: {
         flex: 1,
-        marginTop: -20,
+        marginTop: -40,
     },
     calendarSection: {
         backgroundColor: '#f8f8f8',

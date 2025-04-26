@@ -338,12 +338,11 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     <ImageBackground source={require('../../assets/images/Login.png')} style={styles.background}>
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
+        onPress={() => navigation.goBack()}>
         <FontAwesomeIcon icon={faArrowLeft} size={16} color="white" />
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
-      <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode='contain' />
+      <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode='contain'/>
       <View style={styles.container}>
         <View style={styles.Space} />
         {!isEmailLogin ? (
@@ -356,7 +355,6 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
         ) : (
           <Text style={[styles.subtitle, { textAlign: 'center' }]}></Text>
         )}
-
         <View style={styles.bottomSpace} />
         <Text style={[styles.title, { textAlign: 'center' }]}>
           {isEmailLogin ? 'Enter your password' : 'Enter the OTP'}
@@ -487,3 +485,4 @@ const styles = StyleSheet.create({
 });
 
 export default OTPScreen;
+ 

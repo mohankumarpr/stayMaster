@@ -37,6 +37,7 @@ interface PropertyCardProps {
   bookingValue: number;
   nightsBooked: number;
   onPress: () => void;
+  address: string;
 }
 
 const { width } = Dimensions.get('window');
@@ -51,9 +52,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   bathrooms,
   bookingValue,
   nightsBooked,
+  address,
   onPress,
 }) => {
-  
+
   function formatAmount(bookingValue: number): string {
     if (bookingValue === undefined) return '0';
     return bookingValue.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).replace(/\.00$/, '');
@@ -61,7 +63,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   return (
     <TouchableOpacity style={styles.propertyCard} onPress={onPress}>
-      <Image source={{ uri: image }}  style={styles.propertyImage} resizeMode="cover" />
+      <Image source={{ uri: image }} style={styles.propertyImage} resizeMode="cover" />
       <View style={styles.propertyTitleContainer}>
         <Text style={styles.propertyTitle}>{title}</Text>
         <TouchableOpacity>
@@ -69,17 +71,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         </TouchableOpacity>
       </View>
       <Text style={styles.propertyDetails}>
-        {guests} guests · {bedrooms} bedrooms · {beds} beds · {bathrooms} bathroom
+        {address}
       </Text>
       <View style={styles.divider} />
-      <Text style={styles.metricsTitle}>Performance metrics</Text>
+      <Text style={styles.metricsTitle}>Performance</Text>
       <View style={styles.metricsContainer}>
         <View>
-          <Text style={styles.metricsLabel}>NBV</Text>
+          <Text style={styles.metricsLabel}>Revenue</Text>
           <Text style={styles.metricsValue}>₹ {formatAmount(bookingValue)}</Text>
         </View>
         <View>
-          <Text style={styles.metricsLabel}>No. of nights booked</Text>
+          <Text style={styles.metricsLabel}>Nights Booked</Text>
           <Text style={styles.metricsValue}>{nightsBooked}</Text>
         </View>
       </View>
@@ -98,7 +100,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   React.useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await Storage.getObject<{firstname?: string}>(STORAGE_KEYS.USER_DATA);
+        const userData = await Storage.getObject<{ firstname?: string }>(STORAGE_KEYS.USER_DATA);
         console.log("userData", userData);
         if (userData && userData.firstname) {
           setUserName(userData.firstname);
@@ -153,19 +155,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             resizeMode="cover"
           >
             <SafeAreaView>
-              <View style={styles.header}>
+            
                 <View style={styles.userInfo}>
-                  <Image
-                    source={require('../../assets/images/logo.png')}
-                    style={styles.avatar}
-                  />
-                  <View>
-                    <Text style={styles.welcomeText}>Welcome back,</Text>
+                  <Image source={require('../../assets/images/StayMaster-Logo.png')} style={styles.avatar} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.welcomeText}>Welcome</Text>
                     <Text style={styles.userName}>{userName}</Text>
                   </View>
                 </View>
-              </View>
-
+              
 
               {/* Summary Cards */}
               <View style={styles.summaryContainer}>
@@ -173,11 +171,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   style={styles.summaryCard}
                   onPress={() => {
                     // return navigation.navigate('BookingDetails');
-                  }}
-                >
+                  }}>
                   {/* Top Row - Net Booking Value & Chevron */}
                   <View style={styles.topRow}>
-                    <Text style={styles.summaryLabel}>Net Booking Value</Text>
+                    <Text style={styles.summaryLabel}>Revenue Current FY</Text>
                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
 
@@ -205,7 +202,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 >
                   {/* Top Row - Net Booking Value & Chevron */}
                   <View style={styles.topRow}>
-                    <Text style={styles.summaryLabel}>No. of Nights Book</Text>
+                    <Text style={styles.summaryLabel}>Nights Booked Current FY</Text>
                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
 
@@ -221,7 +218,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     </View>
                     <Text style={styles.bookingValue}>{formatAmount(totalNights)} days</Text>
                   </View>
-                </TouchableOpacity> 
+                </TouchableOpacity>
               </View>
             </SafeAreaView>
           </ImageBackground>
@@ -232,7 +229,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
             {/* Properties Section */}
             <View style={styles.propertiesSection}>
-              <Text style={styles.sectionTitle}>Our Property</Text>
+              <Text style={styles.sectionTitle}>My Homes</Text>
 
               {isLoading ? (
                 <View style={styles.loadingContainer}>
@@ -252,6 +249,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                       bathrooms={typeof property.number_of_bathrooms === 'number' ? property.number_of_bathrooms : 0}
                       bookingValue={typeof property.nbv === 'number' ? property.nbv : 0}
                       nightsBooked={typeof property.nights === 'number' ? property.nights : 0}
+                      address={property.address_line_2}
+
                       onPress={() => {
                         // Navigate to Earnings screen and set the selected property
                         navigation.navigate('Earnings');
@@ -300,7 +299,7 @@ const styles = StyleSheet.create({
     elevation: 0, // For Android shadow
   },
   topContainer: {
-    height: 260, // Increased from 220 to give even more space
+    height: 220, // Increased from 220 to give even more space
   },
   topBackground: {
     width: '100%',
@@ -313,29 +312,40 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   header: {
+    flexDirection: 'row',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    justifyContent: 'space-between',
+    paddingTop: 10,
     paddingBottom: 15,
   },
   userInfo: {
     flexDirection: 'row',
-    alignItems: 'center',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
   },
   avatar: {
     width: 50,
     height: 50,
     borderRadius: 20,
-    marginRight: 10,
     resizeMode: 'contain',
+  },
+  textContainer: {
+    flexDirection: 'column', 
   },
   welcomeText: {
     color: 'white',
     fontSize: 14,
+    marginLeft: 10,
+    textAlign: 'right',
     opacity: 0.9,
+    marginBottom: 2, // Add small gap between welcome text and username
   },
   userName: {
     color: 'white',
     fontSize: 18,
+    textAlign: 'right',
     fontWeight: 'bold',
   },
   summaryContainer: {
@@ -356,7 +366,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   summaryContent: {
-    flex: 1, 
+    flex: 1,
   },
   summaryLabel: {
     fontSize: 12,
@@ -491,7 +501,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 15,
-    paddingBottom: 15,
+    paddingBottom: 25,
     paddingTop: 5,
   },
   metricsLabel: {

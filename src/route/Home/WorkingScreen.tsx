@@ -8,9 +8,12 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import HomeScreen from '../MainScreen/HomeScreen';
 
 // Import SVG icons
-import CalendarIcon from '../../assets/icons/calendartest.svg';
-import WalletIcon from '../../assets/icons/dollar.svg';
-import HomeIcon from '../../assets/icons/home.svg';
+import CalendarIcon from '../../assets/icons/calendar.svg';
+import CalendarIcon1 from '../../assets/icons/calendar_new.svg';
+import WalletIcon from '../../assets/icons/dollar1.svg';
+import WalletIcon1 from '../../assets/icons/dollar.svg';
+import HomeIcon from '../../assets/icons/home1.svg';
+import HomeIcon1 from '../../assets/icons/home.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
 import CalendarScreen from '../MainScreen/CalendarScreen';
 import EarningsScreen from '../MainScreen/EarningsScreen';
@@ -23,7 +26,7 @@ const DashboardScreen = () => (
   </View>
 );
 
- 
+
 // Create Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
@@ -35,23 +38,28 @@ const WorkingScreen: React.FC<WorkingScreenProps> = ({ navigation }) => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ color, size, focused }) => {
           switch (route.name) {
             case 'Home':
-              return <HomeIcon width={size} height={size} fill={color} />;
+              return (
+                focused ? <HomeIcon1 width={size} height={size} stroke={color} fill="none" /> : <HomeIcon width={size} height={size} stroke={color} fill="none" />
+              );
             case 'Earnings':
-              return <WalletIcon width={size} height={size} fill={color} />;
+              return (
+                focused ? <WalletIcon1 width={size} height={size} stroke={color} fill="none" /> : <WalletIcon width={size} height={size} stroke={color} fill="none" />
+              );
             case 'Calendar':
-              return <CalendarIcon width={size} height={size} fill={color} />;
+              return (
+                focused ? <CalendarIcon1 width={size} height={size} stroke={color} fill="none" /> : <CalendarIcon width={size} height={size} stroke={color} fill="none" />
+              );
             case 'Profile':
-              //return <ProfileIcon width={size} height={size} fill={color} />;
               return <FontAwesomeIcon icon={faUser} size={22} color={color} />
             default:
-              return <HomeIcon width={size} height={size} fill={color} />;
+              return <HomeIcon1 width={size} height={size} stroke={color} fill="none" />;
           }
         },
-        tabBarActiveTintColor: '#2A144B',
-        tabBarInactiveTintColor: '#9CA1A7',
+        tabBarActiveTintColor: '#000000',        // Black color for active tab
+        tabBarInactiveTintColor: '#808080',      // Gray color for inactive tab
         tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold' },
         tabBarStyle: {
           backgroundColor: 'white',
@@ -76,7 +84,7 @@ const WorkingScreen: React.FC<WorkingScreenProps> = ({ navigation }) => {
         component={HomeScreen}
         options={{ headerShown: false }}
       />
-      <Tab.Screen name="Earnings" component={EarningsScreen} options={{ headerShown: false   }} />
+      <Tab.Screen name="Earnings" component={EarningsScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Calendar" component={CalendarScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

@@ -49,26 +49,14 @@ interface UnblockBlockScreenProps {
 
 
 const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(new Date());
-  const [showStartPicker, setShowStartPicker] = useState(false);
+  const receivedDate = new Date(props.route.params.date);
+  const [startDate, setStartDate] = useState<Date>(receivedDate);
+  const [endDate, setEndDate] = useState<Date>(receivedDate);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [blockType, _setBlockType] = useState('Owner block');
   const [reason, setReason] = useState('');
   const propertyId = props.route.params.propertyId;
-  console.log('propertyId', propertyId);
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleStartDateChange = (event: any, selectedDate?: Date) => {
-    setShowStartPicker(false);
-    if (selectedDate) {
-      setStartDate(selectedDate);
-      // If end date is before start date, update it
-      if (endDate < selectedDate) {
-        setEndDate(selectedDate);
-      }
-    }
-  };
 
   const handleEndDateChange = (event: any, selectedDate?: Date) => {
     setShowEndPicker(false);
@@ -76,8 +64,6 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
       setEndDate(selectedDate);
     }
   };
-
-
 
   const handleBlockSubmit = async () => {
     if (!blockType) {
@@ -231,26 +217,13 @@ const UnblockBlockScreen: React.FC<UnblockBlockScreenProps> = (props) => {
             </TouchableOpacity>
           </View>
 
-          {/* Start Date Picker */}
-          <TouchableOpacity
-            style={styles.datePickerButton}
-            onPress={() => setShowStartPicker(true)}
-          >
+          {/* Start Date Display (Fixed) */}
+          <View style={styles.datePickerButton}>
             <Text style={styles.datePickerLabel}>Start Date:</Text>
             <Text style={styles.datePickerValue}>
               {startDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}
             </Text>
-          </TouchableOpacity>
-
-          {showStartPicker && (
-            <DateTimePicker
-              value={startDate}
-              mode="date"
-              minimumDate={new Date()}
-              onChange={handleStartDateChange}
-              display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
-            />
-          )}
+          </View>
 
           {/* End Date Picker */}
           <TouchableOpacity
