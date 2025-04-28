@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { CalendarList, DateData } from 'react-native-calendars';
+import { Calendar, CalendarList, DateData } from 'react-native-calendars';
 import 'react-native-gesture-handler';
 // import 'react-native-reanimated';
 import { faAdd, faChevronDown } from '@fortawesome/free-solid-svg-icons';
@@ -23,6 +23,7 @@ import { useProperty } from '../../context/PropertyContext';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import PropertyService from '../../services/propertyService';
 import { Property } from '../../types/property';
+import Storage from '../../utils/Storage';
 
 
 
@@ -77,6 +78,73 @@ const LegendItem: React.FC<LegendItemProps> = ({ color, label }) => {
     );
 };
 
+// Custom Day Component for overlapping and normal days
+const CustomDay = ({ date, state, marking }: { date: any, state: any, marking: any }) => {
+    if (marking && marking.leftColor && marking.rightColor) {
+        return (
+            <View style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'transparent',
+                overflow: 'hidden',
+            }}>
+                {/* Left color fill */}
+                <View style={{
+                    position: 'absolute',
+                    left: 0,
+                    width: '54%',
+                    height: 36,
+                    backgroundColor: marking.leftColor,
+                    borderTopRightRadius: 18,
+                    borderBottomRightRadius: 18,
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                }} />
+                {/* Right color fill */}
+                <View style={{
+                    position: 'absolute',
+                    right: 0,
+                    width: '54%',
+                    height: 36,
+                    backgroundColor: marking.rightColor,
+                    borderTopLeftRadius: 18,
+                    borderBottomLeftRadius: 18,
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                }} />
+                {/* Centered date number */}
+                <Text style={{
+                    color: 'white',
+                    zIndex: 2,
+                    textAlign: 'center',
+                    fontSize: 14,
+                }}>
+                    {date.day}
+                </Text>
+            </View>
+        );
+    }
+    // Fallback to default rendering for non-overlapping days
+    if (marking && marking.customStyles) {
+        return (
+            <View style={[{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', overflow: 'hidden' }, marking.customStyles.container]}>
+                <Text style={[{ color: state === 'disabled' ? '#d9e1e8' : 'white', fontSize: 14 }, marking.customStyles.text]}>
+                    {date.day}
+                </Text>
+            </View>
+        );
+    }
+    // Default day
+    return (
+        <View style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', overflow: 'hidden' }}>
+            <Text style={{ color: state === 'disabled' ? '#d9e1e8' : 'black', fontSize: 14 }}>{date.day}</Text>
+        </View>
+    );
+};
 
 const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
     const { selectedProperty, setSelectedProperty, numberOfBedrooms, setNumberOfBedrooms } = useProperty();
@@ -149,7 +217,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 setSelectedProperty(propertyList[0].id.toString());
                 const property = propertyList[0];
                 setNumberOfBedrooms(property.number_of_bedrooms || 0);
-                console.log("Number of Bedrooms:", numberOfBedrooms);
+                console.log('Number of Bedrooms:', numberOfBedrooms);
             }
         } catch (error) {
             console.error('Error fetching properties:', error);
@@ -164,9 +232,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
             const response = await PropertyService.getPropertyCalendar(selectedProperty);
             const bookings = response.calendar;
 
-            // Group bookings by booking_id
             const groups = bookings.reduce((acc: { [key: string]: any[] }, booking: any) => {
-                console.log("booking details in calendar screen", booking);
                 if (!acc[booking.id]) {
                     acc[booking.id] = [];
                 }
@@ -174,13 +240,11 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 return acc;
             }, {});
 
-            // Store booking groups in state
             setBookingGroups(groups as any);
-            // Convert bookings to period marking format
             const marked: any = {};
 
+            // First mark all regular dates
             Object.values(groups).forEach(bookingGroup => {
-                console.log("bookingGroup", bookingGroup);
                 const type = bookingGroup[0].type;
                 let color = '';
                 if (type === 'Owner block') {
@@ -190,95 +254,122 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                 } else if (type === 'Maintenance block') {
                     color = '#FF5252';
                 }
-                console.log("color", color);
 
                 const firstDate = bookingGroup[0].start;
                 const lastDate = bookingGroup[0].end;
 
-                // Mark first date with left margin
-                marked[firstDate] = {
-                    startingDay: true,
-                    color: color,
-                    textColor: 'white',
-                    customStyles: {
-                        container: {
-                            borderLeftWidth: 0,
-                            borderRightWidth: 0,
-                            borderTopWidth: 0,
-                            borderBottomWidth: 0,
-                            backgroundColor: 'transparent',
-                        },
-                        text: {
-                            color: 'black',
-                        },
-                    },
-                    leftMargin: {
+                // Mark start date
+                if (!marked[firstDate]?.endingDay) { // Only mark if not already marked as an end date
+                    marked[firstDate] = {
+                        startingDay: true,
                         color: color,
-                        width: '50%',
-                    },
-                };
+                        customStyles: {
+                            container: {
+                                backgroundColor: color,
+                                width: '50%',
+                                marginLeft: '50%',
+                                borderTopLeftRadius: 20,
+                                borderBottomLeftRadius: 20,
+                                borderTopRightRadius: 0,
+                                borderBottomRightRadius: 0,
+                            },
+                            text: {
+                                color: 'white',
+                            },
+                        },
+                    };
+                }
 
-                // Mark last date with right margin
-                marked[lastDate] = {
-                    endingDay: true,
-                    color: color,
-                    textColor: 'white',
-                    customStyles: {
-                        container: {
-                            borderLeftWidth: 0,
-                            borderRightWidth: 0,
-                            borderTopWidth: 0,
-                            borderBottomWidth: 0,
-                            backgroundColor: 'transparent',
-                        },
-                        text: {
-                            color: 'black',
-                        },
-                    },
-                    rightMargin: {
+                // Mark end date
+                if (!marked[lastDate]?.startingDay) { // Only mark if not already marked as a start date
+                    marked[lastDate] = {
+                        endingDay: true,
                         color: color,
-                        width: '50%',
-                    },
-                };
+                        customStyles: {
+                            container: {
+                                backgroundColor: color,
+                                width: '45%',
+                                marginRight: '55%',
+                                borderTopRightRadius: 20,
+                                borderBottomRightRadius: 20,
+                                borderTopLeftRadius: 0,
+                                borderBottomLeftRadius: 0,
+                            },
+                            text: {
+                                color: 'white',
+                            },
+                        },
+                    };
+                }
 
-                // Mark middle dates with both margins
+                // Mark middle dates
                 const currentDate = new Date(firstDate);
                 const endDate = new Date(lastDate);
+
                 while (currentDate <= endDate) {
                     const dateString = currentDate.toISOString().split('T')[0];
                     if (dateString !== firstDate && dateString !== lastDate) {
                         marked[dateString] = {
                             color: color,
-                            textColor: 'white',
                             customStyles: {
                                 container: {
-                                    borderLeftWidth: 0,
-                                    borderRightWidth: 0,
-                                    borderTopWidth: 0,
-                                    borderBottomWidth: 0,
-                                    backgroundColor: 'transparent',
+                                    backgroundColor: color,
+                                    width: '100%',
+                                    borderRadius: 0,
                                 },
                                 text: {
-                                    color: 'black',
-                                },
-                            },
-                            leftMargin: {
-                                color: color,
-                                width: '50%',
-                            },
-                            rightMargin: {
-                                color: color,
-                                width: '50%',
-                            },
+                                    color: 'white',
+                                }
+                            }
                         };
                     }
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
             });
 
+            // Then handle overlapping dates
+            Object.values(groups).forEach(bookingGroup => {
+                const endDate = bookingGroup[0].end;
+
+                const overlappingBooking = Object.values(groups).find(
+                    group => group[0].start === endDate && group[0].id !== bookingGroup[0].id
+                );
+
+                if (overlappingBooking) {
+                    const currentColor = bookingGroup[0].type === 'Owner block' ? '#FFC107' : 
+                                       bookingGroup[0].type === 'Booking' ? '#50cebb' : '#FF5252';
+
+                    const nextColor = overlappingBooking[0].type === 'Owner block' ? '#FFC107' : 
+                                     overlappingBooking[0].type === 'Booking' ? '#50cebb' : '#FF5252';
+
+                    marked[endDate] = {
+                        leftColor: currentColor,
+                        rightColor: nextColor,
+                    };
+                }
+            });
+
             setMarkedDates(marked);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching calendar data:', error);
+
+            // Handle authentication errors
+            if (error.message === 'Guest token not found' || error.response?.status === 401) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Session Expired',
+                    text2: 'Please log in again to continue.',
+                    position: 'top',
+                    visibilityTime: 4000,
+                });
+
+                await Storage.clear();
+
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                });
+            }
         } finally {
             setLoading(false);
         }
@@ -286,12 +377,10 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
     const onDayPress = (day: DateData) => {
         console.log("Day pressed:", day.dateString);
-        console.log("Day pressed:", day.dateString);
-        let bookingId = null; // Variable to store the booking ID
+        let bookingId = null;
         const selectedDate = day.dateString;
-        let bookingFound = false; // Flag to check if a booking is found
+        let bookingFound = false;
 
-        // Animate the transition to the CalendarInfo screen
         Object.values(bookingGroups).forEach(bookingGroup => {
             console.log("bookingGroup", bookingGroup);
             const firstDate = bookingGroup[0].start;
@@ -299,46 +388,30 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
 
             if (selectedDate >= firstDate && selectedDate <= lastDate) {
                 console.log("Booking found for date:", selectedDate);
-                const startDate = bookingGroup[0].start; // Get the start date
-                const endDate = bookingGroup[bookingGroup.length - 1].end; // Get the end date
-                bookingId = bookingGroup[0].id; // Assuming the booking ID is stored in the first booking of the group
+                const startDate = bookingGroup[0].start;
+                const endDate = bookingGroup[bookingGroup.length - 1].end;
+                bookingId = bookingGroup[0].id;
                 const type = bookingGroup[0].type;
-
-
-                console.log("Booking ID:", bookingId);
-                console.log("Start Date:", startDate);
-                console.log("End Date:", endDate);
-                console.log("Number of Bedrooms:", numberOfBedrooms);
-                console.log("Type:", type);
-
 
                 if (type?.toLowerCase() === 'booking') {
                     navigation.navigate('CalendarInfo', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
                 } else if (type?.toLowerCase() === 'owner block' || type?.toLowerCase() === 'maintenance block') {
                     navigation.navigate('BlockInfoScreen', { bookingId, startDate, endDate, numberOfBedrooms, type } as any);
                     navigation.addListener('focus', () => {
-                        // Reload the calendar view or refresh data here
-                        // For example, you might want to call a function to fetch the updated calendar data
                         fetchCalendarData();
                     });
                 }
-                bookingFound = true; // Set flag to true if booking is found
-            } else {
-                console.warn("No booking found for the selected date:", selectedDate);
-
+                bookingFound = true;
             }
         });
 
-        // If no booking is found, you may want to handle that case
         if (!bookingFound) {
-            console.warn("No booking found for the selected date.");
+            console.warn('No booking found for the selected date.');
             navigation.navigate('UnblockBlockScreen', { propertyId: selectedProperty, date: selectedDate } as any);
             navigation.addListener('focus', () => {
                 fetchCalendarData();
             });
         }
-
-
     };
 
     const onMonthChange = (month: any) => {
@@ -407,7 +480,6 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                     setSelectedProperty(value);
                                     const property = properties.find(p => p.id.toString() === value);
                                     setNumberOfBedrooms(property?.number_of_bedrooms || 0);
-                                    console.log("Number of Bedrooms:", property?.number_of_bedrooms);
                                 }
                             }}
                             items={pickerItems}
@@ -447,7 +519,7 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                     style={styles.calendar}
                                     onDayPress={onDayPress}
                                     onMonthChange={onMonthChange}
-                                    markingType={'period'}
+                                    markingType="custom"
                                     markedDates={markedDates}
                                     pastScrollRange={12}
                                     futureScrollRange={12}
@@ -459,6 +531,67 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                     showSixWeeks={true}
                                     disableMonthChange={false}
                                     enableSwipeMonths={true}
+                                    dayComponent={({ date, state, marking }: { date: DateData, state: string, marking: any }) => (
+                                        <TouchableOpacity 
+                                            onPress={() => onDayPress(date)}
+                                            activeOpacity={0.7}
+                                            style={{
+                                                flex: 1,
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                position: 'relative',
+                                                width: '100%',
+                                                height: '100%',
+                                                backgroundColor: 'transparent',
+                                                overflow: 'hidden',
+                                            }}
+                                        >
+                                            {marking && marking.leftColor && marking.rightColor ? (
+                                                <>
+                                                    <View style={{
+                                                        position: 'absolute',
+                                                        left: 0,
+                                                        width: '54%',
+                                                        height: 36,
+                                                        backgroundColor: marking.leftColor,
+                                                        borderTopRightRadius: 18,
+                                                        borderBottomRightRadius: 18,
+                                                        borderTopLeftRadius: 0,
+                                                        borderBottomLeftRadius: 0,
+                                                    }} />
+                                                    <View style={{
+                                                        position: 'absolute',
+                                                        right: 0,
+                                                        width: '54%',
+                                                        height: 36,
+                                                        backgroundColor: marking.rightColor,
+                                                        borderTopLeftRadius: 18,
+                                                        borderBottomLeftRadius: 18,
+                                                        borderTopRightRadius: 0,
+                                                        borderBottomRightRadius: 0,
+                                                    }} />
+                                                    <Text style={{
+                                                        color: 'white',
+                                                        zIndex: 2,
+                                                        textAlign: 'center',
+                                                        fontSize: 14,
+                                                    }}>
+                                                        {date.day}
+                                                    </Text>
+                                                </>
+                                            ) : marking && marking.customStyles ? (
+                                                <View style={[{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', overflow: 'hidden' }, marking.customStyles.container]}>
+                                                    <Text style={[{ color: state === 'disabled' ? '#d9e1e8' : 'white', fontSize: 14 }, marking.customStyles.text]}>
+                                                        {date.day}
+                                                    </Text>
+                                                </View>
+                                            ) : (
+                                                <View style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', overflow: 'hidden' }}>
+                                                    <Text style={{ color: state === 'disabled' ? '#d9e1e8' : 'black', fontSize: 14 }}>{date.day}</Text>
+                                                </View>
+                                            )}
+                                        </TouchableOpacity>
+                                    )}
                                     theme={{
                                         backgroundColor: '#ffffff',
                                         calendarBackground: '#ffffff',
@@ -481,25 +614,35 @@ const CalendarScreen: React.FC<CalendarScreenProps> = ({ navigation }) => {
                                                 marginBottom: 0,
                                                 flexDirection: 'row',
                                                 justifyContent: 'space-around',
-                                                paddingVertical: 2,
-                                                borderBottomWidth: 0.4,
-                                                borderBottomColor: '#e0e0e0',
+                                                borderBottomWidth: 1,
+                                                borderBottomColor: '#d5fff8',
                                             },
                                             dayContainer: {
+                                                borderRightWidth: 1,
+                                                borderRightColor: '#d5fff8',
                                                 flex: 1,
                                                 alignItems: 'center',
-                                                borderRightWidth: 0.4,
-                                                borderRightColor: '#e0e0e0',
-                                                borderBottomWidth: 0.4,
-                                                borderBottomColor: '#e0e0e0',
-                                            },
-                                            'stylesheet.calendar.main.dayContainer:last-child': {
-                                                borderRightWidth: 0,
-                                            },
-                                            'stylesheet.calendar.main.week:last-child': {
-                                                borderBottomWidth: 0,
-                                            },
+                                            }
                                         },
+                                        'stylesheet.calendar.header': {
+                                            week: {
+                                                marginTop: 5,
+                                                marginBottom: 5,
+                                                flexDirection: 'row',
+                                                justifyContent: 'space-around',
+                                                paddingHorizontal: 5,
+                                                borderBottomWidth: 1,
+                                                borderBottomColor: '#d5fff8',
+                                            },
+                                            dayHeader: {
+                                                marginTop: 2,
+                                                marginBottom: 7,
+                                                width: 32,
+                                                textAlign: 'center',
+                                                fontSize: 12,
+                                                color: '#b6c1cd',
+                                            }
+                                        }
                                     }}
                                 />
                             </View>
@@ -880,7 +1023,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: '#e0e0e0',
+        backgroundColor: '#d5fff8',
         marginVertical: 15,
     },
     guestSection: {
@@ -915,7 +1058,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     editButton: {
-        backgroundColor: '#e0e0e0',
+        backgroundColor: '#d5fff8',
         paddingHorizontal: 15,
         paddingVertical: 8,
         borderRadius: 20,
@@ -935,7 +1078,7 @@ const styles = StyleSheet.create({
         height: 60,
         backgroundColor: '#fff',
         borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
+        borderTopColor: '#d5fff8',
     },
     tabItem: {
         flex: 1,
@@ -962,7 +1105,7 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         paddingHorizontal: 5,
         borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
+        borderBottomColor: '#d5fff8',
         marginBottom: 10,
     },
     legendContainer2: {
@@ -973,7 +1116,7 @@ const styles = StyleSheet.create({
         paddingVertical: 3,
         paddingHorizontal: 3,
         borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
+        borderBottomColor: '#d5fff8',
         marginBottom: 5,
     },
     legendItem: {

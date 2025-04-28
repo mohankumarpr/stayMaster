@@ -31,17 +31,17 @@ interface BookingDetails {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [visibleRentInfo, setVisibleRentInfo] = useState(false);
 
-  console.log("Booking ID:", bookingId);
-  console.log("Start Date:", startDate);
-  console.log("End Date:", endDate);
-  console.log("Number of Bedrooms:", numberOfBedrooms);
+  // console.log("Booking ID:", bookingId);
+  // console.log("Start Date:", startDate);
+  // console.log("End Date:", endDate);
+  // console.log("Number of Bedrooms:", numberOfBedrooms);
 
   const fetchBookingDetails = useCallback(async () => {
     try {
       const response = await PropertyService.getBookingDetails(bookingId, startDate, endDate);
       const bookings = response;
       setBookingDetails(bookings);
-      console.log("Booking Details:", bookings);
+      console.log('Booking Details:', bookings);
     } catch (error) {
       console.error('Error fetching booking details:', error);
     }
@@ -68,7 +68,7 @@ interface BookingDetails {
     checkOutDateTime: bookingDetails?.booking.end,
     checkInDate: bookingDetails?.booking.arrivalTime,
     checkOutDate: bookingDetails?.booking.departureTime,
-    nights: bookingDetails?.rentalInfo.length - 1,
+    nights: bookingDetails?.rentalInfo.length,
     guests: {
       adults: '',
       children: '',
@@ -76,17 +76,19 @@ interface BookingDetails {
     },
     rentalInfo: bookingDetails?.rentalInfo,
     rooms: numberOfBedrooms ?? 0,
-    securityDeposit: bookingDetails?.tariff.totalAmountBeforeTax,
+    netBookingValue: bookingDetails?.tariff.totalAmountBeforeTax,
     petCount: 0,
     staffCount: 0,
     source: bookingDetails?.booking.source,
     secondarySource: 'OYO Platform',
-    status: 'Confirmed'
+    status: 'Confirmed',
+    groupType: bookingDetails?.booking.groupType,
+    purpose: bookingDetails?.booking.purpose,
   };
 
-  function formatNumber(securityDeposit: any): React.ReactNode {
-    if (securityDeposit === undefined) return '0.00';
-    return securityDeposit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
+  function formatNumber(netBookingValue: any): React.ReactNode {
+    if (netBookingValue === undefined) return '0.00';
+    return netBookingValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
   }
 
 
@@ -124,10 +126,22 @@ interface BookingDetails {
           <View style={styles.infoCard}>
             <View style={styles.guestInfoContent}>
               <View style={styles.guestInfoColumn}>
-                <Text style={styles.guestInfoLabel}>Guest name:</Text>
-                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.name ?? '...'}</Text>
-                <Text style={styles.guestInfoLabel}>Booking ID:</Text>
-                <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.bookingId ?? '...'}</Text>
+                <View style={styles.bookingInfoRow}>
+                  <View style={styles.bookingInfoItem}>
+                    <Text style={styles.guestInfoLabel}>Guest name:</Text>
+                    <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.name ?? '...'}</Text>
+                  </View>
+                </View>
+                <View style={styles.bookingInfoRow}>
+                  <View style={styles.bookingInfoItem}>
+                    <Text style={styles.guestInfoLabel}>Booking ID:</Text>
+                    <Text style={styles.guestInfoValue}>{alpineBlissBooking.guest.bookingId ?? '...'}</Text>
+                  </View>
+                  <View style={styles.bookingInfoItem}>
+                    <Text style={styles.guestInfoLabel}>No. of nights:</Text>
+                    <Text style={styles.guestInfoValue}>{alpineBlissBooking.nights ?? '...'}</Text>
+                  </View>
+                </View>
               </View>
             {/*   <TouchableOpacity style={styles.guestDetailsButton} onPress={() => {
                 // Toggle visibility of rental info
@@ -141,32 +155,22 @@ interface BookingDetails {
           {/* Check-in/out Section  connvert into 13/03/2025 to Nov 02, 2024 | 02:00 pm*/}
           <View style={styles.datesSection}>
             <View style={styles.dateColumn}>
-              <Text style={styles.dateLabel}>Check-in Date | Time</Text>
-              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkInDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} | ${alpineBlissBooking.checkInDate}`}</Text>
+              <Text style={styles.dateLabel}>Check-in Date</Text>
+              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkInDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`}</Text>
             </View>
             <View style={styles.dateColumn}>
-              <Text style={styles.dateLabel}>Check-out Date | Time</Text>
-              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkOutDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} | ${alpineBlissBooking.checkOutDate}`}</Text>
+              <Text style={styles.dateLabel}>Check-out Date</Text>
+              <Text style={styles.dateValue}>{`${new Date(alpineBlissBooking.checkOutDateTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}`}</Text>
             </View>
           </View>
 
           {/* Stay Details Section */}
-          <View style={styles.metricsRow}>
-            <View style={styles.metricItem}>
-              <Text style={[styles.metricLabel, { textAlign: 'center' }]}>No.of nights</Text>
-              <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.nights ?? '...'}</Text>
-            </View>
-           {/*  <View style={styles.metricItem}>
-              <Text style={[styles.metricLabel, { textAlign: 'center' }]}>Guests</Text>
-              <Text style={[styles.metricValue, { textAlign: 'center' }]}>
-                {alpineBlissBooking.guests.total}
-              </Text>
-            </View> */}
+          {/* <View style={styles.metricsRow}>
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { textAlign: 'center' }]}>No. of Rooms</Text>
               <Text style={[styles.metricValue, { textAlign: 'center' }]}>{alpineBlissBooking.rooms ?? '...'}</Text>
             </View>
-          </View>
+          </View> */}
          {/*  <View style={styles.infoRow}>
             <Text style={[styles.infoLabel, { textAlign: 'center' }]}>Guests</Text>
             <Text style={[styles.infoValue, { textAlign: 'center' }]}>
@@ -177,15 +181,26 @@ interface BookingDetails {
           {/* Additional Information */}
           <View style={styles.additionalInfoSection}>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Security Deposit</Text>
-              <Text style={styles.infoValue}>₹ {formatNumber(alpineBlissBooking.securityDeposit ?? 0)}</Text>
+              <Text style={styles.infoLabel}>Net Booking Value</Text>
+              <Text style={styles.infoValue}>₹ {formatNumber(alpineBlissBooking.netBookingValue ?? 0)}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Pet Count</Text>
-              <Text style={styles.infoValue}>{alpineBlissBooking.petCount ?? '...'}</Text>
-            </View> 
+              <Text style={styles.infoLabel}>Net Price Per Night</Text>
+              <Text style={styles.infoValue}>₹ {formatNumber((alpineBlissBooking.netBookingValue ?? 0) / (alpineBlissBooking.nights ?? 1))}</Text>
+            </View>
           </View>
 
+          <View style={styles.sourceSection}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>No. of Adults</Text>
+              <Text style={styles.infoValue}>{alpineBlissBooking?.rentalInfo?.[0]?.adults ?? 0}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>No. of Kids</Text>
+              <Text style={styles.infoValue}>{alpineBlissBooking?.rentalInfo?.[0]?.children ?? 0}</Text>
+            </View>
+          </View>
           {/* Source Information */}
           <View style={styles.sourceSection}>
             <View style={styles.infoRow}>
@@ -193,7 +208,17 @@ interface BookingDetails {
               <Text style={styles.infoValue}>{alpineBlissBooking.source ?? '...'}</Text>
             </View>
 
-            <TouchableOpacity 
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Group Type</Text>
+              <Text style={styles.infoValue}>{alpineBlissBooking?.groupType || '...'}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Purpose of Visit</Text>
+              <Text style={styles.infoValue}>{alpineBlissBooking.purpose ?? '...'}</Text>
+            </View>
+
+            {/* <TouchableOpacity 
               style={[styles.infoRow, styles.clickableRow]} 
               onPress={() => {
                 setVisibleRentInfo(prev => !prev);
@@ -202,7 +227,7 @@ interface BookingDetails {
             >
               <Text style={styles.infoLabel}>Booking Information</Text>
               <FontAwesomeIcon icon={visibleRentInfo ? faChevronUp : faChevronDown} size={22} color="#000" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           {/* Rental Info Section - Now inside the main card */}
@@ -298,7 +323,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32, // Add extra padding at bottom for better scrolling
   },
   mainCard: {
-    backgroundColor: '#FFFFFF', // White color
+    backgroundColor: '#f9f5f3', // White color
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
@@ -308,7 +333,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   propertyHeader: {
-    marginBottom: 16,
+    marginBottom: 8,
     position: 'relative',
   },
   propertyName: {
@@ -345,10 +370,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   infoCard: {
-    backgroundColor: '#F0F0F0', // Light gray shading color
+    backgroundColor: '#C4B385', // Light gray shading color
     borderRadius: 12,
     padding: 14,
-    marginBottom: 16,
+    marginBottom: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -365,14 +390,16 @@ const styles = StyleSheet.create({
   },
   guestInfoLabel: {
     fontSize: 14,
-    color: '#8F9BB3',
+    color: '#ffffff',
     marginBottom: 2,
+    textAlign: 'center',
   },
   guestInfoValue: {
     fontSize: 16,
     fontWeight: '600',
     color: '#2E3A59',
     marginBottom: 6,
+    textAlign: 'center',
   },
   guestDetailsButton: {
     backgroundColor: '#F1F3F7',
@@ -498,6 +525,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 12,
+  },
+  bookingInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  bookingInfoItem: {
+    flex: 1,
   },
 });
 

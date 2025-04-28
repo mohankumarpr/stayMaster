@@ -37,6 +37,19 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     if (otpDetected) return; // Prevent multiple detection attempts
     
     console.log('Starting OTP detection...');
+    
+    // First check if we already have an OTP in the route params
+    if (route.params?.otp) {
+      console.log('OTP found in route params:', route.params.otp);
+      const otpString = route.params.otp.toString();
+      const otpArray = otpString.split('');
+      console.log('Setting OTP array from route params:', otpArray);
+      setOtp(otpArray);
+      setOtpDetected(true);
+      return;
+    }
+    
+    // If no OTP in route params, try to detect from SMS
     OtpVerify.getHash()
       .then((hash: string[]) => {
         console.log('Hash received:', hash);
@@ -94,7 +107,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
         console.log('Error in OTP detection:', error);
         showToast('error', 'Error', 'Failed to start OTP detection');
       });
-  }, [otpDetected]);
+  }, [otpDetected, route.params?.otp]);
 
   // Request SMS permissions and start OTP detection
   const requestSMSPermission = useCallback(async () => {
@@ -209,52 +222,18 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
     setTimer(60);
     setCanResend(false);
     
-    // Handle initial OTP if available in route params
-    if (route.params?.otp) {
-      console.log('Initial OTP received:', route.params.otp);
-      const otpString = route.params.otp.toString();
-      const otpArray = otpString.split('');
-      console.log('Setting initial OTP array:', otpArray);
-      setOtp(otpArray);
-      setOtpDetected(true);
-    }
-    
     // Request SMS permissions and start OTP detection
     if (!isEmailLogin) {
       requestSMSPermission();
     }
-  }, [isEmailLogin, requestSMSPermission, route.params?.otp]);
+  }, [isEmailLogin, requestSMSPermission]);
 
   // Add effect to handle OTP from response data
   useEffect(() => {
-    const handleInitialOTP = async () => {
-      try {
-        let response;
-        if (email) {
-          response = await api.post('/hosts/generateEmailOTP', {
-            email: email
-          });
-        } else {
-          response = await api.post('/hosts/generateOTP', {
-            phone: `91${mobileNumber}`
-          });
-        }
-
-        if (response.data != null && response.data.otp) {
-          console.log('Initial OTP received in response:', response.data.otp);
-          const otpString = response.data.otp.toString();
-          const otpArray = otpString.split('');
-          console.log('Setting initial OTP array from response:', otpArray);
-          setOtp(otpArray);
-          setOtpDetected(true);
-        }
-      } catch (error) {
-        console.log('Error getting initial OTP:', error);
-      }
-    };
-
-    handleInitialOTP();
-  }, [email, mobileNumber]);
+    // Remove the automatic OTP generation
+    // The OTP is already generated in LoginScreen and passed to this screen
+    console.log('OTP screen mounted with params:', route.params);
+  }, [email, mobileNumber, route.params]);
 
   useEffect(() => {
     const enteredOtp = otp.join('');

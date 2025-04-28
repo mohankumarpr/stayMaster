@@ -1,6 +1,6 @@
 import NetInfo from '@react-native-community/netinfo';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ActivityIndicator, Image, ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import api from '../../api/api';
@@ -19,16 +19,11 @@ interface UserData {
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [_password, setPassword] = useState(''); // Prefix with underscore to indicate it's intentionally unused
   const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Add useEffect to check for stored user data
-  useEffect(() => {
-    checkUserData();
-  }, []);
-
-  const checkUserData = async () => {
+  const checkUserData = useCallback(async () => {
     const userData = await Storage.getObject<UserData>(STORAGE_KEYS.USER_DATA);
     if (userData) {
       navigation.reset({
@@ -36,7 +31,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         routes: [{ name: 'Working' }],
       });
     }
-  };
+  }, [navigation]);
+
+  // Add useEffect to check for stored user data
+  useEffect(() => {
+    checkUserData();
+  }, [checkUserData]);
 
   const handleLogin = async () => {
     // Check network status
@@ -55,15 +55,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       // Show loading indicator
       setLoading(true);
-      navigation.navigate('OTP', { mobileNumber, email, isEmailLogin });
-      setLoading(false);
-      /* try {
+      
+      try {
         const response = await api.post('/hosts/generateEmailOTP', {
           email: email
         });
         console.log('Response Data:', response.data);
         if (response.data != null && response.data.otp) {
-          navigation.navigate('PasswordScreen', { email });
+          // Pass the OTP to the OTP screen
+          navigation.navigate('OTP', { 
+            mobileNumber, 
+            email, 
+            isEmailLogin,
+            otp: response.data.otp // Pass the OTP to the OTP screen
+          });
         } else {
           showToast('error', 'Failed to generate OTP. Please try again.', '');
         }
@@ -71,7 +76,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         showToast('error', 'Email is not valid. Please try again.', '');
       } finally {
         setLoading(false);
-      } */
+      }
     } else {
       // Validate mobile number
       if (mobileNumber.length < 10) {
@@ -88,7 +93,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         });
         console.log('Response Data:', response.data);
         if (response.data != null && response.data.otp) {
-          navigation.navigate('OTP', { mobileNumber, email, isEmailLogin });
+          // Pass the OTP to the OTP screen
+          navigation.navigate('OTP', { 
+            mobileNumber, 
+            email, 
+            isEmailLogin,
+            otp: response.data.otp // Pass the OTP to the OTP screen
+          });
         } else {
           showToast('error', 'Failed to generate OTP. Please try again.', '');
         }

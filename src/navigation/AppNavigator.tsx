@@ -24,7 +24,7 @@ import ResetPasswordScreen from '../route/Auth/ResetPasswordScreen';
 
 export type RootStackParamList = {
   Login: undefined;
-  OTP: { mobileNumber: string, email: string, isEmailLogin: boolean };
+  OTP: { mobileNumber: string, email: string, isEmailLogin: boolean, otp?: string | number };
   Welcome: undefined;
   Home: undefined;
   Earnings: undefined;
