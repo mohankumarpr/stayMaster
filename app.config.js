@@ -1,5 +1,5 @@
 module.exports = {
   name: "stayMaster",
-  displayName: "stayMaster",
+  displayName: "Stay Master",
   version: "1.0.0"
 }; 

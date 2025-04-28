@@ -175,8 +175,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   {/* Top Row - Net Booking Value & Chevron */}
                   <View style={styles.topRow}>
                     <View style={styles.columnContainer}>
-                      <Text style={styles.summaryLabel}>Revenue Current FY</Text>
-                      <Text style={styles.summaryLabel2}></Text>
+                      <Text style={styles.summaryLabel}>Revenue</Text>
+                      <Text style={styles.summaryLabel2}>Current FY</Text>
                     </View>
                     <FontAwesomeIcon icon={faChevronCircleRight} size={15} color="#008489" />
                   </View>
