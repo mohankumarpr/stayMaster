@@ -12,14 +12,13 @@ import {
     Text,
     TouchableOpacity,
     View,
-
 } from 'react-native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { default as PropertyService, default as propertyService } from '../../services/propertyService';
 import { Property } from '../../types/property';
 import Storage, { STORAGE_KEYS } from '../../utils/Storage';
-import { Linking } from 'react-native';
 import Share from 'react-native-share';
+import { Linking } from 'react-native';
 import RNFS from 'react-native-fs';
 
 type ProfileScreenProps = {
@@ -34,6 +33,7 @@ interface Propertys {
     number_of_bedrooms: number;
     number_of_beds: number;
     number_of_bathrooms: number;
+    slug?: string;
     onPress: () => void;
 }
 
@@ -44,43 +44,36 @@ const PropertyCard: React.FC<Propertys> = ({
     number_of_bedrooms,
     number_of_beds,
     number_of_bathrooms,
+    slug,
     onPress,
 }) => {
-    console.log('Image URL:', url);
     const handleShare = async () => {
         try {
-            const fileName = `property_${Date.now()}.jpg`;
-            const localPath = `${RNFS.CachesDirectoryPath}/${fileName}`;
+            const shareUrl = slug 
+                ? `https://staymaster.in/stay-description/${slug}`
+                : 'https://staymaster.in/';
 
-            // Download the image
-            const downloadResult = await RNFS.downloadFile({
-                fromUrl: url,
-                toFile: localPath,
-            }).promise;
+            const shareOptions = {
+                title: listing_name,
+                message: `
+Discover this beautiful property on StayMaster:
 
-            if (downloadResult.statusCode === 200) {
-                const shareOptions = {
-                    title: listing_name,
-                    message: `
-        🏠 ${listing_name}
-        
-        📊 Property Details:
-        • Guests: ${number_of_guests}
-        • Bedrooms: ${number_of_bedrooms}
-        • Beds: ${number_of_beds}
-        • Bathrooms: ${number_of_bathrooms}
-        
-        by Staymaster
-              `.trim(),
-                    url: `file://${localPath}`,
-                    type: 'image/jpeg',
-                    failOnCancel: false,
-                };
+*${listing_name}*
 
-                await Share.open(shareOptions);
-            } else {
-                console.warn('Failed to download image');
-            }
+_Property Specifications:_
+• Maximum Occupancy: ${number_of_guests} guests
+• Bedrooms: ${number_of_bedrooms}
+• Beds: ${number_of_beds || 'N/A'}
+• Bathrooms: ${number_of_bathrooms}
+
+*Book your stay now!*
+
+`,
+                url: shareUrl,
+                failOnCancel: false,
+            };
+
+            await Share.open(shareOptions);
         } catch (error) {
             console.error('Error sharing:', error);
         }
@@ -230,6 +223,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                     number_of_bedrooms={propertys.number_of_bedrooms}
                                     number_of_beds={propertys.number_of_beds}
                                     number_of_bathrooms={propertys.number_of_bathrooms}
+                                    slug={propertys.slug}
                                     onPress={() => {
                                         // return navigation.navigate('PropertyDetails', { propertyId: propertys.id });
                                     }}

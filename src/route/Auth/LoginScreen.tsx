@@ -214,13 +214,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   registerinput: {
-    height: 40,
-    borderBottomWidth: 1, // Add bottom border
-    borderBottomColor: '#FFFFFF', // Color of the underline
-    color: '#FFFFFF', // Text color
-    paddingHorizontal: 10, // Padding inside the input field
-    marginBottom: 35, // Space between input fields
+    height: 50,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FFFFFF',
+    color: '#FFFFFF',
+    paddingHorizontal: 10,
+    marginBottom: 35,
     fontSize: 16,
+    width: '100%',
+    minWidth: 280,
   },
   forgotPassword: {
     alignSelf: 'flex-end',

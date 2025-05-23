@@ -34,10 +34,10 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
 
   // Start OTP detection
   const startOtpDetection = useCallback(() => {
-    if (otpDetected) return; // Prevent multiple detection attempts
-    
+    if (otpDetected) {return;} // Prevent multiple detection attempts
+
     console.log('Starting OTP detection...');
-    
+
     // First check if we already have an OTP in the route params
     if (route.params?.otp) {
       console.log('OTP found in route params:', route.params.otp);
@@ -48,16 +48,16 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
       setOtpDetected(true);
       return;
     }
-    
+
     // If no OTP in route params, try to detect from SMS
     OtpVerify.getHash()
       .then((hash: string[]) => {
         console.log('Hash received:', hash);
-        
+
         // Start listening for OTP using hash-based detection
         OtpVerify.addListener((message: string) => {
           console.log('Raw message received:', message);
-          
+
           // First try to extract OTP from the response data
           try {
             const responseData = JSON.parse(message);
@@ -82,6 +82,10 @@ const OTPScreen: React.FC<OTPScreenProps> = ({ navigation, route }) => {
             /OTP[:\s]*(\d{6})/, // OTP followed by 6 digits
             /verification code[:\s]*(\d{6})/, // Verification code followed by 6 digits
             /code[:\s]*(\d{6})/, // Code followed by 6 digits
+            /(\d{6}) is your OTP/, // OTP followed by "is your OTP"
+            /OTP[:\s]*(\d{6})[:\s]*for/, // OTP followed by "for"
+            /(\d{6})[:\s]*is your verification code/, // 6 digits followed by "is your verification code"
+            /verification code[:\s]*(\d{6})[:\s]*for/, // Verification code followed by 6 digits and "for"
           ];
 
           for (const pattern of patterns) {
