@@ -112,14 +112,14 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
 
     const showToast = (type: string, title: string, message: string) => {
         Toast.show({
-            type: type,
-            text1: title,
-            text2: message,
-            visibilityTime: 4000, // Duration for which the toast is visible
-            autoHide: true, // Automatically hide the toast after the visibility time
-            topOffset: 30, // Offset from the top of the screen
+          type: type,
+          text1: title,
+          text2: message,
+          visibilityTime: 4000, // Duration for which the toast is visible
+          autoHide: true, // Automatically hide the toast after the visibility time
+          topOffset: 30, // Offset from the top of the screen
         });
-    };
+      };
     function formatAmount(totalNBV: number): string {
         if (totalNBV === undefined) return '0.00';
         return totalNBV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\.00$/, '');
@@ -143,10 +143,10 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="large" color="#008489" />
                             </View>
-                        ) : ( 
+                        ) : (
                             <RNPickerSelect
                                 onValueChange={(value) => setSelectedProperty(value)}
-                                items={[ 
+                                items={[
                                     ...(properties || []).map((property) => ({
                                         label: property.listing_name,
                                         value: property.id.toString(),
@@ -264,16 +264,23 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                                 const downloadUrl = await PropertyService.downloadMonthlyStatement(selectedProperty, statement.name);
                                 const fileUrl = downloadUrl; // Extract the URL from the response
                                 console.log('File URL:', fileUrl);
+                                const url = new URL(fileUrl.toString()).toString();
+                                console.log(`Statement downloaded: ${url}`);
+                                // Remove last character if it's a forward slash
+                                const formattedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
 
-                                // Convert the URL to a proper format if needed
-                                const formattedUrl = fileUrl;
-
-                                await Linking.openURL(formattedUrl.url).catch(err => {
+                                // Check if the URL is valid
+                                if (!formattedUrl) {
+                                    showToast('error', 'Invalid URL', 'The download URL is not valid');
+                                    return;
+                                }
+                              
+                                await Linking.openURL(formattedUrl).catch(err => {
                                     console.error('Error opening URL:', err);
                                     return showToast('error', 'Error opening URL', err.message);
                                 });
 
-                                console.log(`Statement downloaded: ${fileUrl}`);
+                                // console.log(`Statement downloaded: ${fileUrl}`);
                                 // Optionally, you can handle the download URL here (e.g., open it)
                             } finally {
                                 setLoading(false); // End loading state
@@ -282,7 +289,7 @@ const MonthlyStatements = ({ navigation }: { navigation: any }) => {
                             console.log('No statement found');
                             showToast('error', 'No statement found', '');
                         }
-                    }} 
+                    }}
                     disabled={!selectedYear || !selectedMonth} // Disable button if year or month is not selected
                 >
                     <Text style={styles.downloadButtonText}>Download Statement</Text>
@@ -299,7 +306,7 @@ const pickerSelectStyles = {
         borderRadius: 10,
         backgroundColor: '#fff',
         padding: 2,
-    }, 
+    },
     inputIOS: {
         fontSize: 14,
         paddingVertical: 12,
@@ -332,7 +339,7 @@ const pickerSelectStyles = {
         color: '#008281',
         fontWeight: 'bold',
     },
-   
+
 };
 
 
